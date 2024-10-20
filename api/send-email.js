@@ -14,19 +14,13 @@ module.exports = async (req, res) => {
         port: 465,
         secure: true, // Use SSL
         auth: {
-          user: process.env.EMAIL_USER, // Ceci sera merci.lille1@gmail.com
-          pass: process.env.EMAIL_PASS, // Le mot de passe associé à merci.lille1@gmail.com sur OVH
+          user: process.env.EMAIL_USER, // merci.lille1@gmail.com
+          pass: process.env.EMAIL_PASS,
         },
-        debug: console.log, // Enable debug logs
-        logger: true, // Enable logger
       });
       console.log("Transporter created successfully");
-
-      // Verify SMTP connection configuration
-      await transporter.verify();
-      console.log("SMTP connection verified successfully");
     } catch (error) {
-      console.error("Error creating or verifying transporter:", error);
+      console.error("Error creating transporter:", error);
       return res.status(500).json({
         message: "Failed to create email transporter",
         error: error.message,
@@ -36,9 +30,9 @@ module.exports = async (req, res) => {
     try {
       console.log("Attempting to send email");
       const info = await transporter.sendMail({
-        from: `"Merci Lille" <contact@mercilille.com>`,
-        to: "contact@mercilille.com", // L'adresse qui recevra les emails
-        replyTo: email, // L'adresse email de l'expéditeur du formulaire
+        from: `"Merci Lille" <${process.env.EMAIL_USER}>`,
+        to: "contact@mercilille.com", // Adresse de réception ajoutée ici
+        replyTo: email,
         subject: `Nouveau message de ${name}: ${subject}`,
         text: `De: ${name} (${email})\n\nMessage: ${message}`,
         html: `<p><strong>De:</strong> ${name} (${email})</p><p><strong>Message:</strong> ${message}</p>`,
