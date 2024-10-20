@@ -36,9 +36,9 @@ module.exports = async (req, res) => {
     try {
       console.log("Attempting to send email");
       const info = await transporter.sendMail({
-        from: `"Merci Lille" <${process.env.EMAIL_USER}>`,
+        from: `${name} <${email}>`,
         to: process.env.EMAIL_USER, // ou l'adresse à laquelle vous voulez recevoir les emails
-        subject: `Nouveau message de ${name}: ${subject}`,
+        subject: `${subject}`,
         text: `De: ${name} (${email})\n\nMessage: ${message}`,
         html: `<p><strong>De:</strong> ${name} (${email})</p><p><strong>Message:</strong> ${message}</p>`,
       });
