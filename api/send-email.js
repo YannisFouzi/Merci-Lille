@@ -12,10 +12,10 @@ module.exports = async (req, res) => {
       transporter = nodemailer.createTransport({
         host: "ssl0.ovh.net",
         port: 465,
-        secure: true, // use SSL
+        secure: true, // Use SSL
         auth: {
-          user: process.env.EMAIL_USER, // Votre adresse email OVH complète
-          pass: process.env.EMAIL_PASS, // Le mot de passe de votre compte email OVH
+          user: process.env.EMAIL_USER, // Ceci sera merci.lille1@gmail.com
+          pass: process.env.EMAIL_PASS, // Le mot de passe associé à merci.lille1@gmail.com sur OVH
         },
         debug: console.log, // Enable debug logs
         logger: true, // Enable logger
@@ -27,30 +27,27 @@ module.exports = async (req, res) => {
       console.log("SMTP connection verified successfully");
     } catch (error) {
       console.error("Error creating or verifying transporter:", error);
-      return res
-        .status(500)
-        .json({
-          message: "Failed to create email transporter",
-          error: error.message,
-        });
+      return res.status(500).json({
+        message: "Failed to create email transporter",
+        error: error.message,
+      });
     }
 
     try {
       console.log("Attempting to send email");
       const info = await transporter.sendMail({
-        from: `"Merci Lille" <${process.env.EMAIL_USER}>`,
-        to: process.env.EMAIL_USER, // ou l'adresse à laquelle vous voulez recevoir les emails
+        from: `"Merci Lille" <contact@mercilille.com>`,
+        to: "contact@mercilille.com", // L'adresse qui recevra les emails
+        replyTo: email, // L'adresse email de l'expéditeur du formulaire
         subject: `Nouveau message de ${name}: ${subject}`,
         text: `De: ${name} (${email})\n\nMessage: ${message}`,
         html: `<p><strong>De:</strong> ${name} (${email})</p><p><strong>Message:</strong> ${message}</p>`,
       });
       console.log("Email sent successfully:", info.messageId);
-      res
-        .status(200)
-        .json({
-          message: "Email sent successfully",
-          messageId: info.messageId,
-        });
+      res.status(200).json({
+        message: "Email sent successfully",
+        messageId: info.messageId,
+      });
     } catch (error) {
       console.error("Error sending email:", error);
       res
