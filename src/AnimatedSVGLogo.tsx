@@ -20,8 +20,8 @@ const AnimatedSVGLogo: React.FC = () => {
       path.style.fill = "#ffffff";
       path.style.fillOpacity = "0";
       path.style.stroke = "#ffffff";
-      path.style.strokeWidth = "20"; // Contour plus épais
-      path.style.strokeLinecap = "round"; // Extrémités arrondies pour un meilleur rendu
+      path.style.strokeWidth = "20";
+      path.style.strokeLinecap = "round"; // Extrémités arrondies
 
       // Forcer un reflow
       path.getBoundingClientRect();

@@ -12,17 +12,16 @@ module.exports = async (req, res) => {
       transporter = nodemailer.createTransport({
         host: "ssl0.ovh.net",
         port: 465,
-        secure: true, // use SSL
+        secure: true,
         auth: {
-          user: process.env.EMAIL_USER, // Votre adresse email OVH complète
-          pass: process.env.EMAIL_PASS, // Le mot de passe de votre compte email OVH
+          user: process.env.EMAIL_USER,
+          pass: process.env.EMAIL_PASS,
         },
-        debug: console.log, // Enable debug logs
-        logger: true, // Enable logger
+        debug: console.log,
+        logger: true,
       });
       console.log("Transporter created successfully");
 
-      // Verify SMTP connection configuration
       await transporter.verify();
       console.log("SMTP connection verified successfully");
     } catch (error) {
@@ -37,7 +36,7 @@ module.exports = async (req, res) => {
       console.log("Attempting to send email");
       const info = await transporter.sendMail({
         from: `${name} <${email}>`,
-        to: process.env.EMAIL_USER, // ou l'adresse à laquelle vous voulez recevoir les emails
+        to: process.env.EMAIL_USER,
         subject: `${subject}`,
         text: `De: ${name} (${email})\n\nMessage: ${message}`,
         html: `<p><strong>De:</strong> ${name} (${email})</p><p><strong>Message:</strong> ${message}</p>`,

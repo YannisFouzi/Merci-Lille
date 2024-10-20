@@ -1,4 +1,3 @@
-/* Existing styles */
 .App {
   text-align: center;
 }
@@ -38,7 +37,6 @@
   }
 }
 
-/* New styles for EmailForm */
 @import url("https://fonts.googleapis.com/css?family=Poppins:400,500,600,700,800,900");
 
 body {
@@ -53,9 +51,9 @@ body {
 
 .card-3d-wrap {
   position: relative;
-  width: 440px;
+  width: 400px;
   max-width: 100%;
-  height: 400px;
+  height: 500px;
   -webkit-transform-style: preserve-3d;
   transform-style: preserve-3d;
   perspective: 800px;
@@ -92,6 +90,7 @@ body {
   -moz-backface-visibility: hidden;
   -o-backface-visibility: hidden;
   backface-visibility: hidden;
+  overflow: hidden;
 }
 
 .card-back {
@@ -112,7 +111,6 @@ body {
   z-index: 20;
   display: block;
 }
-
 .form-group textarea.form-style {
   height: auto;
   resize: none;
@@ -131,14 +129,15 @@ body {
 
 .form-group {
   position: relative;
-  display: block;
-  margin: 0;
-  padding: 0;
+  margin-bottom: 20px;
+}
+
+.input-wrapper {
+  position: relative;
 }
 
 .form-style {
-  padding: 13px 20px;
-  padding-left: 55px;
+  padding: 13px 20px 13px 55px;
   height: 48px;
   width: 100%;
   font-weight: 500;
@@ -164,13 +163,69 @@ body {
 
 .input-icon {
   position: absolute;
-  top: 0;
+  top: 50%;
   left: 18px;
-  height: 48px;
-  font-size: 24px;
-  line-height: 48px;
-  text-align: left;
+  transform: translateY(-50%);
   color: #ffeba7;
+  -webkit-transition: all 200ms linear;
+  transition: all 200ms linear;
+}
+
+.message-icon {
+  top: 17px;
+  transform: none;
+}
+
+textarea.form-style {
+  padding-top: 20px;
+}
+
+.form-group textarea + .input-icon {
+  top: 20%;
+  transform: none;
+}
+
+.form-group input:-ms-input-placeholder {
+  color: #c4c3ca;
+  opacity: 0.7;
+  -webkit-transition: all 200ms linear;
+  transition: all 200ms linear;
+}
+.form-group input::-moz-placeholder {
+  color: #c4c3ca;
+  opacity: 0.7;
+  -webkit-transition: all 200ms linear;
+  transition: all 200ms linear;
+}
+.form-group input:-moz-placeholder {
+  color: #c4c3ca;
+  opacity: 0.7;
+  -webkit-transition: all 200ms linear;
+  transition: all 200ms linear;
+}
+.form-group input::-webkit-input-placeholder {
+  color: #c4c3ca;
+  opacity: 0.7;
+  -webkit-transition: all 200ms linear;
+  transition: all 200ms linear;
+}
+.form-group input:focus:-ms-input-placeholder {
+  opacity: 0;
+  -webkit-transition: all 200ms linear;
+  transition: all 200ms linear;
+}
+.form-group input:focus::-moz-placeholder {
+  opacity: 0;
+  -webkit-transition: all 200ms linear;
+  transition: all 200ms linear;
+}
+.form-group input:focus:-moz-placeholder {
+  opacity: 0;
+  -webkit-transition: all 200ms linear;
+  transition: all 200ms linear;
+}
+.form-group input:focus::-webkit-input-placeholder {
+  opacity: 0;
   -webkit-transition: all 200ms linear;
   transition: all 200ms linear;
 }
@@ -203,16 +258,105 @@ body {
   color: #102770;
   box-shadow: 0 8px 24px 0 rgba(255, 235, 167, 0.2);
 }
-
 .btn:active,
 .btn:focus {
   background-color: #102770;
   color: #ffeba7;
   box-shadow: 0 8px 24px 0 rgba(16, 39, 112, 0.2);
 }
-
 .btn:hover {
   background-color: #102770;
   color: #ffeba7;
   box-shadow: 0 8px 24px 0 rgba(16, 39, 112, 0.2);
+}
+
+.error-message {
+  color: #ff6b6b;
+  font-size: 12px;
+  margin-top: 5px;
+}
+
+textarea.form-style {
+  min-height: 80px;
+  resize: none;
+  overflow-y: auto;
+  padding-top: 15px;
+}
+
+.section {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.form-group {
+  margin-bottom: 10px;
+}
+
+.btn {
+  margin-top: auto;
+}
+
+.card-back .center-wrap {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+.card-back h4 {
+  margin-bottom: 20px;
+}
+
+@media (max-width: 480px) {
+  .card-3d-wrap {
+    width: 100%;
+    height: auto;
+    min-height: 500px;
+  }
+
+  .center-wrap {
+    padding: 20px;
+  }
+
+  .form-style {
+    font-size: 13px;
+  }
+
+  .btn {
+    font-size: 12px;
+    padding: 0 20px;
+  }
+}
+
+.section h4 {
+  color: #c4c3ca;
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+
+.confirmation-message {
+  background-color: #4caf50;
+  color: white;
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.confirmation-icon {
+  margin-right: 10px;
+  font-size: 18px;
 }
