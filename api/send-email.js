@@ -9,6 +9,18 @@ module.exports = async (req, res) => {
     let transporter;
     try {
       console.log("Creating transporter");
+
+      // Ajoutez ces logs ici
+      console.log("Email configuration:", {
+        host: "ssl0.ovh.net",
+        port: 465,
+        secure: true,
+        auth: {
+          user: process.env.EMAIL_USER,
+          pass: "******", // Ne loggez jamais le mot de passe complet
+        },
+      });
+
       transporter = nodemailer.createTransport({
         host: "ssl0.ovh.net",
         port: 465,
@@ -34,17 +46,10 @@ module.exports = async (req, res) => {
     }
 
     try {
-      // Ajoutez ce nouveau log ici
-      console.log("Email configuration:", {
-        from: process.env.EMAIL_USER,
-        to: process.env.EMAIL_USER,
-        subject: `Nouveau message de ${name}: ${subject}`,
-      });
-
       console.log("Attempting to send email");
       const info = await transporter.sendMail({
         from: `"Merci Lille" <${process.env.EMAIL_USER}>`,
-        to: process.env.EMAIL_USER,
+        to: "contact@mercilille.com", // Assurez-vous que c'est la bonne adresse de réception
         subject: `Nouveau message de ${name}: ${subject}`,
         text: `De: ${name} (${email})\n\nMessage: ${message}`,
         html: `<p><strong>De:</strong> ${name} (${email})</p><p><strong>Message:</strong> ${message}</p>`,
