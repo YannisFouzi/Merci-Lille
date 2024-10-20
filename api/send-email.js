@@ -14,8 +14,8 @@ module.exports = async (req, res) => {
         port: 465,
         secure: true, // use SSL
         auth: {
-          user: process.env.EMAIL_USER, // Votre adresse email OVH complète
-          pass: process.env.EMAIL_PASS, // Le mot de passe de votre compte email OVH
+          user: process.env.EMAIL_USER,
+          pass: process.env.EMAIL_PASS,
         },
         debug: console.log, // Enable debug logs
         logger: true, // Enable logger
@@ -34,10 +34,17 @@ module.exports = async (req, res) => {
     }
 
     try {
+      // Ajoutez ce nouveau log ici
+      console.log("Email configuration:", {
+        from: process.env.EMAIL_USER,
+        to: process.env.EMAIL_USER,
+        subject: `Nouveau message de ${name}: ${subject}`,
+      });
+
       console.log("Attempting to send email");
       const info = await transporter.sendMail({
         from: `"Merci Lille" <${process.env.EMAIL_USER}>`,
-        to: process.env.EMAIL_USER, // ou l'adresse à laquelle vous voulez recevoir les emails
+        to: process.env.EMAIL_USER,
         subject: `Nouveau message de ${name}: ${subject}`,
         text: `De: ${name} (${email})\n\nMessage: ${message}`,
         html: `<p><strong>De:</strong> ${name} (${email})</p><p><strong>Message:</strong> ${message}</p>`,
