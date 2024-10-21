@@ -7,6 +7,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useState } from "react";
+import "./EmailForm.css";
 
 const EmailForm: React.FC = () => {
   const [isFlipped, setIsFlipped] = useState(false);

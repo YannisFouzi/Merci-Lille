@@ -1,15 +1,7 @@
 import React, { useEffect } from "react";
-import AnimatedSVGLogo from "./AnimatedSVGLogo";
 import "./App.css";
-import EmailForm from "./EmailForm";
-
-interface Event {
-  id: number;
-  name: string;
-  date: string;
-  venue: string;
-  ticketLink: string;
-}
+import EmailForm from "./components/EmailForm/EmailForm";
+import AnimatedSVGLogo from "./components/SVGAnimation/AnimatedSVGLogo";
 
 const ShotgunWidget: React.FC = () => {
   useEffect(() => {
@@ -45,18 +37,15 @@ const App: React.FC = () => {
         <header className="py-8 flex flex-col items-center">
           <AnimatedSVGLogo />
         </header>
-
         <main>
           <section className="mb-12">
             <ShotgunWidget />
           </section>
-
           <section className="mb-12">
             <h2 className="text-3xl font-semibold mb-4 text-green-400"></h2>
             <EmailForm />
           </section>
         </main>
-
         <footer className="py-8 text-center text-gray-400">
           <p>&copy; 2024 Merci Lille. Tous droits réservés.</p>
         </footer>
