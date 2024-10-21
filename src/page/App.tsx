@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
+import BouncingText from "../components/BouncingText/BouncingText";
+import EmailForm from "../components/EmailForm/EmailForm";
+import ProfileCard from "../components/ProfilCard/ProfileCard";
+import PuzzleGame from "../components/PuzzleGame/PuzzleGame";
+import SocialMediaMenu from "../components/SocialMediaMenu/SocialMediaMenu";
+import AnimatedSVGLogo from "../components/SVGAnimation/AnimatedSVGLogo";
+import TextScramble from "../components/TextScramble/TextScramble";
 import "./App.css";
-import BouncingText from "./components/BouncingText/BouncingText";
-import EmailForm from "./components/EmailForm/EmailForm";
-import ProfileCard from "./components/ProfileCard";
-import PuzzleGame from "./components/PuzzleGame";
-import SocialMediaMenu from "./components/SocialMediaMenu";
-import AnimatedSVGLogo from "./components/SVGAnimation/AnimatedSVGLogo";
-import TextScramble from "./components/TextScramble/TextScramble";
 
 const ShotgunWidget: React.FC = () => {
   useEffect(() => {

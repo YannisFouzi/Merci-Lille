@@ -1,7 +1,7 @@
 import React from "react";
-import bananaSmootie from "../media/banana_smoothie.jpg";
-import raptureFouzi from "../media/rapture_fouzi.jpg";
-import scooby from "../media/scooby.jpg";
+import bananaSmootie from "../../media/banana_smoothie.jpg";
+import raptureFouzi from "../../media/rapture_fouzi.jpg";
+import scooby from "../../media/scooby.jpg";
 
 interface ProfileCardProps {
   name: string;
