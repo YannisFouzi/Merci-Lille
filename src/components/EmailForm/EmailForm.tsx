@@ -61,7 +61,7 @@ const EmailForm: React.FC = () => {
       ...prevState,
       [name]: value,
     }));
-    // Clear error when user starts typing
+    // Effacer l'erreur lorsque l'utilisateur commence à taper
     setErrors((prevErrors) => ({
       ...prevErrors,
       [name]: "",
@@ -81,7 +81,6 @@ const EmailForm: React.FC = () => {
         });
 
         if (response.ok) {
-          console.log("Email sent successfully");
           setConfirmationMessage("Email envoyé avec succès !");
           // Réinitialiser le formulaire
           setFormData({ name: "", email: "", subject: "", message: "" });
