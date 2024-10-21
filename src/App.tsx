@@ -2,7 +2,9 @@ import React, { useEffect, useState } from "react";
 import "./App.css";
 import BouncingText from "./components/BouncingText/BouncingText";
 import EmailForm from "./components/EmailForm/EmailForm";
+import ProfileCard from "./components/ProfileCard";
 import PuzzleGame from "./components/PuzzleGame";
+import SocialMediaMenu from "./components/SocialMediaMenu";
 import AnimatedSVGLogo from "./components/SVGAnimation/AnimatedSVGLogo";
 import TextScramble from "./components/TextScramble/TextScramble";
 
@@ -64,8 +66,14 @@ const App: React.FC = () => {
             <ShotgunWidget />
           </section>
           <section className="mb-12">
+            <ProfileCard />
+          </section>
+          <section className="mb-12">
             <h2 className="text-3xl font-semibold mb-4 text-green-400"></h2>
             <EmailForm />
+          </section>
+          <section className="mb-12">
+            <SocialMediaMenu />
           </section>
           <section className="mb-12">
             <BouncingText />
