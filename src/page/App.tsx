@@ -1,4 +1,4 @@
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import React, { useEffect, useRef, useState } from "react";
 import EmailForm from "../components/EmailForm/EmailForm";
 import Gallery from "../components/Gallery/Gallery";
@@ -7,6 +7,7 @@ import PuzzleGame from "../components/PuzzleGame/PuzzleGame";
 import SocialMediaMenu from "../components/SocialMediaMenu/SocialMediaMenu";
 import AnimatedSVGLogo from "../components/SVGAnimation/AnimatedSVGLogo";
 import TextScramble from "../components/TextScramble/TextScramble";
+import "./App.css";
 
 const useElementOnScreen = (options: IntersectionObserverInit) => {
   const elementRef = useRef<HTMLDivElement>(null);
@@ -17,7 +18,6 @@ const useElementOnScreen = (options: IntersectionObserverInit) => {
       const [entry] = entries;
       if (entry.isIntersecting) {
         setIsVisible(true);
-        // Une fois que l'élément est visible, on arrête d'observer
         if (elementRef.current) {
           observer.unobserve(elementRef.current);
         }
@@ -37,32 +37,6 @@ const useElementOnScreen = (options: IntersectionObserverInit) => {
   }, [options]);
 
   return [elementRef, isVisible] as const;
-};
-
-const ShotgunWidget: React.FC = () => {
-  const [ref, isVisible] = useElementOnScreen({ threshold: 0.1 });
-
-  useEffect(() => {
-    const script = document.createElement("script");
-    script.src = "https://shotgun.live/widget.js";
-    script.async = true;
-    document.body.appendChild(script);
-
-    return () => {
-      document.body.removeChild(script);
-    };
-  }, []);
-
-  return (
-    <div ref={ref} className="relative min-h-[800px]">
-      <iframe
-        src="https://shotgun.live/venues/merci-lille?embedded=1&ui=dark"
-        allow="payment"
-        className="w-full h-[800px] max-h-[calc(100vh-200px)] border-0"
-        title="Shotgun Events"
-      />
-    </div>
-  );
 };
 
 const Section: React.FC<{ children: React.ReactNode; className?: string }> = ({
@@ -88,8 +62,39 @@ const Section: React.FC<{ children: React.ReactNode; className?: string }> = ({
   );
 };
 
+const ShotgunWidget: React.FC = () => {
+  useEffect(() => {
+    const script = document.createElement("script");
+    script.src = "https://shotgun.live/widget.js";
+    script.async = true;
+    document.body.appendChild(script);
+
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
+
+  return (
+    <iframe
+      src="https://shotgun.live/venues/merci-lille?embedded=1&ui=dark"
+      allow="payment"
+      style={{
+        width: "100%",
+        height: "800px",
+        maxHeight: "calc(100vh - 200px)",
+        border: "0",
+      }}
+      title="Shotgun Events"
+    />
+  );
+};
+
 const App: React.FC = () => {
   const [showPuzzle, setShowPuzzle] = useState(false);
+
+  const togglePuzzle = () => {
+    setShowPuzzle(!showPuzzle);
+  };
 
   useEffect(() => {
     if (showPuzzle) {
@@ -128,6 +133,7 @@ const App: React.FC = () => {
           </Section>
 
           <Section>
+            <h2 className="text-3xl font-semibold mb-4 text-green-400"></h2>
             <EmailForm />
           </Section>
 
@@ -138,40 +144,25 @@ const App: React.FC = () => {
 
         <footer className="py-8 text-center text-gray-400">
           <p>
-            &copy; {new Date().getFullYear()} Merci Lille. Tous droits réservés.{" "}
-            <motion.span
-              onClick={() => setShowPuzzle(true)}
-              className="cursor-pointer hover:text-green-400 transition-colors duration-200"
-              whileHover={{ scale: 1.05 }}
-            >
-              Terrorclown
-            </motion.span>
+            &copy; 2024 Merci Lille. Tous droits réservés.{" "}
+            <span onClick={togglePuzzle}>Terrorclown</span>
           </p>
         </footer>
       </div>
 
-      <AnimatePresence>
-        {showPuzzle && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center"
+      {showPuzzle && (
+        <div className="fixed inset-0 z-50 bg-black flex items-center justify-center">
+          <button
+            onClick={togglePuzzle}
+            className="absolute top-4 right-4 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
           >
-            <motion.button
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              onClick={() => setShowPuzzle(false)}
-              className="absolute top-4 right-4 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors duration-200"
-            >
-              Fermer
-            </motion.button>
-            <div className="w-full h-full">
-              <PuzzleGame />
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            Fermer
+          </button>
+          <div className="w-full h-full">
+            <PuzzleGame />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
