@@ -75,7 +75,16 @@ class TextScrambleLogic {
   }
 }
 
-const phrases: string[] = ["Hardmusic", "Techno", "Drum 'n' Bass", "Freestyle"];
+const phrases: string[] = [
+  "Hardstyle",
+  "Hardcore",
+  "Hard Groove",
+  "UK Garage",
+  "Eurodance",
+  "Techno",
+  "Drum 'n' Bass",
+  "Freestyle",
+];
 
 const TextScramble: React.FC = () => {
   const el = useRef<HTMLDivElement>(null);

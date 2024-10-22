@@ -110,7 +110,7 @@ const EmailForm: React.FC = () => {
         <div className="card-front">
           <div className="center-wrap">
             <div className="section text-center">
-              <h4 className="mb-4 pb-3">Envoyer nous un e-mail</h4>
+              <h4 className="mb-4 pb-3">Bookings & Infos</h4>
               {confirmationMessage && (
                 <div className="confirmation-message">
                   <FontAwesomeIcon

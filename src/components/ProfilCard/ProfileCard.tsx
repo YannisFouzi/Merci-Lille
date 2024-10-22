@@ -96,7 +96,7 @@ const ProfileCardsGrid: React.FC = () => {
   return (
     <div>
       <h1 className="text-6xl font-bold text-center mb-16 text-white">
-        Nos artistes
+        Nos ""Artistes"""
       </h1>
 
       <div className="space-y-8">
