@@ -4,6 +4,20 @@ import React, { useEffect, useRef } from "react";
 import terrorclownMusic from "../../media/terrorclown.mp3";
 import "./PuzzleGame.scss";
 
+interface CustomWindow extends Window {
+  gtag: (
+    command: string,
+    action: string,
+    params: {
+      event_category: string;
+      event_label: string;
+      [key: string]: any;
+    }
+  ) => void;
+}
+
+declare let window: CustomWindow;
+
 gsap.registerPlugin(Draggable);
 
 const PuzzleGame: React.FC = () => {
@@ -108,9 +122,16 @@ const PuzzleGame: React.FC = () => {
         puzzle.appendChild(endImg as Node);
         gsap.to(endImg, { duration: 1, opacity: 1, ease: "power2.inOut" });
         audioRef.current?.play();
+        try {
+          window.gtag?.("event", "puzzle_completed", {
+            event_category: "engagement",
+            event_label: "puzzle_success",
+          });
+        } catch (error) {
+          console.log("GTM tracking error:", error);
+        }
       }
     }
-
     gsap.set(".endImg, .box, .pieces", { x: 82.5, y: 50 });
     gsap.set("body", {
       background: `hsl(${gsap.utils.random(0, 360)}, 70%, 80%)`,
