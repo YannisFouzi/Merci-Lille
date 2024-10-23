@@ -4,6 +4,7 @@ import EmailForm from "../components/EmailForm/EmailForm";
 import Gallery from "../components/Gallery/Gallery";
 import ProfileCard from "../components/ProfilCard/ProfileCard";
 import PuzzleGame from "../components/PuzzleGame/PuzzleGame";
+import ShotgunEvents from "../components/ShotgunEvents/ShotgunEvents";
 import SocialMediaMenu from "../components/SocialMediaMenu/SocialMediaMenu";
 import AnimatedSVGLogo from "../components/SVGAnimation/AnimatedSVGLogo";
 import TextScramble from "../components/TextScramble/TextScramble";
@@ -126,6 +127,10 @@ const App: React.FC = () => {
 
           <Section>
             <ProfileCard />
+          </Section>
+
+          <Section>
+            <ShotgunEvents />
           </Section>
 
           <Section>

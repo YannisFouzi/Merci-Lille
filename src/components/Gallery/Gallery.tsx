@@ -1,5 +1,5 @@
 import React from "react";
-import scoobyImage from "../../media/scooby.jpg";
+import scoobyImage from "../../media/artist/scooby.jpg";
 import "./Gallery.css";
 
 const Gallery: React.FC = () => {

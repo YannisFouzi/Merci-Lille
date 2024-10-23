@@ -1,7 +1,7 @@
 import React from "react";
-import bananaSmootie from "../../media/banana_smoothie.jpg";
-import raptureFouzi from "../../media/rapture_fouzi.jpg";
-import scooby from "../../media/scooby.jpg";
+import bananaSmootie from "../../media/artist/banana_smoothie.jpg";
+import raptureFouzi from "../../media/artist/rapture_fouzi.jpg";
+import scooby from "../../media/artist/scooby.jpg";
 
 interface ProfileCardProps {
   name: string;
@@ -96,7 +96,7 @@ const ProfileCardsGrid: React.FC = () => {
   return (
     <div>
       <h1 className="text-6xl font-bold text-center mb-16 text-white">
-        Nos ""Artistes"""
+        Nos ""Artistes""
       </h1>
 
       <div className="space-y-8">
