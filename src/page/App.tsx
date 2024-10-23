@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import React, { useEffect, useRef, useState } from "react";
 import EmailForm from "../components/EmailForm/EmailForm";
 import Gallery from "../components/Gallery/Gallery";
+import Introduction from "../components/Introduction/Introduction";
 import ProfileCard from "../components/ProfilCard/ProfileCard";
 import PuzzleGame from "../components/PuzzleGame/PuzzleGame";
 import ShotgunEvents from "../components/ShotgunEvents/ShotgunEvents";
@@ -9,6 +10,8 @@ import SocialMediaMenu from "../components/SocialMediaMenu/SocialMediaMenu";
 import AnimatedSVGLogo from "../components/SVGAnimation/AnimatedSVGLogo";
 import TextScramble from "../components/TextScramble/TextScramble";
 import "./App.css";
+
+const IS_DEVELOPMENT = false;
 
 const useElementOnScreen = (options: IntersectionObserverInit) => {
   const elementRef = useRef<HTMLDivElement>(null);
@@ -63,34 +66,7 @@ const Section: React.FC<{ children: React.ReactNode; className?: string }> = ({
   );
 };
 
-const ShotgunWidget: React.FC = () => {
-  useEffect(() => {
-    const script = document.createElement("script");
-    script.src = "https://shotgun.live/widget.js";
-    script.async = true;
-    document.body.appendChild(script);
-
-    return () => {
-      document.body.removeChild(script);
-    };
-  }, []);
-
-  return (
-    <iframe
-      src="https://shotgun.live/venues/merci-lille?embedded=1&ui=dark"
-      allow="payment"
-      style={{
-        width: "100%",
-        height: "800px",
-        maxHeight: "calc(100vh - 200px)",
-        border: "0",
-      }}
-      title="Shotgun Events"
-    />
-  );
-};
-
-const App: React.FC = () => {
+const MainContent: React.FC = () => {
   const [showPuzzle, setShowPuzzle] = useState(false);
 
   const togglePuzzle = () => {
@@ -122,11 +98,7 @@ const App: React.FC = () => {
           </Section>
 
           <Section>
-            <ShotgunWidget />
-          </Section>
-
-          <Section>
-            <ProfileCard />
+            <Introduction />
           </Section>
 
           <Section>
@@ -134,11 +106,14 @@ const App: React.FC = () => {
           </Section>
 
           <Section>
+            <ProfileCard />
+          </Section>
+
+          <Section>
             <Gallery />
           </Section>
 
           <Section>
-            <h2 className="text-3xl font-semibold mb-4 text-green-400"></h2>
             <EmailForm />
           </Section>
 
@@ -170,6 +145,88 @@ const App: React.FC = () => {
       )}
     </div>
   );
+};
+
+const ComingSoon: React.FC = () => {
+  const [password, setPassword] = useState("");
+  const [isAuthorized, setIsAuthorized] = useState(false);
+  const [showError, setShowError] = useState(false);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (password === "rapturejetaime") {
+      setIsAuthorized(true);
+      setShowError(false);
+      localStorage.setItem("isAuthorized", "true");
+    } else {
+      setShowError(true);
+      setTimeout(() => setShowError(false), 2000);
+    }
+  };
+
+  useEffect(() => {
+    const auth = localStorage.getItem("isAuthorized");
+    if (auth === "true") {
+      setIsAuthorized(true);
+    }
+  }, []);
+
+  if (isAuthorized) {
+    return <MainContent />;
+  }
+
+  return (
+    <div className="min-h-screen bg-black flex flex-col items-center justify-center p-4">
+      <div className="mb-24 transform scale-150">
+        <AnimatedSVGLogo />
+      </div>
+
+      <h1 className="text-3xl md:text-5xl text-white font-bold text-center mb-6">
+        Notre site arrive bientôt
+      </h1>
+
+      <p className="text-xl md:text-2xl text-gray-400 text-center max-w-2xl mb-12">
+        Nous préparons quelque chose de spécial pour vous. Restez connectés !
+      </p>
+
+      <form onSubmit={handleSubmit} className="mb-8">
+        <div className="relative">
+          <input
+            type="text"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Mot de passe"
+            className={`bg-transparent border-2 ${
+              showError ? "border-red-500" : "border-gray-700"
+            } rounded-lg px-4 py-2 text-white focus:outline-none focus:border-white transition-colors`}
+          />
+          <div
+            className={`absolute -bottom-6 left-0 right-0 text-center text-red-500 text-sm transition-opacity ${
+              showError ? "opacity-100" : "opacity-0"
+            }`}
+          >
+            Mot de passe incorrect
+          </div>
+        </div>
+      </form>
+
+      <div className="transform scale-90">
+        <SocialMediaMenu />
+      </div>
+
+      <footer className="absolute bottom-8 text-center text-gray-400">
+        <p>&copy; 2024 Merci Lille. Tous droits réservés.</p>
+      </footer>
+    </div>
+  );
+};
+
+const App: React.FC = () => {
+  if (!IS_DEVELOPMENT) {
+    return <ComingSoon />;
+  }
+
+  return <MainContent />;
 };
 
 export default App;

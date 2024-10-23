@@ -49,7 +49,7 @@ const AnimatedSVGLogo: React.FC = () => {
   return (
     <svg
       ref={svgRef}
-      className="w-full max-w-xl mb-4" // Réduit la taille maximale et la marge en bas
+      className="w-full max-w-lg mb-4" // Réduit la taille maximale et la marge en bas
       viewBox="0 0 5000 4137"
       xmlns="http://www.w3.org/2000/svg"
     >

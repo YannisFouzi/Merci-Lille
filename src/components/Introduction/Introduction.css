@@ -1,0 +1,62 @@
+.introduction-container {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.introduction-wrapper {
+  position: relative;
+}
+
+.introduction-placeholder {
+  visibility: hidden;
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.9);
+  text-align: justify;
+  user-select: none;
+}
+
+.introduction-content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.9);
+  text-align: justify;
+}
+
+.fade-in-word {
+  display: inline-block;
+  animation: fadeIn 0.3s ease-in forwards;
+  opacity: 0;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 768px) {
+  .introduction-container {
+    padding: 1.5rem;
+  }
+
+  .introduction-placeholder,
+  .introduction-content {
+    font-size: 1rem;
+  }
+}

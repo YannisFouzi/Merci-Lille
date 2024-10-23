@@ -3,13 +3,16 @@ import bananaSmootie from "../../media/artist/banana_smoothie.jpg";
 import raptureFouzi from "../../media/artist/rapture_fouzi.jpg";
 import scooby from "../../media/artist/scooby.jpg";
 
+interface Characteristic {
+  label: string;
+  value: string;
+}
+
 interface ProfileCardProps {
   name: string;
   description: string;
   imageSrc: string;
-  type: string;
-  size: string;
-  weight: string;
+  characteristics: Characteristic[];
   imageOnLeft: boolean;
 }
 
@@ -17,9 +20,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
   name,
   description,
   imageSrc,
-  type,
-  size,
-  weight,
+  characteristics,
   imageOnLeft,
 }) => {
   return (
@@ -43,20 +44,14 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
           {description}
         </p>
         <div className="flex justify-between border-t border-gray-200 pt-3 text-sm">
-          <div>
-            <p className="text-gray-500 uppercase font-medium">
-              Groupe sanguin
-            </p>
-            <p className="font-semibold text-gray-800">{type}</p>
-          </div>
-          <div>
-            <p className="text-gray-500 uppercase font-medium">Taille</p>
-            <p className="font-semibold text-gray-800">{size}</p>
-          </div>
-          <div>
-            <p className="text-gray-500 uppercase font-medium">Animal fav</p>
-            <p className="font-semibold text-gray-800">{weight}</p>
-          </div>
+          {characteristics.map((char, index) => (
+            <div key={index}>
+              <p className="text-gray-500 uppercase font-medium">
+                {char.label}
+              </p>
+              <p className="font-semibold text-gray-800">{char.value}</p>
+            </div>
+          ))}
         </div>
       </div>
     </div>
@@ -67,29 +62,35 @@ const ProfileCardsGrid: React.FC = () => {
   const profilesData = [
     {
       name: "Banana Smoothie",
-      description: `Deux idiots passeront de toute façon le plus clair de leur temps accoudés au bar à essayer de faire comprendre à un habitué - qui n'a rien demandé à personne - pourquoi Taylor Swift, c'est quand même mieux qu'Eminem. "Vous pouvez les sortir ces deux-là?" sera sans doute votre phrase fétiche de la soirée quand viendra le moment de parler de la qualité des DJ présents ce soir, le temps que cette purge se termine sur les coups de 2h.`,
+      description: `Deux imbéciles amateurs de mashups et de sets Freestyle à la cohérence artistique inexistante. Il est recommandé de trouver une autre activité lorsque ceux-ci sont bookés à une de nos soirées afin de gagner du temps (et de l'argent). Leur passion : vous faire préférer Katy Perry à la Techno Boom Boom sans saveur ni intérêt. Le font-ils correctement ? Non. Est-ce que c'est quand même rigolo ? Un peu.`,
       imageSrc: bananaSmootie,
-      type: "O+",
-      size: "1m78",
-      weight: "Pigeon",
+      characteristics: [
+        { label: "Style", value: "Freestyle" },
+        { label: "Animal Préféré", value: "Scooby" },
+        { label: "BPM", value: "825" },
+      ],
     },
     {
       name: "Rapture Fouzi",
       description:
-        "vous voyez un jeune débraillé grimé de merch ignoble d'artiste dont vous avez rien à battre dans un coin du bar, c'est notre Parisien déjanté qui tape sa meilleure sieste. Allongé dans une flaque d'alcool et d'autres substances non identifiées, il se lèvera de temps en temps pour prendre le contrôle des platines et vous assourdir d'un mashup mal calé à 270 bpm.",
+        "Bon, lui il est de Paris mais par nécessité diplomatique nous faisons croire à tout le monde qu'il est Lillois. En gros, il fait un peu de tout et de rien (surtout de rien) et il s'amuse à edit un peu n'importe quoi tant que ça plait aux gens. Le soucis, c'est que ça ne plait à personne, mais au moins il ramène des machins à bidouiller en live et du coup ça fait un peu illusion qu'il fait de la musique.",
       imageSrc: raptureFouzi,
-      type: "A+",
-      size: "1m83",
-      weight: "Rendard",
+      characteristics: [
+        { label: "Style", value: "Débraillé" },
+        { label: "Soleil Préféré", value: "UY Scuti" },
+        { label: "Cachet Moyen", value: "180 000€" },
+      ],
     },
     {
       name: "Scooby",
       description:
-        "La troupe de Merci Lille se coltine à nouveau son espèce de Jacouille local pour vous faire profiter (non) de sa sélection disco house mégaterror xtra uptempo qui a déjà lassé le public rien qu'à la lecture de la présentation.",
+        "Car Merci Lille est non seulement un collectif d'événementiel mais également un refuge pour animaux, nous proposons les services du plus célèbre des chiens enquêteurs de Police. Son style unique permettra de transformer votre établissement en chenil le temps d'une soirée. Laisser la fenêtre entrouverte et une gamelle d'eau à l'entrée avant toute utilisation. N'aime pas les chats.",
       imageSrc: scooby,
-      type: "AB+",
-      size: "90cm",
-      weight: "Rat",
+      characteristics: [
+        { label: "Style ", value: "Drum & Bass" },
+        { label: "Accessoire Préféré", value: "Caisson de Basse" },
+        { label: "Race", value: "Dogue Allemand" },
+      ],
     },
   ];
 
