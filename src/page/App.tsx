@@ -177,7 +177,7 @@ const ComingSoon: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-black flex flex-col items-center justify-center p-4">
-      <div className="mb-24 transform scale-150">
+      <div className="mb-24">
         <AnimatedSVGLogo />
       </div>
 
