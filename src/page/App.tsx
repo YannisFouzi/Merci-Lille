@@ -214,7 +214,7 @@ const ComingSoon: React.FC = () => {
         <SocialMediaMenu />
       </div>
 
-      <footer className="absolute bottom-8 text-center text-gray-400">
+      <footer className="bottom-8 text-center text-gray-400">
         <p>&copy; 2024 Merci Lille. Tous droits réservés.</p>
       </footer>
     </div>
