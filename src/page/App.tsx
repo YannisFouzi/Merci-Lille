@@ -11,7 +11,7 @@ import AnimatedSVGLogo from "../components/SVGAnimation/AnimatedSVGLogo";
 import TextScramble from "../components/TextScramble/TextScramble";
 import "./App.scss";
 
-const IS_DEVELOPMENT = false;
+const IS_DEVELOPMENT = true;
 
 const useElementOnScreen = (options: IntersectionObserverInit) => {
   const elementRef = useRef<HTMLDivElement>(null);
