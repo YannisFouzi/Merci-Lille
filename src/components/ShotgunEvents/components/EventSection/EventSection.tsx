@@ -8,7 +8,7 @@ interface EventSectionProps {
 }
 
 const EventSection: React.FC<EventSectionProps> = ({ title, events }) => {
-  const ITEMS_PER_PAGE = 3;
+  const ITEMS_PER_PAGE = 6;
   const [visibleItems, setVisibleItems] = useState(ITEMS_PER_PAGE);
 
   const showLoadMore = events.length > visibleItems;
