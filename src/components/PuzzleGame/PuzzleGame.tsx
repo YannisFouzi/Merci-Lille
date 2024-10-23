@@ -1,12 +1,14 @@
 import { gsap } from "gsap";
 import { Draggable } from "gsap/Draggable";
 import React, { useEffect, useRef } from "react";
+import terrorclownMusic from "../../media/terrorclown.mp3";
 import "./PuzzleGame.scss";
 
 gsap.registerPlugin(Draggable);
 
 const PuzzleGame: React.FC = () => {
   const puzzleRef = useRef<SVGSVGElement>(null);
+  const audioRef = useRef<HTMLAudioElement>(null);
 
   useEffect(() => {
     if (!puzzleRef.current) return;
@@ -105,6 +107,7 @@ const PuzzleGame: React.FC = () => {
       if (n < 1) {
         puzzle.appendChild(endImg as Node);
         gsap.to(endImg, { duration: 1, opacity: 1, ease: "power2.inOut" });
+        audioRef.current?.play();
       }
     }
 
@@ -122,6 +125,7 @@ const PuzzleGame: React.FC = () => {
 
   return (
     <div className="puzzle-container">
+      <audio ref={audioRef} src={terrorclownMusic} />
       <svg
         ref={puzzleRef}
         className="puzzle"
@@ -188,7 +192,7 @@ const PuzzleGame: React.FC = () => {
               result="specOut"
               lightingColor="white"
             >
-              <fePointLight x="50" y="-150" z="-750"></fePointLight>
+              <fePointLight x="50" y="150" z="-750"></fePointLight>
             </feSpecularLighting>
             <feComposite
               in="specOut"
