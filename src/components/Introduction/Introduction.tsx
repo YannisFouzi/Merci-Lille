@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import "./Introduction.css";
+import "./Introduction.scss";
 
 const Introduction: React.FC = () => {
   const [words, setWords] = useState<string[]>([]);

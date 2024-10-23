@@ -1,25 +1,15 @@
 .btn {
   border-radius: 4px;
-  height: 36px; /* Hauteur réduite */
-  font-size: 12px; /* Taille de police réduite */
+  height: 36px;
+  font-size: 12px;
   font-weight: 600;
   text-transform: uppercase;
-  -webkit-transition: all 200ms linear;
   transition: all 200ms linear;
-  padding: 0 20px; /* Padding réduit */
+  padding: 0 20px;
   letter-spacing: 1px;
-  display: -webkit-inline-flex;
-  display: -ms-inline-flexbox;
   display: inline-flex;
-  -webkit-align-items: center;
-  -moz-align-items: center;
-  -ms-align-items: center;
   align-items: center;
-  -webkit-justify-content: center;
-  -moz-justify-content: center;
-  -ms-justify-content: center;
   justify-content: center;
-  -ms-flex-pack: center;
   text-align: center;
   border: none;
   background-color: #ffffff;
@@ -28,12 +18,12 @@
   margin-top: auto;
   width: 100%;
   cursor: pointer;
-}
 
-.btn:hover {
-  background-color: #102770;
-  color: #ffffff;
-  box-shadow: 0 8px 24px 0 rgba(16, 39, 112, 0.2);
+  &:hover {
+    background-color: #102770;
+    color: #ffffff;
+    box-shadow: 0 8px 24px 0 rgba(16, 39, 112, 0.2);
+  }
 }
 
 .btn-load-more {
@@ -53,11 +43,11 @@
   background-color: transparent;
   color: #ffffff;
   cursor: pointer;
-}
 
-.btn-load-more:hover {
-  background-color: #ffffff;
-  color: #102770;
+  &:hover {
+    background-color: #ffffff;
+    color: #102770;
+  }
 }
 
 @media (max-width: 480px) {

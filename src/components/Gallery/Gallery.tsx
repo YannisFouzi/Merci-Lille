@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "./Gallery.css";
+import "./Gallery.scss";
 
 // Import de toutes les images
 import DSC04500 from "../../media/gallery/DSC04500.jpg";
@@ -100,7 +100,7 @@ const Gallery: React.FC = () => {
 
   return (
     <div className="gallery-container">
-      <h1 className="text-6xl font-bold text-center mb-16 text-white">
+      <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-center mb-16 text-white">
         La Galerie
       </h1>
       <div className="gallery-grid">

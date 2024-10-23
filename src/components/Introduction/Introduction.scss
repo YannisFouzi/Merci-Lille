@@ -7,6 +7,10 @@
   border-radius: 12px;
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.1);
+
+  @media (max-width: 768px) {
+    padding: 1.5rem;
+  }
 }
 
 .introduction-wrapper {
@@ -20,6 +24,10 @@
   color: rgba(255, 255, 255, 0.9);
   text-align: justify;
   user-select: none;
+
+  @media (max-width: 768px) {
+    font-size: 1rem;
+  }
 }
 
 .introduction-content {
@@ -31,6 +39,10 @@
   line-height: 1.6;
   color: rgba(255, 255, 255, 0.9);
   text-align: justify;
+
+  @media (max-width: 768px) {
+    font-size: 1rem;
+  }
 }
 
 .fade-in-word {
@@ -47,16 +59,5 @@
   to {
     opacity: 1;
     transform: translateY(0);
-  }
-}
-
-@media (max-width: 768px) {
-  .introduction-container {
-    padding: 1.5rem;
-  }
-
-  .introduction-placeholder,
-  .introduction-content {
-    font-size: 1rem;
   }
 }

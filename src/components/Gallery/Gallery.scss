@@ -1,0 +1,148 @@
+/* Gallery Container */
+.gallery-container {
+  padding: 20px;
+  width: 100%;
+  max-width: 1800px;
+  margin: 0 auto;
+}
+
+/* Gallery Grid */
+.gallery-grid {
+  display: grid;
+  gap: 32px;
+  grid-template-columns: repeat(3, 1fr); /* Toujours 3 colonnes sur desktop */
+
+  @media (min-width: 992px) {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+  }
+
+  @media (min-width: 768px) and (max-width: 991px) {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+  }
+
+  @media (max-width: 767px) {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+}
+
+/* Gallery Items */
+.gallery-item {
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 6px 7px 28px 0 rgba(16, 16, 16, 0.7);
+  transition: all 0.3s ease;
+  width: fit-content;
+  height: fit-content;
+  margin: auto;
+  background-color: black;
+
+  &.alizarin {
+    border: 3px solid #e74c3c;
+  }
+
+  &.wisteria {
+    border: 3px solid #8e44ad;
+  }
+
+  &.emerland {
+    border: 3px solid #2ecc71;
+  }
+
+  &.belizehole {
+    border: 3px solid #2980b9;
+  }
+
+  &.sunflower {
+    border: 3px solid #f1c40f;
+  }
+
+  &:hover {
+    .gallery-image {
+      transform: scale(1.1);
+    }
+
+    &::after {
+      opacity: 1;
+    }
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.2);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+}
+
+/* Item Content */
+.item-content {
+  width: auto;
+  height: auto;
+}
+
+/* Image Styles */
+.gallery-image {
+  display: block;
+  width: auto;
+  height: auto;
+  max-height: 500px;
+  transition: transform 0.3s ease;
+
+  @media (min-width: 768px) and (max-width: 991px) {
+    max-height: 400px;
+  }
+
+  @media (max-width: 767px) {
+    max-width: 100%;
+    max-height: 350px;
+  }
+}
+
+/* Button Styles */
+.btn-load-more {
+  border-radius: 4px;
+  height: 36px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  transition: all 200ms linear;
+  padding: 0 20px;
+  letter-spacing: 1px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  border: 2px solid #ffffff;
+  background-color: transparent;
+  color: #ffffff;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #ffffff;
+    color: #102770;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 12px;
+    padding: 0 20px;
+  }
+}
+
+@media (max-width: 767px) {
+  .gallery-container {
+    padding: 10px;
+  }
+
+  .gallery-item {
+    max-width: 100%;
+  }
+}

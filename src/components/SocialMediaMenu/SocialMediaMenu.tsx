@@ -1,5 +1,5 @@
 import React from "react";
-import "./SocialMediaMenu.css";
+import "./SocialMediaMenu.scss";
 
 const InstagramLogo = () => (
   <svg

@@ -9,7 +9,7 @@ import ShotgunEvents from "../components/ShotgunEvents/ShotgunEvents";
 import SocialMediaMenu from "../components/SocialMediaMenu/SocialMediaMenu";
 import AnimatedSVGLogo from "../components/SVGAnimation/AnimatedSVGLogo";
 import TextScramble from "../components/TextScramble/TextScramble";
-import "./App.css";
+import "./App.scss";
 
 const IS_DEVELOPMENT = false;
 

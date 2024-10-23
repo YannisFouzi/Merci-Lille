@@ -1,7 +1,7 @@
 import { gsap } from "gsap";
 import { Draggable } from "gsap/Draggable";
 import React, { useEffect, useRef } from "react";
-import "./PuzzleGame.css";
+import "./PuzzleGame.scss";
 
 gsap.registerPlugin(Draggable);
 

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import "./TextScramble.css";
+import "./TextScramble.scss";
 
 class TextScrambleLogic {
   private el: HTMLElement;
@@ -114,7 +114,7 @@ const TextScramble: React.FC = () => {
   }, [counter]);
 
   return (
-    <div className="py-12">
+    <div>
       <div className="container mx-auto px-4">
         <div ref={el} className="text-scramble text-5xl text-center"></div>
       </div>

@@ -1,5 +1,5 @@
 import React from "react";
-import styles from "./BouncingText.module.css";
+import styles from "./BouncingText.module.scss";
 
 const BouncingText: React.FC = () => {
   const textLine1 = "à";
