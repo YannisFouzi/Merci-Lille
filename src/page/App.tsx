@@ -210,7 +210,7 @@ const ComingSoon: React.FC = () => {
         </div>
       </form>
 
-      <div className="transform scale-90">
+      <div className="transform scale-75">
         <SocialMediaMenu />
       </div>
 
