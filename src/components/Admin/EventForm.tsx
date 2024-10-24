@@ -62,30 +62,58 @@ const EventForm: React.FC<EventFormProps> = ({ event, onSubmit }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const data = new FormData();
-    Object.entries(formData).forEach(([key, value]) => {
-      console.log(`Adding to FormData - ${key}:`, value);
-      if (key === "genres") {
-        data.append(
-          key,
-          JSON.stringify(Array.isArray(value) ? value : [value])
-        );
-      } else {
-        data.append(key, value.toString());
-      }
-    });
-
-    if (image) {
-      console.log("Adding image:", image);
-      data.append("image", image);
-    }
-
-    console.log("FormData entries:");
-    for (let pair of data.entries()) {
-      console.log(pair[0], pair[1]);
-    }
-
     try {
+      const data = new FormData();
+
+      // Log complet des données avant envoi
+      console.log("Complete form data before submission:", {
+        ...formData,
+        imageFile: image,
+      });
+
+      // Vérification des champs requis
+      if (
+        !formData.title ||
+        !formData.city ||
+        !formData.date ||
+        !formData.time ||
+        !formData.ticketLink
+      ) {
+        throw new Error("Veuillez remplir tous les champs requis");
+      }
+
+      // Vérification de l'image
+      if (!image && !event?.imageSrc) {
+        throw new Error("Une image est requise");
+      }
+
+      Object.entries(formData).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          if (key === "genres") {
+            data.append(
+              key,
+              JSON.stringify(Array.isArray(value) ? value : [value])
+            );
+          } else {
+            data.append(key, value.toString());
+          }
+        }
+      });
+
+      if (image) {
+        // Vérifier la taille de l'image
+        if (image.size > 5 * 1024 * 1024) {
+          // 5MB
+          throw new Error("L'image est trop volumineuse (max 5MB)");
+        }
+        data.append("image", image);
+      }
+
+      // Log du FormData final
+      for (let pair of data.entries()) {
+        console.log(`FormData - ${pair[0]}:`, pair[1]);
+      }
+
       if (event?._id) {
         await eventsService.updateEvent(event._id, data);
       } else {
@@ -93,7 +121,9 @@ const EventForm: React.FC<EventFormProps> = ({ event, onSubmit }) => {
       }
       onSubmit();
     } catch (error) {
-      console.error("Error saving event:", error);
+      console.error("Erreur détaillée:", error);
+      // Afficher l'erreur à l'utilisateur
+      // TODO: Ajouter un état pour gérer les erreurs
     }
   };
 
