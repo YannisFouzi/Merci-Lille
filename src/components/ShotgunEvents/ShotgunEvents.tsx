@@ -1,8 +1,8 @@
-// src/components/ShotgunEvents/ShotgunEvents.tsx
 import React, { useEffect, useState } from "react";
 import { eventsService } from "../../services/events.service";
 import EventSection from "./components/EventSection/EventSection";
 import "./ShotgunEvents.scss";
+import { EventCardProps } from "./types";
 
 const ShotgunEvents: React.FC = () => {
   const [upcomingEvents, setUpcomingEvents] = useState<EventCardProps[]>([]);
@@ -16,28 +16,48 @@ const ShotgunEvents: React.FC = () => {
         setLoading(true);
         const allEvents = await eventsService.getAllEvents();
 
-        // Tri des événements
         const now = new Date();
         const upcoming: EventCardProps[] = [];
         const past: EventCardProps[] = [];
 
         allEvents.forEach((event: EventCardProps) => {
+          const [hours, minutes] = event.time.split(":");
           const eventDate = new Date(event.date);
-          // On compare la date de l'événement avec aujourd'hui
-          if (eventDate >= now) {
-            upcoming.push(event);
+          eventDate.setHours(parseInt(hours), parseInt(minutes));
+
+          if (eventDate > now) {
+            upcoming.push({
+              ...event,
+              isFree: Boolean(event.isFree),
+            });
           } else {
-            past.push(event);
+            past.push({
+              ...event,
+              isFree: Boolean(event.isFree),
+            });
           }
         });
 
-        // Tri par date
-        upcoming.sort(
-          (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
-        );
-        past.sort(
-          (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-        );
+        // Tri par date avec heure
+        upcoming.sort((a, b) => {
+          const dateA = new Date(a.date);
+          const dateB = new Date(b.date);
+          const [hoursA, minutesA] = a.time.split(":");
+          const [hoursB, minutesB] = b.time.split(":");
+          dateA.setHours(parseInt(hoursA), parseInt(minutesA));
+          dateB.setHours(parseInt(hoursB), parseInt(minutesB));
+          return dateA.getTime() - dateB.getTime();
+        });
+
+        past.sort((a, b) => {
+          const dateA = new Date(a.date);
+          const dateB = new Date(b.date);
+          const [hoursA, minutesA] = a.time.split(":");
+          const [hoursB, minutesB] = b.time.split(":");
+          dateA.setHours(parseInt(hoursA), parseInt(minutesA));
+          dateB.setHours(parseInt(hoursB), parseInt(minutesB));
+          return dateB.getTime() - dateA.getTime();
+        });
 
         setUpcomingEvents(upcoming);
         setPastEvents(past);
@@ -82,19 +102,3 @@ const ShotgunEvents: React.FC = () => {
 };
 
 export default ShotgunEvents;
-
-// Mise à jour de types.ts pour inclure l'ID MongoDB
-export interface EventCardProps {
-  _id: string; // Ajout de l'ID MongoDB
-  imageSrc: string;
-  title: string;
-  eventNumber: string;
-  city: string;
-  country?: string;
-  date: string;
-  time: string;
-  isFree?: boolean;
-  genres: string[];
-  ticketLink: string;
-  isPast?: boolean;
-}

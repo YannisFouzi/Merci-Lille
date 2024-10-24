@@ -10,7 +10,8 @@ const EventCard: React.FC<EventCardProps> = ({
   country,
   date,
   time,
-  isFree = false,
+  isFree,
+  price,
   genres,
   ticketLink,
   isPast = false,
@@ -46,7 +47,9 @@ const EventCard: React.FC<EventCardProps> = ({
             <span className="text-red-500 font-bold">{formatDate(date)}</span>
             <span className="text-white">|</span>
             <span className="text-red-500 font-bold">{time}</span>
-            {isFree && <span className="text-white font-bold">Gratuit</span>}
+            <span className="text-white font-bold">
+              {isFree ? "Gratuit" : `${price} €`}
+            </span>
           </div>
 
           <div className="min-h-[3rem]">

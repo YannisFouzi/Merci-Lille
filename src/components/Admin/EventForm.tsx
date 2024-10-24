@@ -17,12 +17,13 @@ const EventForm: React.FC<EventFormProps> = ({ event, onSubmit }) => {
     event
       ? {
           ...event,
-          date: formatDateForInput(event.date), // Formatage de la date existante
+          date: formatDateForInput(event.date),
           genres: Array.isArray(event.genres)
             ? event.genres
             : typeof event.genres === "string"
             ? JSON.parse(event.genres)
             : [],
+          price: event.price || "",
         }
       : {
           title: "",
@@ -33,6 +34,7 @@ const EventForm: React.FC<EventFormProps> = ({ event, onSubmit }) => {
           genres: [] as string[],
           ticketLink: "",
           isFree: false,
+          price: "",
           imageSrc: "",
         }
   );
@@ -166,7 +168,6 @@ const EventForm: React.FC<EventFormProps> = ({ event, onSubmit }) => {
         <div className="space-y-2">
           <label className="text-white block">Genres musicaux</label>
 
-          {/* Liste des genres actuels */}
           <div className="flex flex-wrap gap-2 mb-2">
             {formData.genres.map((genre) => (
               <span
@@ -185,7 +186,6 @@ const EventForm: React.FC<EventFormProps> = ({ event, onSubmit }) => {
             ))}
           </div>
 
-          {/* Ajouter un nouveau genre */}
           <div className="flex gap-2">
             <input
               type="text"
@@ -204,16 +204,43 @@ const EventForm: React.FC<EventFormProps> = ({ event, onSubmit }) => {
           </div>
         </div>
 
-        <div className="flex items-center">
-          <input
-            type="checkbox"
-            checked={formData.isFree}
-            onChange={(e) =>
-              setFormData({ ...formData, isFree: e.target.checked })
-            }
-            className="mr-2"
-          />
-          <label className="text-white">Gratuit</label>
+        <div className="space-y-2">
+          <div className="flex items-center mb-2">
+            <input
+              type="checkbox"
+              checked={formData.isFree}
+              onChange={(e) => {
+                setFormData({
+                  ...formData,
+                  isFree: e.target.checked,
+                  price: e.target.checked ? "" : formData.price,
+                });
+              }}
+              className="mr-2"
+            />
+            <label className="text-white">Gratuit</label>
+          </div>
+
+          {!formData.isFree && (
+            <div className="flex items-center gap-2">
+              <input
+                type="number"
+                step="0.01"
+                min="0"
+                value={formData.price}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    price: e.target.value,
+                  })
+                }
+                placeholder="Prix"
+                className="w-32 px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white"
+                required={!formData.isFree}
+              />
+              <span className="text-white">€</span>
+            </div>
+          )}
         </div>
       </div>
 

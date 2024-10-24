@@ -127,7 +127,13 @@ const EventsManagement = () => {
                 <td className="px-6 py-4">{event.title}</td>
                 <td className="px-6 py-4">{event.city}</td>
                 <td className="px-6 py-4">
-                  {event.isPast ? "Passé" : "À venir"}
+                  {(() => {
+                    const now = new Date();
+                    const eventDate = new Date(event.date);
+                    const [hours, minutes] = event.time.split(":");
+                    eventDate.setHours(parseInt(hours), parseInt(minutes));
+                    return eventDate > now ? "À venir" : "Passé";
+                  })()}
                 </td>
                 <td className="px-6 py-4 text-right">
                   <button
