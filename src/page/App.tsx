@@ -1,5 +1,10 @@
 import { motion } from "framer-motion";
 import React, { useEffect, useRef, useState } from "react";
+import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
+import AdminLayout from "../components/Admin/AdminLayout";
+import EventsManagement from "../components/Admin/EventsManagement";
+import LoginForm from "../components/Admin/LoginForm";
+import PrivateRoute from "../components/Admin/PrivateRoute";
 import EmailForm from "../components/EmailForm/EmailForm";
 import Gallery from "../components/Gallery/Gallery";
 import Introduction from "../components/Introduction/Introduction";
@@ -9,7 +14,6 @@ import ShotgunEvents from "../components/ShotgunEvents/ShotgunEvents";
 import SocialMediaMenu from "../components/SocialMediaMenu/SocialMediaMenu";
 import AnimatedSVGLogo from "../components/SVGAnimation/AnimatedSVGLogo";
 import TextScramble from "../components/TextScramble/TextScramble";
-import "./App.scss";
 
 const IS_DEVELOPMENT = true;
 
@@ -221,12 +225,37 @@ const ComingSoon: React.FC = () => {
   );
 };
 
-const App: React.FC = () => {
+const AppContent: React.FC = () => {
   if (!IS_DEVELOPMENT) {
     return <ComingSoon />;
   }
 
-  return <MainContent />;
+  return (
+    <Routes>
+      <Route path="/admin/login" element={<LoginForm />} />
+      <Route
+        path="/admin/*"
+        element={
+          <PrivateRoute>
+            <AdminLayout>
+              <Routes>
+                <Route path="events" element={<EventsManagement />} />
+              </Routes>
+            </AdminLayout>
+          </PrivateRoute>
+        }
+      />
+      <Route path="/" element={<MainContent />} />
+    </Routes>
+  );
+};
+
+const App: React.FC = () => {
+  return (
+    <Router>
+      <AppContent />
+    </Router>
+  );
 };
 
 export default App;

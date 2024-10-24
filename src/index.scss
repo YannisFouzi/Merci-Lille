@@ -2,6 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url("https://fonts.googleapis.com/css?family=Poppins:400,500,600,700,800,900");
+
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -64,13 +66,19 @@
     --input: 217.2 32.6% 17.5%;
     --ring: 212.7 26.8% 83.9%;
   }
-}
 
-@layer base {
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
+    font-family: "Poppins", sans-serif;
+    font-weight: 300;
+    font-size: 15px;
+    line-height: 1.7;
+    color: #c4c3ca;
+    background-color: #1f2029;
+    overflow-x: hidden;
   }
 }
