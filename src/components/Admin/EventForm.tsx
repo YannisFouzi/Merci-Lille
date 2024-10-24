@@ -106,16 +106,20 @@ const EventForm: React.FC<EventFormProps> = ({ event, onSubmit }) => {
         />
 
         <div className="grid grid-cols-2 gap-4">
-          <input
-            type="text"
-            value={formData.eventNumber}
-            onChange={(e) =>
-              setFormData({ ...formData, eventNumber: e.target.value })
-            }
-            placeholder="Numéro d'événement"
-            className="px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white"
-            required
-          />
+          <div className="relative">
+            <input
+              type="text"
+              value={formData.eventNumber}
+              onChange={(e) =>
+                setFormData({ ...formData, eventNumber: e.target.value })
+              }
+              placeholder="Numéro d'événement (auto si vide)"
+              className="px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white w-full"
+            />
+            <div className="text-xs text-gray-400 mt-1">
+              Laissez vide pour auto-incrémentation
+            </div>
+          </div>
 
           <input
             type="text"
