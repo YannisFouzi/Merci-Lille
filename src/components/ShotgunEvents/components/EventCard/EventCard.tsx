@@ -16,6 +16,7 @@ const EventCard: React.FC<EventCardProps> = ({
   ticketLink,
   isPast = false,
 }) => {
+  console.log(`Event ${title} - isPast:`, isPast);
   return (
     <a
       href={ticketLink}

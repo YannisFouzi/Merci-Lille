@@ -29,11 +29,13 @@ const ShotgunEvents: React.FC = () => {
             upcoming.push({
               ...event,
               isFree: Boolean(event.isFree),
+              isPast: false,
             });
           } else {
             past.push({
               ...event,
               isFree: Boolean(event.isFree),
+              isPast: true,
             });
           }
         });
