@@ -64,6 +64,7 @@ const EventForm: React.FC<EventFormProps> = ({ event, onSubmit }) => {
 
     const data = new FormData();
     Object.entries(formData).forEach(([key, value]) => {
+      console.log(`Adding to FormData - ${key}:`, value);
       if (key === "genres") {
         data.append(
           key,
@@ -75,7 +76,13 @@ const EventForm: React.FC<EventFormProps> = ({ event, onSubmit }) => {
     });
 
     if (image) {
+      console.log("Adding image:", image);
       data.append("image", image);
+    }
+
+    console.log("FormData entries:");
+    for (let pair of data.entries()) {
+      console.log(pair[0], pair[1]);
     }
 
     try {
