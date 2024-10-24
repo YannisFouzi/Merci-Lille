@@ -25,7 +25,6 @@ const Introduction: React.FC = () => {
   return (
     <div className="introduction-container">
       <div className="introduction-wrapper">
-        {/* Texte complet invisible pour fixer la taille */}
         <div className="introduction-placeholder" aria-hidden="true">
           {text}
         </div>

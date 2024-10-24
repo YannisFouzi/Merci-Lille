@@ -47,9 +47,15 @@ const EventCard: React.FC<EventCardProps> = ({
             <span className="text-red-500 font-bold">{formatDate(date)}</span>
             <span className="text-white">|</span>
             <span className="text-red-500 font-bold">{time}</span>
-            <span className="text-white font-bold">
-              {isFree ? "Gratuit" : `${price} €`}
-            </span>
+            {/* Ne montrer le prix que si l'événement n'est pas passé */}
+            {!isPast && (
+              <>
+                <span className="text-white">|</span>
+                <span className="text-white font-bold">
+                  {isFree ? "Gratuit" : `${price} €`}
+                </span>
+              </>
+            )}
           </div>
 
           <div className="min-h-[3rem]">

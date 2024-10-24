@@ -204,8 +204,6 @@ const EventForm: React.FC<EventFormProps> = ({ event, onSubmit }) => {
           className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white"
           required
         />
-
-        {/* Section des genres */}
         <div className="space-y-2">
           <label className="text-white block">Genres musicaux</label>
 
