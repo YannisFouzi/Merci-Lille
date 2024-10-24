@@ -8,17 +8,33 @@ interface EventFormProps {
 }
 
 const EventForm: React.FC<EventFormProps> = ({ event, onSubmit }) => {
-  const [formData, setFormData] = useState(
-    event || {
-      title: "",
-      eventNumber: "",
-      city: "",
-      date: "",
-      time: "",
-      genres: [] as string[],
-      ticketLink: "",
-      isFree: false,
-    }
+  const formatDateForInput = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toISOString().split("T")[0];
+  };
+
+  const [formData, setFormData] = useState<Omit<EventCardProps, "_id">>(
+    event
+      ? {
+          ...event,
+          date: formatDateForInput(event.date), // Formatage de la date existante
+          genres: Array.isArray(event.genres)
+            ? event.genres
+            : typeof event.genres === "string"
+            ? JSON.parse(event.genres)
+            : [],
+        }
+      : {
+          title: "",
+          eventNumber: "",
+          city: "",
+          date: "",
+          time: "",
+          genres: [] as string[],
+          ticketLink: "",
+          isFree: false,
+          imageSrc: "",
+        }
   );
   const [image, setImage] = useState<File | null>(null);
   const [newGenre, setNewGenre] = useState("");
@@ -47,7 +63,10 @@ const EventForm: React.FC<EventFormProps> = ({ event, onSubmit }) => {
     const data = new FormData();
     Object.entries(formData).forEach(([key, value]) => {
       if (key === "genres") {
-        data.append(key, JSON.stringify(value));
+        data.append(
+          key,
+          JSON.stringify(Array.isArray(value) ? value : [value])
+        );
       } else {
         data.append(key, value.toString());
       }

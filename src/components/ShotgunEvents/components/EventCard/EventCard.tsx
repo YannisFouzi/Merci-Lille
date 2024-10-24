@@ -56,7 +56,9 @@ const EventCard: React.FC<EventCardProps> = ({
                   key={index}
                   className="bg-gray-700 text-xs text-gray-300 px-2 py-0.5 rounded-full border border-gray-600"
                 >
-                  {genre}
+                  {typeof genre === "string" && genre.startsWith("[")
+                    ? JSON.parse(genre)[0]
+                    : genre}
                 </span>
               ))}
             </div>
