@@ -71,7 +71,7 @@ const EventsManagement = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
         <h1 className="text-2xl font-bold text-white">
           Gestion des événements
         </h1>
@@ -87,9 +87,84 @@ const EventsManagement = () => {
         <div className="bg-red-500 text-white p-4 rounded">{error}</div>
       )}
 
+      <div className="overflow-x-auto bg-gray-900 rounded-lg">
+        <table className="w-full text-white">
+          <thead className="bg-gray-800">
+            <tr>
+              <th className="px-4 py-4 text-left text-sm sm:px-6">Date</th>
+              <th className="px-4 py-4 text-left text-sm sm:px-6">Titre</th>
+              <th className="px-4 py-4 text-left text-sm sm:px-6">Ville</th>
+              <th className="px-4 py-4 text-left text-sm sm:px-6">État</th>
+              <th className="px-4 py-4 text-right text-sm sm:px-6">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {events.map((event) => (
+              <tr
+                key={event._id}
+                className="border-t border-gray-800 hover:bg-gray-800/50"
+              >
+                <td className="px-4 py-4 sm:px-6 whitespace-nowrap">
+                  {formatDate(event.date)}
+                </td>
+                <td className="px-4 py-4 sm:px-6 max-w-[200px] truncate">
+                  {event.title}
+                </td>
+                <td className="px-4 py-4 sm:px-6">{event.city}</td>
+                <td className="px-4 py-4 sm:px-6">
+                  {(() => {
+                    const now = new Date();
+                    const eventDate = new Date(event.date);
+                    const [hours, minutes] = event.time.split(":");
+                    eventDate.setHours(parseInt(hours), parseInt(minutes));
+                    return eventDate > now ? (
+                      <span className="text-green-500">À venir</span>
+                    ) : (
+                      <span className="text-gray-500">Passé</span>
+                    );
+                  })()}
+                </td>
+                <td className="px-4 py-4 sm:px-6 text-right">
+                  <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-4">
+                    <button
+                      onClick={() => handleEdit(event)}
+                      className="text-blue-400 hover:text-blue-300 whitespace-nowrap"
+                    >
+                      Modifier
+                    </button>
+                    <button
+                      onClick={() => handleDelete(event._id)}
+                      className="text-red-400 hover:text-red-300 whitespace-nowrap"
+                    >
+                      Supprimer
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {events.length === 0 && !loading && (
+        <div className="text-center py-8 text-gray-400">
+          Aucun événement trouvé
+        </div>
+      )}
+
       {showForm ? (
-        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50">
-          <div className="bg-gray-900 rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+        <div
+          className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-2 sm:p-4 z-50 overflow-y-auto"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setShowForm(false);
+            }
+          }}
+        >
+          <div
+            className="bg-gray-900 rounded-lg p-4 w-full max-w-2xl my-4 sm:p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold text-white">
                 {selectedEvent ? "Modifier un événement" : "Nouvel événement"}
@@ -108,52 +183,6 @@ const EventsManagement = () => {
           </div>
         </div>
       ) : null}
-
-      <div className="bg-gray-900 rounded-lg overflow-hidden">
-        <table className="w-full text-white">
-          <thead className="bg-gray-800">
-            <tr>
-              <th className="px-6 py-3 text-left">Date</th>
-              <th className="px-6 py-3 text-left">Titre</th>
-              <th className="px-6 py-3 text-left">Ville</th>
-              <th className="px-6 py-3 text-left">État</th>
-              <th className="px-6 py-3 text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {events.map((event) => (
-              <tr key={event._id} className="border-t border-gray-800">
-                <td className="px-6 py-4">{formatDate(event.date)}</td>
-                <td className="px-6 py-4">{event.title}</td>
-                <td className="px-6 py-4">{event.city}</td>
-                <td className="px-6 py-4">
-                  {(() => {
-                    const now = new Date();
-                    const eventDate = new Date(event.date);
-                    const [hours, minutes] = event.time.split(":");
-                    eventDate.setHours(parseInt(hours), parseInt(minutes));
-                    return eventDate > now ? "À venir" : "Passé";
-                  })()}
-                </td>
-                <td className="px-6 py-4 text-right">
-                  <button
-                    onClick={() => handleEdit(event)}
-                    className="text-blue-400 hover:text-blue-300 mr-4"
-                  >
-                    Modifier
-                  </button>
-                  <button
-                    onClick={() => handleDelete(event._id)}
-                    className="text-red-400 hover:text-red-300"
-                  >
-                    Supprimer
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
     </div>
   );
 };

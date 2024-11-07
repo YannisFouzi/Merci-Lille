@@ -152,12 +152,13 @@ const EventForm: React.FC<EventFormProps> = ({ event, onSubmit }) => {
     }
   };
 
+  // La partie return du composant
   return (
     <form
       onSubmit={handleSubmit}
-      className="space-y-6 bg-gray-900 p-6 rounded-lg"
+      className="space-y-6 bg-gray-900 p-4 rounded-lg sm:p-6"
     >
-      <div className="space-y-4">
+      <div className="space-y-6">
         <div className="space-y-2">
           <label className="text-white block text-lg font-bold border-b border-gray-600 pb-1 mb-2">
             Titre de l'événement
@@ -174,7 +175,7 @@ const EventForm: React.FC<EventFormProps> = ({ event, onSubmit }) => {
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-2">
             <label className="text-white block text-lg font-bold border-b border-gray-600 pb-1 mb-2">
               Numéro d'événement
@@ -197,7 +198,7 @@ const EventForm: React.FC<EventFormProps> = ({ event, onSubmit }) => {
 
           <div className="space-y-2">
             <label className="text-white block text-lg font-bold border-b border-gray-600 pb-1 mb-2">
-              Lieux
+              Ville
             </label>
             <input
               type="text"
@@ -206,13 +207,13 @@ const EventForm: React.FC<EventFormProps> = ({ event, onSubmit }) => {
                 setFormData({ ...formData, city: e.target.value })
               }
               placeholder="Ville"
-              className="px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white"
+              className="px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white w-full"
               required
             />
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-2">
             <label className="text-white block text-lg font-bold border-b border-gray-600 pb-1 mb-2">
               Date
@@ -223,7 +224,7 @@ const EventForm: React.FC<EventFormProps> = ({ event, onSubmit }) => {
               onChange={(e) =>
                 setFormData({ ...formData, date: e.target.value })
               }
-              className="px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white"
+              className="px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white w-full"
               required
             />
           </div>
@@ -238,7 +239,7 @@ const EventForm: React.FC<EventFormProps> = ({ event, onSubmit }) => {
               onChange={(e) =>
                 setFormData({ ...formData, time: e.target.value })
               }
-              className="px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white"
+              className="px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white w-full"
               required
             />
           </div>
@@ -291,7 +292,6 @@ const EventForm: React.FC<EventFormProps> = ({ event, onSubmit }) => {
           <label className="text-white block text-lg font-bold border-b border-gray-600 pb-1 mb-2">
             Genres musicaux
           </label>
-
           <div className="flex flex-wrap gap-2 mb-2">
             {formData.genres.map((genre) => (
               <span
@@ -310,7 +310,7 @@ const EventForm: React.FC<EventFormProps> = ({ event, onSubmit }) => {
             ))}
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2">
             <input
               type="text"
               value={newGenre}
@@ -327,48 +327,47 @@ const EventForm: React.FC<EventFormProps> = ({ event, onSubmit }) => {
             </button>
           </div>
         </div>
+
         <div className="space-y-2">
           <label className="text-white block text-lg font-bold border-b border-gray-600 pb-1 mb-2">
             Tarification
           </label>
-          <div className="space-y-2">
-            <div className="flex items-center mb-2">
+          <div className="flex items-center mb-2">
+            <input
+              type="checkbox"
+              checked={formData.isFree}
+              onChange={(e) => {
+                setFormData({
+                  ...formData,
+                  isFree: e.target.checked,
+                  price: e.target.checked ? "" : formData.price,
+                });
+              }}
+              className="mr-2"
+            />
+            <label className="text-white">Gratuit</label>
+          </div>
+
+          {!formData.isFree && (
+            <div className="flex items-center gap-2">
               <input
-                type="checkbox"
-                checked={formData.isFree}
-                onChange={(e) => {
+                type="number"
+                step="0.01"
+                min="0"
+                value={formData.price}
+                onChange={(e) =>
                   setFormData({
                     ...formData,
-                    isFree: e.target.checked,
-                    price: e.target.checked ? "" : formData.price,
-                  });
-                }}
-                className="mr-2"
+                    price: e.target.value,
+                  })
+                }
+                placeholder="Prix"
+                className="w-32 px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white"
+                required={!formData.isFree}
               />
-              <label className="text-white">Gratuit</label>
+              <span className="text-white">€</span>
             </div>
-
-            {!formData.isFree && (
-              <div className="flex items-center gap-2">
-                <input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={formData.price}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      price: e.target.value,
-                    })
-                  }
-                  placeholder="Prix"
-                  className="w-32 px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white"
-                  required={!formData.isFree}
-                />
-                <span className="text-white">€</span>
-              </div>
-            )}
-          </div>
+          )}
         </div>
       </div>
 
