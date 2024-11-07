@@ -45,6 +45,8 @@ const EventForm: React.FC<EventFormProps> = ({ event, onSubmit }) => {
         }
   );
   const [image, setImage] = useState<File | null>(null);
+  const [displayFileName, setDisplayFileName] = useState<string>("");
+
   const [newGenre, setNewGenre] = useState("");
 
   const handleAddGenre = (e: React.FormEvent) => {
@@ -131,85 +133,164 @@ const EventForm: React.FC<EventFormProps> = ({ event, onSubmit }) => {
     }
   };
 
+  const extractFileNameFromUrl = (url: string) => {
+    const parts = url.split("/");
+    return parts[parts.length - 1];
+  };
+
+  React.useEffect(() => {
+    if (event?.imageSrc) {
+      setDisplayFileName(extractFileNameFromUrl(event.imageSrc));
+    }
+  }, [event]);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImage(file);
+      setDisplayFileName(file.name);
+    }
+  };
+
   return (
     <form
       onSubmit={handleSubmit}
       className="space-y-6 bg-gray-900 p-6 rounded-lg"
     >
       <div className="space-y-4">
-        <input
-          type="text"
-          value={formData.title}
-          onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-          placeholder="Titre de l'événement"
-          className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white"
-          required
-        />
+        <div className="space-y-2">
+          <label className="text-white block text-lg font-bold border-b border-gray-600 pb-1 mb-2">
+            Titre de l'événement
+          </label>
+          <input
+            type="text"
+            value={formData.title}
+            onChange={(e) =>
+              setFormData({ ...formData, title: e.target.value })
+            }
+            placeholder="Titre de l'événement"
+            className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white"
+            required
+          />
+        </div>
 
         <div className="grid grid-cols-2 gap-4">
-          <div className="relative">
-            <input
-              type="text"
-              value={formData.eventNumber}
-              onChange={(e) =>
-                setFormData({ ...formData, eventNumber: e.target.value })
-              }
-              placeholder="Numéro d'événement (auto si vide)"
-              className="px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white w-full"
-            />
-            <div className="text-xs text-gray-400 mt-1">
-              Laissez vide pour auto-incrémentation
+          <div className="space-y-2">
+            <label className="text-white block text-lg font-bold border-b border-gray-600 pb-1 mb-2">
+              Numéro d'événement
+            </label>
+            <div className="relative">
+              <input
+                type="text"
+                value={formData.eventNumber}
+                onChange={(e) =>
+                  setFormData({ ...formData, eventNumber: e.target.value })
+                }
+                placeholder="Numéro d'événement (auto si vide)"
+                className="px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white w-full"
+              />
+              <div className="text-xs text-gray-400 mt-1">
+                Laissez vide pour auto-incrémentation
+              </div>
             </div>
           </div>
 
-          <input
-            type="text"
-            value={formData.city}
-            onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-            placeholder="Ville"
-            className="px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white"
-            required
-          />
+          <div className="space-y-2">
+            <label className="text-white block text-lg font-bold border-b border-gray-600 pb-1 mb-2">
+              Lieux
+            </label>
+            <input
+              type="text"
+              value={formData.city}
+              onChange={(e) =>
+                setFormData({ ...formData, city: e.target.value })
+              }
+              placeholder="Ville"
+              className="px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white"
+              required
+            />
+          </div>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-          <input
-            type="date"
-            value={formData.date}
-            onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-            className="px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white"
-            required
-          />
+          <div className="space-y-2">
+            <label className="text-white block text-lg font-bold border-b border-gray-600 pb-1 mb-2">
+              Date
+            </label>
+            <input
+              type="date"
+              value={formData.date}
+              onChange={(e) =>
+                setFormData({ ...formData, date: e.target.value })
+              }
+              className="px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white"
+              required
+            />
+          </div>
 
+          <div className="space-y-2">
+            <label className="text-white block text-lg font-bold border-b border-gray-600 pb-1 mb-2">
+              Heure
+            </label>
+            <input
+              type="time"
+              value={formData.time}
+              onChange={(e) =>
+                setFormData({ ...formData, time: e.target.value })
+              }
+              className="px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white"
+              required
+            />
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-white block text-lg font-bold border-b border-gray-600 pb-1 mb-2">
+            Image de l'événement
+          </label>
+          <div className="relative">
+            <input
+              type="file"
+              onChange={handleFileChange}
+              accept="image/*"
+              className="hidden"
+              id="imageInput"
+              required={!event}
+            />
+            <label
+              htmlFor="imageInput"
+              className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white cursor-pointer hover:bg-gray-700 flex justify-between items-center"
+            >
+              <span className="truncate">
+                {displayFileName || "Choisir une image"}
+              </span>
+              <span className="bg-gray-700 px-2 py-1 rounded ml-2">
+                Parcourir
+              </span>
+            </label>
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-white block text-lg font-bold border-b border-gray-600 pb-1 mb-2">
+            Lien de billetterie
+          </label>
           <input
-            type="time"
-            value={formData.time}
-            onChange={(e) => setFormData({ ...formData, time: e.target.value })}
-            className="px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white"
+            type="text"
+            value={formData.ticketLink}
+            onChange={(e) =>
+              setFormData({ ...formData, ticketLink: e.target.value })
+            }
+            placeholder="Lien billetterie"
+            className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white"
             required
           />
         </div>
 
-        <input
-          type="file"
-          onChange={(e) => setImage(e.target.files?.[0] || null)}
-          accept="image/*"
-          className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white"
-          required={!event}
-        />
-
-        <input
-          type="text"
-          value={formData.ticketLink}
-          onChange={(e) =>
-            setFormData({ ...formData, ticketLink: e.target.value })
-          }
-          placeholder="Lien billetterie"
-          className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white"
-          required
-        />
         <div className="space-y-2">
-          <label className="text-white block">Genres musicaux</label>
+          <label className="text-white block text-lg font-bold border-b border-gray-600 pb-1 mb-2">
+            Genres musicaux
+          </label>
 
           <div className="flex flex-wrap gap-2 mb-2">
             {formData.genres.map((genre) => (
@@ -246,44 +327,48 @@ const EventForm: React.FC<EventFormProps> = ({ event, onSubmit }) => {
             </button>
           </div>
         </div>
-
         <div className="space-y-2">
-          <div className="flex items-center mb-2">
-            <input
-              type="checkbox"
-              checked={formData.isFree}
-              onChange={(e) => {
-                setFormData({
-                  ...formData,
-                  isFree: e.target.checked,
-                  price: e.target.checked ? "" : formData.price,
-                });
-              }}
-              className="mr-2"
-            />
-            <label className="text-white">Gratuit</label>
-          </div>
-
-          {!formData.isFree && (
-            <div className="flex items-center gap-2">
+          <label className="text-white block text-lg font-bold border-b border-gray-600 pb-1 mb-2">
+            Tarification
+          </label>
+          <div className="space-y-2">
+            <div className="flex items-center mb-2">
               <input
-                type="number"
-                step="0.01"
-                min="0"
-                value={formData.price}
-                onChange={(e) =>
+                type="checkbox"
+                checked={formData.isFree}
+                onChange={(e) => {
                   setFormData({
                     ...formData,
-                    price: e.target.value,
-                  })
-                }
-                placeholder="Prix"
-                className="w-32 px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white"
-                required={!formData.isFree}
+                    isFree: e.target.checked,
+                    price: e.target.checked ? "" : formData.price,
+                  });
+                }}
+                className="mr-2"
               />
-              <span className="text-white">€</span>
+              <label className="text-white">Gratuit</label>
             </div>
-          )}
+
+            {!formData.isFree && (
+              <div className="flex items-center gap-2">
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={formData.price}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      price: e.target.value,
+                    })
+                  }
+                  placeholder="Prix"
+                  className="w-32 px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white"
+                  required={!formData.isFree}
+                />
+                <span className="text-white">€</span>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
