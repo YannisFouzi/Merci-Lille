@@ -93,7 +93,7 @@ const EventsManagement = () => {
             <tr>
               <th className="px-4 py-4 text-left text-sm sm:px-6">Date</th>
               <th className="px-4 py-4 text-left text-sm sm:px-6">Titre</th>
-              <th className="px-4 py-4 text-left text-sm sm:px-6">Ville</th>
+              <th className="px-4 py-4 text-left text-sm sm:px-6">Lieu</th>
               <th className="px-4 py-4 text-left text-sm sm:px-6">État</th>
               <th className="px-4 py-4 text-right text-sm sm:px-6">Actions</th>
             </tr>
