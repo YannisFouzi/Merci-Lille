@@ -113,6 +113,7 @@ const EventForm: React.FC<EventFormProps> = ({ event, onSubmit }) => {
       }
 
       if (event?._id) {
+        console.log("Data avant update:", Object.fromEntries(data.entries()));
         await eventsService.updateEvent(event._id, data);
       } else {
         await eventsService.createEvent(data);
