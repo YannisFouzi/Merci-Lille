@@ -9,6 +9,11 @@ interface EventFormProps {
 
 const EventForm: React.FC<EventFormProps> = ({ event, onSubmit }) => {
   console.log("Event reçu dans le form:", event);
+  console.log("Format des genres:", {
+    genres: event?.genres,
+    type: typeof event?.genres,
+    isArray: Array.isArray(event?.genres),
+  });
   const formatDateForInput = (dateString: string) => {
     const date = new Date(dateString);
     return date.toISOString().split("T")[0];
