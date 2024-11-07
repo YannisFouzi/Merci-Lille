@@ -82,3 +82,33 @@
     overflow-x: hidden;
   }
 }
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #4b5563;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #4b5563 transparent;
+}
+
+.scrollbar-overlay {
+  scrollbar-width: none;
+}
+
+.scrollbar-overlay::-webkit-scrollbar {
+  display: none;
+}

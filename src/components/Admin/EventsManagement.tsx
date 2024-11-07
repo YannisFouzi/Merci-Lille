@@ -154,7 +154,7 @@ const EventsManagement = () => {
 
       {showForm ? (
         <div
-          className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-2 sm:p-4 z-50 overflow-y-auto"
+          className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-2 sm:p-4 z-50 overflow-y-auto scrollbar-none"
           onClick={(e) => {
             if (e.target === e.currentTarget) {
               setShowForm(false);
@@ -162,16 +162,16 @@ const EventsManagement = () => {
           }}
         >
           <div
-            className="bg-gray-900 rounded-lg p-4 w-full max-w-2xl my-4 sm:p-6"
+            className="bg-gray-900 rounded-lg p-4 w-full max-w-3xl max-h-[85vh] my-6 sm:my-8 overflow-y-auto scrollbar-thin scrollbar-track-gray-800 scrollbar-thumb-gray-600 hover:scrollbar-thumb-gray-500"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold text-white">
+            <div className="flex justify-between items-center mb-6 pb-4 border-b border-gray-700">
+              <h2 className="text-2xl font-bold text-white">
                 {selectedEvent ? "Modifier un événement" : "Nouvel événement"}
               </h2>
               <button
                 onClick={() => setShowForm(false)}
-                className="text-gray-400 hover:text-white"
+                className="text-gray-400 hover:text-white text-xl px-2"
               >
                 ✕
               </button>
