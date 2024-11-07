@@ -8,6 +8,7 @@ interface EventFormProps {
 }
 
 const EventForm: React.FC<EventFormProps> = ({ event, onSubmit }) => {
+  console.log("Event reçu dans le form:", event);
   const formatDateForInput = (dateString: string) => {
     const date = new Date(dateString);
     return date.toISOString().split("T")[0];
@@ -90,10 +91,7 @@ const EventForm: React.FC<EventFormProps> = ({ event, onSubmit }) => {
       Object.entries(formData).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
           if (key === "genres") {
-            data.append(
-              key,
-              JSON.stringify(Array.isArray(value) ? value : [value])
-            );
+            data.append(key, JSON.stringify(Array.isArray(value) ? value : []));
           } else {
             data.append(key, value.toString());
           }

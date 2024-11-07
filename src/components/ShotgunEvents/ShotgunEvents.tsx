@@ -24,16 +24,23 @@ const ShotgunEvents: React.FC = () => {
           const [hours, minutes] = event.time.split(":");
           const eventDate = new Date(event.date);
           eventDate.setHours(parseInt(hours), parseInt(minutes));
+          const processedGenres = Array.isArray(event.genres)
+            ? event.genres
+            : typeof event.genres === "string"
+            ? JSON.parse(event.genres)
+            : [];
 
           if (eventDate > now) {
             upcoming.push({
               ...event,
+              genres: processedGenres,
               isFree: Boolean(event.isFree),
               isPast: false,
             });
           } else {
             past.push({
               ...event,
+              genres: processedGenres,
               isFree: Boolean(event.isFree),
               isPast: true,
             });
