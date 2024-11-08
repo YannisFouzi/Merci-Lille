@@ -1,6 +1,7 @@
 import { gsap } from "gsap";
 import { Draggable } from "gsap/Draggable";
 import React, { useEffect, useRef } from "react";
+import { Helmet } from "react-helmet";
 import terrorclownMusic from "../../media/terrorclown.mp3";
 import "./PuzzleGame.scss";
 
@@ -146,6 +147,13 @@ const PuzzleGame: React.FC = () => {
 
   return (
     <div className="puzzle-container">
+      <Helmet>
+        <title>Jeu de Puzzle | Merci Lille</title>
+        <meta
+          name="description"
+          content="Amusez-vous avec notre jeu de puzzle exclusif !"
+        />
+      </Helmet>
       <audio ref={audioRef} src={terrorclownMusic} />
       <svg
         ref={puzzleRef}

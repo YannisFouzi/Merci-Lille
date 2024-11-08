@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Helmet } from "react-helmet";
 import "./Introduction.scss";
 
 const Introduction: React.FC = () => {
@@ -24,6 +25,13 @@ const Introduction: React.FC = () => {
 
   return (
     <div className="introduction-container">
+      <Helmet>
+        <title>Introduction | Merci Lille</title>
+        <meta
+          name="description"
+          content="Découvrez notre collectif et notre passion pour la musique électronique."
+        />
+      </Helmet>
       <div className="introduction-wrapper">
         <div className="introduction-placeholder" aria-hidden="true">
           {text}

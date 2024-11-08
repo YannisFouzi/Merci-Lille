@@ -21,7 +21,10 @@ const InstagramLogo = () => (
 
 const SocialMediaMenu: React.FC = () => {
   return (
-    <section className="social-media-section">
+    <section
+      className="social-media-section"
+      aria-label="Liens vers les réseaux sociaux"
+    >
       <div className="social-media-menu">
         <ul>
           <li>
@@ -29,6 +32,7 @@ const SocialMediaMenu: React.FC = () => {
               href="https://www.instagram.com/merci.lille/"
               target="_blank"
               rel="noopener noreferrer"
+              aria-label="Visitez notre page Instagram"
             >
               <InstagramLogo />
               <span> - Instagram</span>

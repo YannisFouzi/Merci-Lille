@@ -7,6 +7,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useState } from "react";
+import { Helmet } from "react-helmet";
 import "./EmailForm.scss";
 
 const EmailForm: React.FC = () => {
@@ -106,6 +107,13 @@ const EmailForm: React.FC = () => {
       className="card-3d-wrap mx-auto"
       style={{ width: "600px", height: "600px" }}
     >
+      <Helmet>
+        <title>Contact | Merci Lille</title>
+        <meta
+          name="description"
+          content="Contactez Merci Lille pour des informations ou des réservations d'événements."
+        />
+      </Helmet>
       <div className={`card-3d-wrapper ${isFlipped ? "is-flipped" : ""}`}>
         <div className="card-front">
           <div className="center-wrap">

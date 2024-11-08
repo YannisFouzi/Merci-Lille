@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { Helmet } from "react-helmet";
 import "./TextScramble.scss";
 
 class TextScrambleLogic {
@@ -115,6 +116,13 @@ const TextScramble: React.FC = () => {
 
   return (
     <div>
+      <Helmet>
+        <title>Text Scramble | Merci Lille</title>
+        <meta
+          name="description"
+          content="Effet de texte aléatoire mettant en avant les genres musicaux de Merci Lille."
+        />
+      </Helmet>
       <div className="container mx-auto px-4">
         <div ref={el} className="text-scramble text-5xl text-center"></div>
       </div>

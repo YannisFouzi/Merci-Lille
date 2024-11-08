@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Helmet } from "react-helmet";
 import { eventsService } from "../../services/events.service";
 import { EventCardProps } from "../ShotgunEvents/types";
 import { formatDate } from "../ShotgunEvents/utils/dateFormatter";
@@ -71,6 +72,13 @@ const EventsManagement = () => {
 
   return (
     <div className="space-y-6">
+      <Helmet>
+        <title>Gestion des Événements | Merci Lille</title>
+        <meta
+          name="description"
+          content="Page de gestion des événements de Merci Lille."
+        />
+      </Helmet>
       <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
         <h1 className="text-2xl font-bold text-white">
           Gestion des événements

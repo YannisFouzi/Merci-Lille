@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import React, { useEffect, useRef, useState } from "react";
+import { Helmet } from "react-helmet";
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import AdminLayout from "../components/Admin/AdminLayout";
 import EventsManagement from "../components/Admin/EventsManagement";
@@ -253,7 +254,27 @@ const AppContent: React.FC = () => {
 const App: React.FC = () => {
   return (
     <Router>
-      <AppContent />
+      <Helmet>
+        <title>Merci Lille - Collectif Événements Électro</title>
+        <meta
+          name="description"
+          content="Découvrez nos événements électro à Lille. Rejoignez-nous pour une expérience musicale unique !"
+        />
+      </Helmet>
+      <Routes>
+        <Route path="/" element={<MainContent />} />
+        <Route path="/admin/login" element={<LoginForm />} />
+        <Route
+          path="/admin/events"
+          element={
+            <PrivateRoute>
+              <AdminLayout>
+                <EventsManagement />
+              </AdminLayout>
+            </PrivateRoute>
+          }
+        />
+      </Routes>
     </Router>
   );
 };
