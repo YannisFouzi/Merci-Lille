@@ -50,9 +50,10 @@ const GalleryManagement: React.FC = () => {
     try {
       setUploadLoading(true);
       const formData = new FormData();
-      Array.from(selectedFiles).forEach((file) => {
-        formData.append("images", file);
-      });
+
+      for (let i = 0; i < selectedFiles.length; i++) {
+        formData.append("image", selectedFiles[i]);
+      }
 
       await galleryService.uploadImages(formData);
       await loadImages();
@@ -60,6 +61,7 @@ const GalleryManagement: React.FC = () => {
       setSelectedFiles(null);
     } catch (err) {
       setError("Erreur lors de l'upload des images");
+      console.error("Upload error:", err);
     } finally {
       setUploadLoading(false);
     }

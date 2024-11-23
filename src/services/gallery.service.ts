@@ -7,6 +7,10 @@ export const galleryService = {
   },
 
   async uploadImages(formData: FormData) {
+    for (let [key, value] of formData.entries()) {
+      console.log(`${key}: ${value}`);
+    }
+
     const response = await api.post("/gallery", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
