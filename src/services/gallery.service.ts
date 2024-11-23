@@ -20,9 +20,7 @@ export const galleryService = {
   },
 
   async deleteImages(imageIds: string[]) {
-    const response = await api.delete(`/gallery/batch`, {
-      data: { imageIds },
-    });
+    const response = await api.post(`/gallery/delete-multiple`, { imageIds });
     return response.data;
   },
 

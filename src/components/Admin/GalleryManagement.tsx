@@ -52,7 +52,7 @@ const GalleryManagement: React.FC = () => {
       const formData = new FormData();
 
       for (let i = 0; i < selectedFiles.length; i++) {
-        formData.append("image", selectedFiles[i]);
+        formData.append("images", selectedFiles[i]);
       }
 
       await galleryService.uploadImages(formData);
