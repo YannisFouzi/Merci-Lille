@@ -127,7 +127,7 @@ const GalleryManagement: React.FC = () => {
         <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50">
           <div className="bg-gray-900 rounded-lg p-6 w-full max-w-md">
             <h2 className="text-xl font-bold text-white mb-4">
-              Ajouter une image
+              Ajouter des images
             </h2>
             <form onSubmit={handleUpload} className="space-y-4">
               <div>
@@ -135,13 +135,22 @@ const GalleryManagement: React.FC = () => {
                   type="file"
                   onChange={handleFileChange}
                   accept="image/*"
-                  className="text-white"
+                  multiple
+                  className="text-white w-full"
                 />
+                {selectedFiles && (
+                  <p className="text-gray-400 mt-2">
+                    {selectedFiles.length} fichier(s) sélectionné(s)
+                  </p>
+                )}
               </div>
               <div className="flex justify-end gap-4">
                 <button
                   type="button"
-                  onClick={() => setShowUploadForm(false)}
+                  onClick={() => {
+                    setShowUploadForm(false);
+                    setSelectedFiles(null);
+                  }}
                   className="px-4 py-2 text-gray-400 hover:text-white"
                 >
                   Annuler
@@ -151,7 +160,9 @@ const GalleryManagement: React.FC = () => {
                   disabled={uploadLoading || !selectedFiles}
                   className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50"
                 >
-                  {uploadLoading ? "Upload en cours..." : "Upload"}
+                  {uploadLoading
+                    ? `Upload en cours (0/${selectedFiles?.length || 0})...`
+                    : "Upload"}
                 </button>
               </div>
             </form>
