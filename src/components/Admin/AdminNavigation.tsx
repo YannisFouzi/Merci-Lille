@@ -13,6 +13,14 @@ const AdminNavigation: React.FC = () => {
             Événements
           </Link>
         </li>
+        <li>
+          <Link
+            to="/admin/gallery"
+            className="text-white hover:text-red-500 transition-colors"
+          >
+            Galerie
+          </Link>
+        </li>
       </ul>
     </nav>
   );
