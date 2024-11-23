@@ -18,6 +18,12 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             <Link to="/admin/events" className="text-white hover:text-gray-300">
               Événements
             </Link>
+            <Link
+              to="/admin/gallery"
+              className="text-white hover:text-gray-300"
+            >
+              Gallerie
+            </Link>
             <a
               href="https://mercilille.com"
               target="_blank"
