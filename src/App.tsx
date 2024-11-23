@@ -1,8 +1,9 @@
 import React, { useEffect } from "react";
+import { Route, Routes } from "react-router-dom";
 import "./App.css";
-import EmailForm from "./components/EmailForm/EmailForm";
-import AnimatedSVGLogo from "./components/SVGAnimation/AnimatedSVGLogo";
-
+import EventsManagement from "./components/Admin/EventsManagement";
+import GalleryManagement from "./components/Admin/GalleryManagement";
+import AdminLayout from "./layouts/AdminLayout";
 const ShotgunWidget: React.FC = () => {
   useEffect(() => {
     const script = document.createElement("script");
@@ -32,25 +33,13 @@ const ShotgunWidget: React.FC = () => {
 
 const App: React.FC = () => {
   return (
-    <div className="min-h-screen bg-black text-white">
-      <div className="container mx-auto px-4">
-        <header className="py-8 flex flex-col items-center">
-          <AnimatedSVGLogo />
-        </header>
-        <main>
-          <section className="mb-12">
-            <ShotgunWidget />
-          </section>
-          <section className="mb-12">
-            <h2 className="text-3xl font-semibold mb-4 text-green-400"></h2>
-            <EmailForm />
-          </section>
-        </main>
-        <footer className="py-8 text-center text-gray-400">
-          <p>&copy; 2024 Merci Lille. Tous droits réservés.</p>
-        </footer>
-      </div>
-    </div>
+    <Routes>
+      <Route path="/" element={<App />} />
+      <Route path="/admin" element={<AdminLayout />}>
+        <Route path="events" element={<EventsManagement />} />
+        <Route path="gallery" element={<GalleryManagement />} />
+      </Route>
+    </Routes>
   );
 };
 

@@ -13,8 +13,9 @@ const GalleryManagement: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [showUploadForm, setShowUploadForm] = useState(false);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
   const [uploadLoading, setUploadLoading] = useState(false);
+  const [selectedImages, setSelectedImages] = useState<string[]>([]);
 
   const loadImages = async () => {
     try {
@@ -34,40 +35,58 @@ const GalleryManagement: React.FC = () => {
   }, []);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setSelectedFile(e.target.files[0]);
+    if (e.target.files && e.target.files.length > 0) {
+      setSelectedFiles(e.target.files);
     }
   };
 
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedFile) {
-      setError("Veuillez sélectionner une image");
+    if (!selectedFiles || selectedFiles.length === 0) {
+      setError("Veuillez sélectionner au moins une image");
       return;
     }
 
     try {
       setUploadLoading(true);
       const formData = new FormData();
-      formData.append("image", selectedFile);
-      await galleryService.uploadImage(formData);
+      Array.from(selectedFiles).forEach((file) => {
+        formData.append("images", file);
+      });
+
+      await galleryService.uploadImages(formData);
       await loadImages();
       setShowUploadForm(false);
-      setSelectedFile(null);
+      setSelectedFiles(null);
     } catch (err) {
-      setError("Erreur lors de l'upload de l'image");
+      setError("Erreur lors de l'upload des images");
     } finally {
       setUploadLoading(false);
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (window.confirm("Êtes-vous sûr de vouloir supprimer cette image ?")) {
+  const toggleImageSelection = (id: string) => {
+    setSelectedImages((prev) =>
+      prev.includes(id)
+        ? prev.filter((imageId) => imageId !== id)
+        : [...prev, id]
+    );
+  };
+
+  const handleDeleteSelected = async () => {
+    if (selectedImages.length === 0) return;
+
+    if (
+      window.confirm(
+        `Êtes-vous sûr de vouloir supprimer ${selectedImages.length} image(s) ?`
+      )
+    ) {
       try {
-        await galleryService.deleteImage(id);
+        await galleryService.deleteImages(selectedImages);
         await loadImages();
+        setSelectedImages([]);
       } catch (err) {
-        setError("Erreur lors de la suppression");
+        setError("Erreur lors de la suppression des images");
       }
     }
   };
@@ -129,7 +148,7 @@ const GalleryManagement: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  disabled={uploadLoading || !selectedFile}
+                  disabled={uploadLoading || !selectedFiles}
                   className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50"
                 >
                   {uploadLoading ? "Upload en cours..." : "Upload"}
@@ -140,11 +159,28 @@ const GalleryManagement: React.FC = () => {
         </div>
       )}
 
+      {selectedImages.length > 0 && (
+        <div className="fixed bottom-4 right-4 bg-gray-900 p-4 rounded-lg shadow-lg">
+          <p className="text-white mb-2">
+            {selectedImages.length} image(s) sélectionnée(s)
+          </p>
+          <button
+            onClick={handleDeleteSelected}
+            className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+          >
+            Supprimer la sélection
+          </button>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
         {images.map((image) => (
           <div
             key={image._id}
-            className="relative group bg-gray-800 rounded-lg overflow-hidden"
+            className={`relative group bg-gray-800 rounded-lg overflow-hidden ${
+              selectedImages.includes(image._id) ? "ring-2 ring-red-500" : ""
+            }`}
+            onClick={() => toggleImageSelection(image._id)}
           >
             <img
               src={image.imageSrc}
@@ -153,10 +189,12 @@ const GalleryManagement: React.FC = () => {
             />
             <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all duration-300 flex items-center justify-center">
               <button
-                onClick={() => handleDelete(image._id)}
+                onClick={() => toggleImageSelection(image._id)}
                 className="opacity-0 group-hover:opacity-100 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-opacity duration-300"
               >
-                Supprimer
+                {selectedImages.includes(image._id)
+                  ? "Désélectionner"
+                  : "Sélectionner"}
               </button>
             </div>
           </div>

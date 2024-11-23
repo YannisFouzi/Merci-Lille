@@ -6,11 +6,18 @@ export const galleryService = {
     return response.data;
   },
 
-  async uploadImage(imageData: FormData) {
-    const response = await api.post("/gallery", imageData, {
+  async uploadImages(formData: FormData) {
+    const response = await api.post("/gallery", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
+    });
+    return response.data;
+  },
+
+  async deleteImages(imageIds: string[]) {
+    const response = await api.delete(`/gallery/batch`, {
+      data: { imageIds },
     });
     return response.data;
   },
