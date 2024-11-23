@@ -4,6 +4,7 @@ import { Helmet } from "react-helmet";
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import AdminLayout from "../components/Admin/AdminLayout";
 import EventsManagement from "../components/Admin/EventsManagement";
+import GalleryManagement from "../components/Admin/GalleryManagement";
 import LoginForm from "../components/Admin/LoginForm";
 import PrivateRoute from "../components/Admin/PrivateRoute";
 import EmailForm from "../components/EmailForm/EmailForm";
@@ -241,6 +242,7 @@ const AppContent: React.FC = () => {
             <AdminLayout>
               <Routes>
                 <Route path="events" element={<EventsManagement />} />
+                <Route path="gallery" element={<GalleryManagement />} />
               </Routes>
             </AdminLayout>
           </PrivateRoute>
@@ -270,6 +272,16 @@ const App: React.FC = () => {
             <PrivateRoute>
               <AdminLayout>
                 <EventsManagement />
+              </AdminLayout>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/admin/gallery"
+          element={
+            <PrivateRoute>
+              <AdminLayout>
+                <GalleryManagement />
               </AdminLayout>
             </PrivateRoute>
           }
