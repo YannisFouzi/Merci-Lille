@@ -23,7 +23,7 @@ const GalleryManagement: React.FC = () => {
   const fetchPhotos = async () => {
     try {
       console.log("Fetching photos...");
-      const response = await api.get("/api/gallery");
+      const response = await api.get("/gallery");
       console.log("Photos received:", response.data);
       setPhotos(response.data);
     } catch (error) {
