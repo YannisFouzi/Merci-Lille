@@ -22,19 +22,22 @@ const GalleryManagement: React.FC = () => {
 
   const fetchPhotos = async () => {
     try {
-      console.log("Fetching photos...");
+      console.log("Début fetchPhotos");
       const response = await api.get("/gallery");
-      console.log("Photos received:", response.data);
+      console.log("Réponse API:", response);
       setPhotos(response.data);
     } catch (error) {
-      console.error("Error fetching photos:", error);
+      console.error("Erreur fetchPhotos:", error);
       setError(
         error instanceof Error ? error.message : "Une erreur est survenue"
       );
     } finally {
       setLoading(false);
+      console.log("Fin fetchPhotos");
     }
   };
+
+  console.log("Rendu GalleryManagement:", { loading, photos, error });
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
