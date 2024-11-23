@@ -14,6 +14,7 @@ const AdminRoutes: React.FC = () => {
           </AdminLayout>
         }
       >
+        <Route index element={<EventsManagement />} />
         <Route path="events" element={<EventsManagement />} />
         <Route path="gallery" element={<GalleryManagement />} />
       </Route>

@@ -13,17 +13,24 @@ const GalleryManagement: React.FC = () => {
   const [photos, setPhotos] = useState<GalleryPhoto[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    console.log("GalleryManagement monté");
     fetchPhotos();
   }, []);
 
   const fetchPhotos = async () => {
     try {
-      const response = await api.get("/gallery");
+      console.log("Fetching photos...");
+      const response = await api.get("/api/gallery");
+      console.log("Photos received:", response.data);
       setPhotos(response.data);
     } catch (error) {
       console.error("Error fetching photos:", error);
+      setError(
+        error instanceof Error ? error.message : "Une erreur est survenue"
+      );
     } finally {
       setLoading(false);
     }
@@ -62,13 +69,19 @@ const GalleryManagement: React.FC = () => {
     }
   };
 
+  if (error) {
+    return <div className="text-red-500">Erreur: {error}</div>;
+  }
+
   return (
     <div className="p-6">
       <Helmet>
         <title>Gestion de la Galerie | Admin</title>
       </Helmet>
 
-      <h1 className="text-2xl font-bold mb-6">Gestion de la Galerie</h1>
+      <h1 className="text-2xl font-bold mb-6 text-white">
+        Gestion de la Galerie
+      </h1>
 
       <form onSubmit={handleUpload} className="mb-8">
         <div className="flex gap-4">
