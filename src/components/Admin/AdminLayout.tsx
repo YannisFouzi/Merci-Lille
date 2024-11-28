@@ -22,7 +22,7 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               to="/admin/gallery"
               className="text-white hover:text-gray-300"
             >
-              Gallerie
+              Galerie
             </Link>
             <a
               href="https://mercilille.com"
