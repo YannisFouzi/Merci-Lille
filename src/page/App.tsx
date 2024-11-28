@@ -130,8 +130,15 @@ const MainContent: React.FC = () => {
 
         <footer className="py-8 text-center text-gray-400">
           <p>
-            &copy; 2024 Merci Lille. Tous droits réservés.{" "}
-            <span onClick={togglePuzzle}>Terrorclown</span>
+            &copy; 2024 Merci Lille. Tous droits réservés. Développé par{" "}
+            <a
+              href="https://fouzi-dev.fr"
+              target="_blank"
+              className="font-bold"
+            >
+              fouzi-dev.fr
+            </a>
+            . <span onClick={togglePuzzle}>Terrorclown</span>
           </p>
         </footer>
       </div>
