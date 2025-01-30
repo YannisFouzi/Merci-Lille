@@ -98,7 +98,11 @@ const EventForm: React.FC<EventFormProps> = ({ event, onSubmit }) => {
       Object.entries(formData).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
           if (key === "genres") {
-            data.append(key, JSON.stringify(Array.isArray(value) ? value : []));
+            // Envoyer chaque genre individuellement
+            const genres = Array.isArray(value) ? value : [];
+            genres.forEach((genre, index) => {
+              data.append(`genres[${index}]`, genre);
+            });
           } else {
             data.append(key, value.toString());
           }
