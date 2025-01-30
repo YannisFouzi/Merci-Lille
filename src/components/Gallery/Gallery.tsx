@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { Helmet } from "react-helmet";
 import { galleryService } from "../../services/gallery.service";
 import "./Gallery.scss";
@@ -13,6 +14,7 @@ const Gallery: React.FC = () => {
   const [visibleItems, setVisibleItems] = useState(ITEMS_PER_PAGE);
   const [images, setImages] = useState<GalleryImage[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchImages = async () => {
@@ -28,6 +30,19 @@ const Gallery: React.FC = () => {
 
     fetchImages();
   }, []);
+
+  useEffect(() => {
+    // Désactiver le défilement quand une image est sélectionnée
+    if (selectedImage) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [selectedImage]);
 
   // Définition des couleurs disponibles
   const borderColors = [
@@ -78,6 +93,26 @@ const Gallery: React.FC = () => {
     setVisibleItems((prev: number) => prev + ITEMS_PER_PAGE);
   };
 
+  const handleImageClick = (imageSrc: string) => {
+    setSelectedImage(imageSrc);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedImage(null);
+  };
+
+  const Modal = () => {
+    if (!selectedImage) return null;
+    return createPortal(
+      <div className="modal-overlay" onClick={handleCloseModal}>
+        <div className="modal-content">
+          <img src={selectedImage} alt="Selected" className="modal-image" />
+        </div>
+      </div>,
+      document.body
+    );
+  };
+
   if (loading) {
     return (
       <div className="text-center py-12">
@@ -100,7 +135,11 @@ const Gallery: React.FC = () => {
       </h1>
       <div className="gallery-grid">
         {items.slice(0, visibleItems).map((item) => (
-          <div key={item.id} className={`gallery-item show ${item.colorClass}`}>
+          <div
+            key={item.id}
+            className={`gallery-item show ${item.colorClass}`}
+            onClick={() => handleImageClick(item.image)}
+          >
             <div className="item-content">
               <img
                 src={item.image}
@@ -111,6 +150,8 @@ const Gallery: React.FC = () => {
           </div>
         ))}
       </div>
+
+      {selectedImage && <Modal />}
 
       {showLoadMore && (
         <div className="mt-8 text-center">
