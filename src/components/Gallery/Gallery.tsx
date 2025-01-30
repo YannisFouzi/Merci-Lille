@@ -13,7 +13,6 @@ const Gallery: React.FC = () => {
   const [visibleItems, setVisibleItems] = useState(ITEMS_PER_PAGE);
   const [images, setImages] = useState<GalleryImage[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchImages = async () => {
@@ -79,15 +78,6 @@ const Gallery: React.FC = () => {
     setVisibleItems((prev: number) => prev + ITEMS_PER_PAGE);
   };
 
-  const handleImageClick = (imageSrc: string, e: React.MouseEvent) => {
-    e.preventDefault();
-    setSelectedImage(imageSrc);
-  };
-
-  const handleCloseFullscreen = () => {
-    setSelectedImage(null);
-  };
-
   if (loading) {
     return (
       <div className="text-center py-12">
@@ -110,11 +100,7 @@ const Gallery: React.FC = () => {
       </h1>
       <div className="gallery-grid">
         {items.slice(0, visibleItems).map((item) => (
-          <div
-            key={item.id}
-            className={`gallery-item show ${item.colorClass} cursor-pointer`}
-            onClick={(e) => handleImageClick(item.image, e)}
-          >
+          <div key={item.id} className={`gallery-item show ${item.colorClass}`}>
             <div className="item-content">
               <img
                 src={item.image}
@@ -131,27 +117,6 @@ const Gallery: React.FC = () => {
           <button onClick={handleLoadMore} className="btn-load-more">
             Voir plus
           </button>
-        </div>
-      )}
-
-      {/* Modal plein écran */}
-      {selectedImage && (
-        <div
-          className="fixed inset-0 z-50 bg-black bg-opacity-90 flex items-center justify-center"
-          onClick={handleCloseFullscreen}
-        >
-          <button
-            className="absolute top-4 right-4 text-white text-xl hover:text-red-500 transition-colors"
-            onClick={handleCloseFullscreen}
-          >
-            ✕
-          </button>
-          <img
-            src={selectedImage}
-            alt="Full screen view"
-            className="max-h-[90vh] max-w-[90vw] object-contain"
-            onClick={(e) => e.stopPropagation()}
-          />
         </div>
       )}
     </div>

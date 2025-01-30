@@ -39,7 +39,6 @@
   height: fit-content;
   margin: auto;
   background-color: black;
-  cursor: pointer;
 
   &.alizarin {
     border: 3px solid #e74c3c;
@@ -146,18 +145,4 @@
   .gallery-item {
     max-width: 100%;
   }
-}
-
-/* Animation pour le modal */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-.fixed {
-  animation: fadeIn 0.3s ease-in-out;
 }
