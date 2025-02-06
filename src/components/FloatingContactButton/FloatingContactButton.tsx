@@ -1,6 +1,17 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 const FloatingContactButton: React.FC = () => {
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    // Animation d'entrée après 1 seconde
+    const timer = setTimeout(() => {
+      setIsVisible(true);
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
   const scrollToContact = () => {
     const contactSection = document.getElementById("contact-section");
     if (contactSection) {
@@ -11,7 +22,14 @@ const FloatingContactButton: React.FC = () => {
   return (
     <button
       onClick={scrollToContact}
-      className="fixed bottom-8 left-1/2 transform -translate-x-1/2 bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-full shadow-lg transition-all duration-300 hover:scale-105 z-50 flex items-center gap-2"
+      className={`
+        fixed bottom-8 left-1/2 transform -translate-x-1/2 
+        bg-red-600 hover:bg-red-700 text-white px-6 py-3 
+        rounded-full shadow-lg transition-all duration-300 
+        hover:scale-105 hover:shadow-xl z-50 flex items-center gap-2
+        ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-16"}
+        transition-all duration-700 ease-out
+      `}
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
