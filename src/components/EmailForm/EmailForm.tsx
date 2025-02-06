@@ -104,6 +104,7 @@ const EmailForm: React.FC = () => {
 
   return (
     <div
+      id="contact-section"
       className="card-3d-wrap mx-auto"
       style={{ width: "600px", height: "600px" }}
     >

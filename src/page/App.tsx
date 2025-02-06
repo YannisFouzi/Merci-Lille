@@ -1,3 +1,5 @@
+import PuzzleGame from "@/components/PuzzleGame/PuzzleGame";
+import TextScramble from "@/components/TextScramble/TextScramble";
 import { motion } from "framer-motion";
 import React, { useEffect, useRef, useState } from "react";
 import { Helmet } from "react-helmet";
@@ -8,14 +10,13 @@ import GalleryManagement from "../components/Admin/GalleryManagement";
 import LoginForm from "../components/Admin/LoginForm";
 import PrivateRoute from "../components/Admin/PrivateRoute";
 import EmailForm from "../components/EmailForm/EmailForm";
+import FloatingContactButton from "../components/FloatingContactButton/FloatingContactButton";
 import Gallery from "../components/Gallery/Gallery";
 import Introduction from "../components/Introduction/Introduction";
 import ProfileCard from "../components/ProfilCard/ProfileCard";
-import PuzzleGame from "../components/PuzzleGame/PuzzleGame";
 import ShotgunEvents from "../components/ShotgunEvents/ShotgunEvents";
 import SocialMediaMenu from "../components/SocialMediaMenu/SocialMediaMenu";
 import AnimatedSVGLogo from "../components/SVGAnimation/AnimatedSVGLogo";
-import TextScramble from "../components/TextScramble/TextScramble";
 
 const IS_DEVELOPMENT = true;
 
@@ -156,6 +157,7 @@ const MainContent: React.FC = () => {
           </div>
         </div>
       )}
+      <FloatingContactButton />
     </div>
   );
 };
