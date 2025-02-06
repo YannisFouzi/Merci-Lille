@@ -11,7 +11,7 @@ const FloatingContactButton: React.FC = () => {
   return (
     <button
       onClick={scrollToContact}
-      className="fixed bottom-8 right-8 bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-full shadow-lg transition-all duration-300 transform hover:scale-105 z-50 flex items-center gap-2"
+      className="fixed bottom-8 left-1/2 transform -translate-x-1/2 bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-full shadow-lg transition-all duration-300 hover:scale-105 z-50 flex items-center gap-2"
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"

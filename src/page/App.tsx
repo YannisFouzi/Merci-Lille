@@ -129,7 +129,7 @@ const MainContent: React.FC = () => {
           </Section>
         </main>
 
-        <footer className="py-8 text-center text-gray-400">
+        <footer className="py-8 pb-24 text-center text-gray-400">
           <p>
             &copy; 2024 Merci Lille. Tous droits réservés. Développé par{" "}
             <a
