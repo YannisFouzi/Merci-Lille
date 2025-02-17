@@ -29,7 +29,7 @@ const EventForm: React.FC<EventFormProps> = ({ event, onSubmit }) => {
             : typeof event.genres === "string"
             ? JSON.parse(event.genres)
             : [],
-          price: event.price || "",
+          price: event.price ? event.price.toString() : "",
         }
       : {
           title: "",
@@ -73,9 +73,19 @@ const EventForm: React.FC<EventFormProps> = ({ event, onSubmit }) => {
     try {
       const data = new FormData();
 
+      // Formatage du prix avant l'envoi
+      const formDataToSend = {
+        ...formData,
+        price: formData.isFree
+          ? "0"
+          : formData.price?.trim()
+          ? formData.price.replace(",", ".")
+          : "0",
+      };
+
       // Log complet des données avant envoi
       console.log("Complete form data before submission:", {
-        ...formData,
+        ...formDataToSend,
         imageFile: image,
       });
 
@@ -95,7 +105,7 @@ const EventForm: React.FC<EventFormProps> = ({ event, onSubmit }) => {
         throw new Error("Une image est requise");
       }
 
-      Object.entries(formData).forEach(([key, value]) => {
+      Object.entries(formDataToSend).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
           if (key === "genres") {
             // Envoyer chaque genre individuellement
@@ -355,16 +365,18 @@ const EventForm: React.FC<EventFormProps> = ({ event, onSubmit }) => {
           {!formData.isFree && (
             <div className="flex items-center gap-2">
               <input
-                type="number"
-                step="0.01"
-                min="0"
+                type="text"
                 value={formData.price}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    price: e.target.value,
-                  })
-                }
+                onChange={(e) => {
+                  const value = e.target.value;
+                  // Accepte uniquement les nombres avec point ou virgule, maximum 2 décimales
+                  if (/^\d*[.,]?\d{0,2}$/.test(value)) {
+                    setFormData({
+                      ...formData,
+                      price: value.replace(",", "."),
+                    });
+                  }
+                }}
                 placeholder="Prix"
                 className="w-32 px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white"
                 required={!formData.isFree}
