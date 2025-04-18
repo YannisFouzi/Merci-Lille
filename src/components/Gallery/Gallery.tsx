@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { Helmet } from "react-helmet";
 import { galleryService } from "../../services/gallery.service";
 import "./Gallery.scss";
 
@@ -123,13 +122,6 @@ const Gallery: React.FC = () => {
 
   return (
     <div className="gallery-container">
-      <Helmet>
-        <title>Galerie Photo | Merci Lille</title>
-        <meta
-          name="description"
-          content="Explorez toute les photos de nos événements passés."
-        />
-      </Helmet>
       <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-center mb-16 text-white">
         La Galerie
       </h1>
