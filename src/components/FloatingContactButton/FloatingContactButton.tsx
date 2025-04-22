@@ -1,6 +1,12 @@
 import React, { useEffect, useState } from "react";
 
-const FloatingContactButton: React.FC = () => {
+interface FloatingContactButtonProps {
+  showPuzzle: boolean;
+}
+
+const FloatingContactButton: React.FC<FloatingContactButtonProps> = ({
+  showPuzzle,
+}) => {
   const [isVisible, setIsVisible] = useState(false);
   const [isAtContact, setIsAtContact] = useState(false);
 
@@ -41,6 +47,11 @@ const FloatingContactButton: React.FC = () => {
       }
     }
   };
+
+  // Ne pas afficher le bouton si le puzzle est visible
+  if (showPuzzle) {
+    return null;
+  }
 
   return (
     <button

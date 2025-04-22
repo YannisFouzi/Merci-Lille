@@ -157,7 +157,7 @@ const MainContent: React.FC = () => {
           </div>
         </div>
       )}
-      <FloatingContactButton />
+      <FloatingContactButton showPuzzle={showPuzzle} />
     </div>
   );
 };

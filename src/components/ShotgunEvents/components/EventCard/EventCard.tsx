@@ -25,8 +25,12 @@ const EventCard: React.FC<EventCardProps> = ({
       className="block w-full hover:no-underline"
     >
       <div className="w-full bg-gray-800 rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 h-full">
-        <div className="w-full">
-          <img src={imageSrc} alt={title} className="w-full object-contain" />
+        <div className="w-full aspect-[16/9] overflow-hidden">
+          <img
+            src={imageSrc}
+            alt={title}
+            className="w-full h-full object-cover"
+          />
         </div>
 
         <div className="p-3 space-y-2 flex flex-col">
