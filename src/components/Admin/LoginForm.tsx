@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { Helmet } from "react-helmet";
 import { authService } from "../../services/auth.service";
 
 const LoginForm = () => {
@@ -21,13 +20,6 @@ const LoginForm = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-black">
-      <Helmet>
-        <title>Connexion Admin | Merci Lille</title>
-        <meta
-          name="description"
-          content="Connectez-vous pour accéder à l'administration des événements."
-        />
-      </Helmet>
       <div className="max-w-md w-full space-y-8 p-8 bg-gray-900 rounded-lg">
         <h2 className="text-2xl font-bold text-white text-center">
           Administration

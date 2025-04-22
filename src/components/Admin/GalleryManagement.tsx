@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { Helmet } from "react-helmet";
 import { galleryService } from "../../services/gallery.service";
 
 interface GalleryImage {
@@ -103,14 +102,6 @@ const GalleryManagement: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <Helmet>
-        <title>Gestion de la Galerie | Merci Lille</title>
-        <meta
-          name="description"
-          content="Page de gestion de la galerie de Merci Lille."
-        />
-      </Helmet>
-
       <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
         <h1 className="text-2xl font-bold text-white">Gestion de la galerie</h1>
         <button

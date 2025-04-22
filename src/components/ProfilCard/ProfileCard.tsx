@@ -1,5 +1,4 @@
 import React from "react";
-import { Helmet } from "react-helmet";
 import bananaSmootie from "../../media/artist/banana_smoothie.jpg";
 import raptureFouzi from "../../media/artist/rapture_fouzi.jpg";
 import scooby from "../../media/artist/scooby.jpg";
@@ -30,10 +29,6 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
         imageOnLeft ? "md:flex-row" : "md:flex-row-reverse"
       } gap-4 max-w-4xl mx-auto mb-8`}
     >
-      <Helmet>
-        <title>{name} - Artiste | Merci Lille</title>
-        <meta name="description" content={description} />
-      </Helmet>
       <div className="w-full md:w-1/2 bg-white rounded-lg overflow-hidden shadow-[0_0_20px_rgba(255,255,255,0.5)]">
         <img
           src={imageSrc}

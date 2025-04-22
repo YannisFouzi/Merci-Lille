@@ -266,7 +266,7 @@ const App: React.FC = () => {
   return (
     <Router>
       <Helmet>
-        <title>Merci Lille - Collectif Événements Électro</title>
+        <title>Merci Lille</title>
         <meta
           name="description"
           content="Découvrez nos événements électro à Lille. Rejoignez-nous pour une expérience musicale unique !"
