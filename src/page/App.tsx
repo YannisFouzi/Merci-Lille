@@ -9,6 +9,7 @@ import EventsManagement from "../components/Admin/EventsManagement";
 import GalleryManagement from "../components/Admin/GalleryManagement";
 import LoginForm from "../components/Admin/LoginForm";
 import PrivateRoute from "../components/Admin/PrivateRoute";
+import Aftermovies from "../components/Aftermovies/Aftermovies";
 import EmailForm from "../components/EmailForm/EmailForm";
 import FloatingContactButton from "../components/FloatingContactButton/FloatingContactButton";
 import FullGallery from "../components/Gallery/FullGallery";
@@ -111,6 +112,10 @@ const MainContent: React.FC = () => {
 
           <Section>
             <ShotgunEvents />
+          </Section>
+
+          <Section>
+            <Aftermovies />
           </Section>
 
           <Section>
