@@ -16,6 +16,7 @@ const GalleryManagement: React.FC = () => {
   const [uploadLoading, setUploadLoading] = useState(false);
   const [selectedImages, setSelectedImages] = useState<string[]>([]);
   const [isDragOver, setIsDragOver] = useState(false);
+  const [isGalleryDragOver, setIsGalleryDragOver] = useState(false);
   const [draggedImage, setDraggedImage] = useState<string | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const [hasOrderChanged, setHasOrderChanged] = useState(false);
@@ -111,6 +112,62 @@ const GalleryManagement: React.FC = () => {
   const handleDrop = async (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragOver(false);
+
+    const files = e.dataTransfer.files;
+    if (files && files.length > 0) {
+      // Filtrer pour ne garder que les images
+      const imageFiles = Array.from(files).filter((file) =>
+        file.type.startsWith("image/")
+      );
+
+      if (imageFiles.length > 0) {
+        try {
+          setUploadLoading(true);
+          const formData = new FormData();
+
+          imageFiles.forEach((file) => {
+            formData.append("images", file);
+          });
+
+          await galleryService.uploadImages(formData);
+          await loadImages();
+          setHasOrderChanged(false); // Reset car on recharge les images
+        } catch (err) {
+          setError("Erreur lors de l'upload des images");
+          console.error("Upload error:", err);
+        } finally {
+          setUploadLoading(false);
+        }
+      } else {
+        setError("Veuillez déposer uniquement des fichiers image");
+      }
+    }
+  };
+
+  const handleGalleryDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    // Vérifier si ce sont des fichiers (pas un réordrement d'images)
+    if (e.dataTransfer.types.includes("Files")) {
+      setIsGalleryDragOver(true);
+    }
+  };
+
+  const handleGalleryDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    // Vérifier si on sort vraiment de la zone de galerie
+    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+      setIsGalleryDragOver(false);
+    }
+  };
+
+  const handleGalleryDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsGalleryDragOver(false);
+
+    // Si c'est un réordrement d'image, ne pas traiter comme un upload
+    if (draggedImage) {
+      return;
+    }
 
     const files = e.dataTransfer.files;
     if (files && files.length > 0) {
@@ -325,7 +382,23 @@ const GalleryManagement: React.FC = () => {
         </div>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+      <div
+        className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 transition-all duration-200 ${
+          isGalleryDragOver
+            ? "bg-gray-800/50 ring-2 ring-red-400 ring-dashed p-6 rounded-lg"
+            : ""
+        }`}
+        onDragOver={handleGalleryDragOver}
+        onDragLeave={handleGalleryDragLeave}
+        onDrop={handleGalleryDrop}
+      >
+        {isGalleryDragOver && (
+          <div className="col-span-full flex items-center justify-center py-12 text-center">
+            <div className="text-red-400 text-xl font-medium">
+              Déposez vos images ici pour les ajouter à la galerie
+            </div>
+          </div>
+        )}
         {images.map((image, index) => (
           <div
             key={image._id}
@@ -367,8 +440,30 @@ const GalleryManagement: React.FC = () => {
       </div>
 
       {images.length === 0 && !loading && (
-        <div className="text-center py-8 text-gray-400">
-          Aucune image dans la galerie
+        <div
+          className={`text-center py-12 transition-all duration-200 ${
+            isGalleryDragOver
+              ? "bg-gray-800/50 ring-2 ring-red-400 ring-dashed p-6 rounded-lg"
+              : ""
+          }`}
+          onDragOver={handleGalleryDragOver}
+          onDragLeave={handleGalleryDragLeave}
+          onDrop={handleGalleryDrop}
+        >
+          {isGalleryDragOver ? (
+            <div className="text-red-400 text-xl font-medium">
+              Déposez vos images ici pour créer votre galerie
+            </div>
+          ) : (
+            <div className="text-gray-400">
+              Aucune image dans la galerie
+              <br />
+              <span className="text-sm">
+                Glissez-déposez des images ici ou utilisez le bouton "Ajouter
+                une image"
+              </span>
+            </div>
+          )}
         </div>
       )}
     </div>
