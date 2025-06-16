@@ -28,4 +28,9 @@ export const galleryService = {
     const response = await api.delete(`/gallery/${id}`);
     return response.data;
   },
+
+  async updateImageOrder(orderedIds: string[]) {
+    const response = await api.put("/gallery/update-order", { orderedIds });
+    return response.data;
+  },
 };

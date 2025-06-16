@@ -16,6 +16,10 @@ const GalleryManagement: React.FC = () => {
   const [uploadLoading, setUploadLoading] = useState(false);
   const [selectedImages, setSelectedImages] = useState<string[]>([]);
   const [isDragOver, setIsDragOver] = useState(false);
+  const [draggedImage, setDraggedImage] = useState<string | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  const [hasOrderChanged, setHasOrderChanged] = useState(false);
+  const [saveOrderLoading, setSaveOrderLoading] = useState(false);
 
   const loadImages = async () => {
     try {
@@ -59,6 +63,7 @@ const GalleryManagement: React.FC = () => {
       await loadImages();
       setShowUploadForm(false);
       setSelectedFiles(null);
+      setHasOrderChanged(false); // Reset car on recharge les images
     } catch (err) {
       setError("Erreur lors de l'upload des images");
       console.error("Upload error:", err);
@@ -125,6 +130,7 @@ const GalleryManagement: React.FC = () => {
 
           await galleryService.uploadImages(formData);
           await loadImages();
+          setHasOrderChanged(false); // Reset car on recharge les images
         } catch (err) {
           setError("Erreur lors de l'upload des images");
           console.error("Upload error:", err);
@@ -135,6 +141,69 @@ const GalleryManagement: React.FC = () => {
         setError("Veuillez déposer uniquement des fichiers image");
       }
     }
+  };
+
+  const handleImageDragStart = (e: React.DragEvent, imageId: string) => {
+    setDraggedImage(imageId);
+    e.dataTransfer.effectAllowed = "move";
+  };
+
+  const handleImageDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+    setDragOverIndex(index);
+  };
+
+  const handleImageDragLeave = () => {
+    setDragOverIndex(null);
+  };
+
+  const handleImageDrop = async (e: React.DragEvent, dropIndex: number) => {
+    e.preventDefault();
+    setDragOverIndex(null);
+
+    if (!draggedImage) return;
+
+    const draggedIndex = images.findIndex((img) => img._id === draggedImage);
+    if (draggedIndex === -1 || draggedIndex === dropIndex) {
+      setDraggedImage(null);
+      return;
+    }
+
+    // Créer un nouveau tableau avec l'ordre modifié
+    const newImages = [...images];
+    const [draggedItem] = newImages.splice(draggedIndex, 1);
+    newImages.splice(dropIndex, 0, draggedItem);
+
+    // Mettre à jour localement pour un feedback immédiat
+    setImages(newImages);
+    setDraggedImage(null);
+    setHasOrderChanged(true);
+  };
+
+  const saveImageOrder = async () => {
+    if (!hasOrderChanged) return;
+
+    try {
+      setSaveOrderLoading(true);
+      const orderedIds = images.map((img) => img._id);
+
+      await galleryService.updateImageOrder(orderedIds);
+
+      setHasOrderChanged(false);
+      // Optionnel: recharger pour confirmer l'ordre depuis le serveur
+      // await loadImages();
+    } catch (err) {
+      setError("Erreur lors de la sauvegarde de l'ordre");
+      console.error("Save order error:", err);
+    } finally {
+      setSaveOrderLoading(false);
+    }
+  };
+
+  const cancelOrderChanges = async () => {
+    setHasOrderChanged(false);
+    await loadImages(); // Recharger l'ordre original
   };
 
   if (loading) {
@@ -149,17 +218,36 @@ const GalleryManagement: React.FC = () => {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
         <h1 className="text-2xl font-bold text-white">Gestion de la galerie</h1>
-        <button
-          onClick={() => setShowUploadForm(true)}
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          onDrop={handleDrop}
-          className={`px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-all duration-200 ${
-            isDragOver ? "bg-red-500 scale-105 shadow-lg" : ""
-          }`}
-        >
-          {isDragOver ? "Déposez vos images ici" : "Ajouter une image"}
-        </button>
+        <div className="flex gap-2">
+          {hasOrderChanged && (
+            <>
+              <button
+                onClick={cancelOrderChanges}
+                className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
+              >
+                Annuler
+              </button>
+              <button
+                onClick={saveImageOrder}
+                disabled={saveOrderLoading}
+                className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50"
+              >
+                {saveOrderLoading ? "Sauvegarde..." : "Sauvegarder l'ordre"}
+              </button>
+            </>
+          )}
+          <button
+            onClick={() => setShowUploadForm(true)}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            className={`px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-all duration-200 ${
+              isDragOver ? "bg-red-500 scale-105 shadow-lg" : ""
+            }`}
+          >
+            {isDragOver ? "Déposez vos images ici" : "Ajouter une image"}
+          </button>
+        </div>
       </div>
 
       {error && (
@@ -228,26 +316,36 @@ const GalleryManagement: React.FC = () => {
       )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-        {images.map((image) => (
+        {images.map((image, index) => (
           <div
             key={image._id}
-            className={`relative group bg-gray-800 rounded-lg overflow-hidden ${
+            draggable
+            onDragStart={(e) => handleImageDragStart(e, image._id)}
+            onDragOver={(e) => handleImageDragOver(e, index)}
+            onDragLeave={handleImageDragLeave}
+            onDrop={(e) => handleImageDrop(e, index)}
+            className={`relative group bg-gray-800 rounded-lg overflow-hidden cursor-move transition-all duration-200 ${
               selectedImages.includes(image._id) ? "ring-2 ring-red-500" : ""
+            } ${draggedImage === image._id ? "opacity-50 scale-95" : ""} ${
+              dragOverIndex === index ? "ring-2 ring-blue-400 scale-105" : ""
             }`}
             onClick={() => toggleImageSelection(image._id)}
           >
             <img
               src={image.imageSrc}
               alt="Gallery"
-              className="w-full h-48 object-cover"
+              className="w-full h-48 object-cover pointer-events-none"
             />
+            <div className="absolute top-2 right-2 bg-black bg-opacity-75 text-white text-xs px-2 py-1 rounded">
+              {index + 1}
+            </div>
             <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all duration-300 flex items-center justify-center">
               <button
                 onClick={(e) => {
                   e.stopPropagation();
                   toggleImageSelection(image._id);
                 }}
-                className="opacity-0 group-hover:opacity-100 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-opacity duration-300"
+                className="opacity-0 group-hover:opacity-100 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-opacity duration-300 pointer-events-auto"
               >
                 {selectedImages.includes(image._id)
                   ? "Désélectionner"
