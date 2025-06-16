@@ -298,17 +298,39 @@ const GalleryManagement: React.FC = () => {
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
-            className={`px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-all duration-200 ${
+            disabled={uploadLoading}
+            className={`px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-all duration-200 flex items-center gap-2 disabled:opacity-50 ${
               isDragOver ? "bg-red-500 scale-105 shadow-lg" : ""
             }`}
           >
-            {isDragOver ? "Déposez vos images ici" : "Ajouter une image"}
+            {uploadLoading && (
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+            )}
+            {uploadLoading
+              ? "Upload en cours..."
+              : isDragOver
+              ? "Déposez vos images ici"
+              : "Ajouter une image"}
           </button>
         </div>
       </div>
 
       {error && (
         <div className="bg-red-500 text-white p-4 rounded">{error}</div>
+      )}
+
+      {uploadLoading && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+          <div className="bg-gray-900 rounded-lg p-8 text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-500 mx-auto mb-4"></div>
+            <h3 className="text-white text-lg font-medium mb-2">
+              Upload en cours...
+            </h3>
+            <p className="text-gray-400">
+              Veuillez patienter pendant l'ajout des images
+            </p>
+          </div>
+        </div>
       )}
 
       {showUploadForm && (
@@ -346,11 +368,12 @@ const GalleryManagement: React.FC = () => {
                 <button
                   type="submit"
                   disabled={uploadLoading || !selectedFiles}
-                  className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50"
+                  className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50 flex items-center gap-2"
                 >
-                  {uploadLoading
-                    ? `Upload en cours (0/${selectedFiles?.length || 0})...`
-                    : "Upload"}
+                  {uploadLoading && (
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  )}
+                  {uploadLoading ? `Upload en cours...` : "Upload"}
                 </button>
               </div>
             </form>
