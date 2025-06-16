@@ -302,16 +302,26 @@ const GalleryManagement: React.FC = () => {
       )}
 
       {selectedImages.length > 0 && (
-        <div className="fixed bottom-4 right-4 bg-gray-900 p-4 rounded-lg shadow-lg">
-          <p className="text-white mb-2">
-            {selectedImages.length} image(s) sélectionnée(s)
-          </p>
-          <button
-            onClick={handleDeleteSelected}
-            className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-          >
-            Supprimer la sélection
-          </button>
+        <div className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-4 sm:w-auto bg-gray-900 p-4 rounded-lg shadow-lg z-50">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+            <p className="text-white text-center sm:text-left">
+              {selectedImages.length} image(s) sélectionnée(s)
+            </p>
+            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+              <button
+                onClick={() => setSelectedImages([])}
+                className="w-full sm:w-auto px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
+              >
+                Annuler
+              </button>
+              <button
+                onClick={handleDeleteSelected}
+                className="w-full sm:w-auto px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+              >
+                Supprimer la sélection
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
