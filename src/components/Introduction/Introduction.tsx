@@ -4,7 +4,7 @@ import "./Introduction.scss";
 const Introduction: React.FC = () => {
   const [words, setWords] = useState<string[]>([]);
   const text =
-    "Né de l'esprit malade de quatre zigotos sympathiques mais simplets, Merci Lille est une association de musique électronique éclectique (un mot difficile à prononcer pour ses deux fondateurs) visant à rassembler les divers styles et genres qui composent le très vaste éventail de l'électro.";
+    "Né de l'esprit malade de quatre zigotos sympathiques mais simplets, Merci Lille est une association de musique électronique éclectique (un mot difficile à prononcer pour ses fondateurs) visant à rassembler les divers styles et genres qui composent le très vaste éventail de l'électro.";
 
   useEffect(() => {
     const wordsArray = text.split(" ");
