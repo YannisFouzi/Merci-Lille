@@ -15,6 +15,7 @@ const GalleryManagement: React.FC = () => {
   const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
   const [uploadLoading, setUploadLoading] = useState(false);
   const [selectedImages, setSelectedImages] = useState<string[]>([]);
+  const [isDragOver, setIsDragOver] = useState(false);
 
   const loadImages = async () => {
     try {
@@ -92,6 +93,50 @@ const GalleryManagement: React.FC = () => {
     }
   };
 
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+  };
+
+  const handleDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+
+    const files = e.dataTransfer.files;
+    if (files && files.length > 0) {
+      // Filtrer pour ne garder que les images
+      const imageFiles = Array.from(files).filter((file) =>
+        file.type.startsWith("image/")
+      );
+
+      if (imageFiles.length > 0) {
+        try {
+          setUploadLoading(true);
+          const formData = new FormData();
+
+          imageFiles.forEach((file) => {
+            formData.append("images", file);
+          });
+
+          await galleryService.uploadImages(formData);
+          await loadImages();
+        } catch (err) {
+          setError("Erreur lors de l'upload des images");
+          console.error("Upload error:", err);
+        } finally {
+          setUploadLoading(false);
+        }
+      } else {
+        setError("Veuillez déposer uniquement des fichiers image");
+      }
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -106,9 +151,14 @@ const GalleryManagement: React.FC = () => {
         <h1 className="text-2xl font-bold text-white">Gestion de la galerie</h1>
         <button
           onClick={() => setShowUploadForm(true)}
-          className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+          className={`px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-all duration-200 ${
+            isDragOver ? "bg-red-500 scale-105 shadow-lg" : ""
+          }`}
         >
-          Ajouter une image
+          {isDragOver ? "Déposez vos images ici" : "Ajouter une image"}
         </button>
       </div>
 
@@ -193,7 +243,10 @@ const GalleryManagement: React.FC = () => {
             />
             <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all duration-300 flex items-center justify-center">
               <button
-                onClick={() => toggleImageSelection(image._id)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleImageSelection(image._id);
+                }}
                 className="opacity-0 group-hover:opacity-100 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-opacity duration-300"
               >
                 {selectedImages.includes(image._id)
