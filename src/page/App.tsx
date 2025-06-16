@@ -11,6 +11,7 @@ import LoginForm from "../components/Admin/LoginForm";
 import PrivateRoute from "../components/Admin/PrivateRoute";
 import EmailForm from "../components/EmailForm/EmailForm";
 import FloatingContactButton from "../components/FloatingContactButton/FloatingContactButton";
+import FullGallery from "../components/Gallery/FullGallery";
 import Gallery from "../components/Gallery/Gallery";
 import Introduction from "../components/Introduction/Introduction";
 import ProfileCard from "../components/ProfilCard/ProfileCard";
@@ -258,6 +259,7 @@ const AppContent: React.FC = () => {
         }
       />
       <Route path="/" element={<MainContent />} />
+      <Route path="/gallerie" element={<FullGallery />} />
     </Routes>
   );
 };
@@ -274,6 +276,7 @@ const App: React.FC = () => {
       </Helmet>
       <Routes>
         <Route path="/" element={<MainContent />} />
+        <Route path="/gallerie" element={<FullGallery />} />
         <Route path="/admin/login" element={<LoginForm />} />
         <Route
           path="/admin/events"

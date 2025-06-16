@@ -9,9 +9,7 @@ interface GalleryImage {
   imageSrc: string;
 }
 
-const Gallery: React.FC = () => {
-  const ITEMS_PER_PAGE = 6;
-  const [visibleItems, setVisibleItems] = useState(ITEMS_PER_PAGE);
+const FullGallery: React.FC = () => {
   const [images, setImages] = useState<GalleryImage[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -87,7 +85,6 @@ const Gallery: React.FC = () => {
   };
 
   const items = generateItems();
-  const showViewAll = items.length > visibleItems;
 
   const handleImageClick = (imageSrc: string) => {
     setSelectedImage(imageSrc);
@@ -111,46 +108,81 @@ const Gallery: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="text-center py-12">
-        <div className="text-white">Chargement des images...</div>
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="text-white text-xl">Chargement des images...</div>
       </div>
     );
   }
 
   return (
-    <div className="gallery-container">
-      <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-center mb-16 text-white">
-        La Galerie
-      </h1>
-      <div className="gallery-grid">
-        {items.slice(0, visibleItems).map((item) => (
-          <div
-            key={item.id}
-            className={`gallery-item show ${item.colorClass}`}
-            onClick={() => handleImageClick(item.image)}
-          >
-            <div className="item-content">
-              <img
-                src={item.image}
-                alt={`Gallery item ${item.id}`}
-                className="gallery-image"
-              />
-            </div>
+    <div className="min-h-screen bg-black text-white">
+      {/* Navbar fixe */}
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-black/90 backdrop-blur-sm border-b border-gray-800">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <Link
+              to="/"
+              className="flex items-center gap-2 text-white hover:text-red-500 transition-colors"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                />
+              </svg>
+              <span className="text-lg font-medium">Retour à l'accueil</span>
+            </Link>
           </div>
-        ))}
-      </div>
-
-      {selectedImage && <Modal />}
-
-      {showViewAll && (
-        <div className="mt-8 text-center">
-          <Link to="/gallerie" className="btn-load-more">
-            Voir toute la galerie
-          </Link>
         </div>
-      )}
+      </nav>
+
+      <div className="container mx-auto px-4 pt-24 pb-8">
+        <div className="gallery-container">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-center mb-16 text-white">
+            Toute la Galerie
+          </h1>
+
+          {images.length > 0 ? (
+            <>
+              <div className="gallery-grid">
+                {items.map((item) => (
+                  <div
+                    key={item.id}
+                    className={`gallery-item show ${item.colorClass}`}
+                    onClick={() => handleImageClick(item.image)}
+                  >
+                    <div className="item-content">
+                      <img
+                        src={item.image}
+                        alt={`Gallery item ${item.id}`}
+                        className="gallery-image"
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          ) : (
+            <div className="text-center py-12">
+              <p className="text-gray-400 text-xl">
+                Aucune image dans la galerie
+              </p>
+            </div>
+          )}
+
+          {selectedImage && <Modal />}
+        </div>
+      </div>
     </div>
   );
 };
 
-export default Gallery;
+export default FullGallery;
