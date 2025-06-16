@@ -4,7 +4,7 @@ const Aftermovies: React.FC = () => {
   return (
     <div className="text-center">
       <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-center mb-16 text-white">
-        Nos Aftermovies
+        Vidéos
       </h1>
 
       <div className="max-w-4xl mx-auto">
