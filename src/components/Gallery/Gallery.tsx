@@ -120,7 +120,7 @@ const Gallery: React.FC = () => {
   return (
     <div className="gallery-container">
       <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-center mb-16 text-white">
-        La Galerie
+        Galerie
       </h1>
       <div className="gallery-grid">
         {items.slice(0, visibleItems).map((item) => (
