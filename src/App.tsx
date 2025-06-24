@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import "./App.css";
 import EventsManagement from "./components/Admin/EventsManagement";
@@ -8,8 +8,19 @@ import PrivateRoute from "./components/Admin/PrivateRoute";
 import FullGallery from "./components/Gallery/FullGallery";
 import AdminLayout from "./layouts/AdminLayout";
 import MainContent from "./page/App";
+import { authService } from "./services/auth.service";
 
 const App: React.FC = () => {
+  useEffect(() => {
+    // Initialiser la vérification périodique du token si l'utilisateur est déjà connecté
+    authService.initializePeriodicCheck();
+
+    // Nettoyer lors du démontage du composant
+    return () => {
+      authService.stopPeriodicCheck();
+    };
+  }, []);
+
   return (
     <Routes>
       <Route path="/" element={<MainContent />} />
