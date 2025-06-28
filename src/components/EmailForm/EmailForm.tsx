@@ -76,6 +76,7 @@ const EmailForm: React.FC = () => {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            "X-Requested-With": "XMLHttpRequest", // Header CSRF requis
           },
           body: JSON.stringify(formData),
         });
@@ -87,12 +88,24 @@ const EmailForm: React.FC = () => {
           // Effacer le message de confirmation après 5 secondes
           setTimeout(() => setConfirmationMessage(""), 5000);
         } else {
-          console.error("Failed to send email");
-          setConfirmationMessage(
-            "Échec de l'envoi de l'email. Veuillez réessayer."
-          );
+          const errorData = await response.json();
+          if (response.status === 429) {
+            setConfirmationMessage(
+              "Trop d'emails envoyés. Veuillez réessayer dans une heure."
+            );
+          } else if (response.status >= 500) {
+            setConfirmationMessage(
+              "Erreur serveur. Veuillez réessayer plus tard."
+            );
+          } else if (errorData?.message) {
+            setConfirmationMessage(errorData.message);
+          } else {
+            setConfirmationMessage(
+              "Échec de l'envoi de l'email. Veuillez réessayer."
+            );
+          }
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error("Error sending email:", error);
         setConfirmationMessage(
           "Une erreur est survenue. Veuillez réessayer plus tard."
