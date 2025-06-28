@@ -155,36 +155,20 @@ module.exports = async (req, res) => {
 
       // Configuration du transporteur email
       console.log("📮 Configuration du transporteur email...");
-      let transporter;
-      try {
-        transporter = nodemailer.createTransporter({
-          host: "ssl0.ovh.net",
-          port: 465,
-          secure: true,
-          auth: {
-            user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASS,
-          },
-          logger: false, // Désactiver les logs détaillés en production
-          debug: false,
-        });
-
-        console.log("🔌 Vérification de la connexion SMTP...");
-        await transporter.verify();
-        console.log("✅ Connexion SMTP vérifiée avec succès");
-      } catch (error) {
-        console.error(
-          "❌ Erreur de configuration du transporteur:",
-          error.message
-        );
-        console.error("📧 Host: ssl0.ovh.net, Port: 465");
-        console.error(
-          `👤 User: ${process.env.EMAIL_USER ? "défini" : "manquant"}`
-        );
-        return res.status(500).json({
-          message: "Erreur de configuration email",
-        });
-      }
+      const transporter = nodemailer.createTransporter({
+        host: "ssl0.ovh.net",
+        port: 465,
+        secure: true,
+        auth: {
+          user: process.env.EMAIL_USER,
+          pass: process.env.EMAIL_PASS,
+        },
+        logger: false, // Désactiver les logs détaillés en production
+        debug: false,
+      });
+      console.log(
+        "✅ Transporteur email configuré (pas de vérification préalable)"
+      );
 
       // Envoi de l'email avec contenu nettoyé
       console.log("📤 Tentative d'envoi de l'email...");
