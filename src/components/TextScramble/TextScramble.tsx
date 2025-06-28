@@ -44,24 +44,37 @@ class TextScrambleLogic {
   }
 
   private update(): void {
-    let output = "";
+    // Vider le contenu existant de manière sécurisée
+    this.el.textContent = "";
     let complete = 0;
+
     for (let i = 0, n = this.queue.length; i < n; i++) {
       let { from, to, start, end, char } = this.queue[i];
+
       if (this.frame >= end) {
         complete++;
-        output += to;
+        // Ajouter le caractère final de manière sécurisée
+        const finalSpan = document.createElement("span");
+        finalSpan.textContent = to;
+        this.el.appendChild(finalSpan);
       } else if (this.frame >= start) {
         if (!char || Math.random() < 0.28) {
           char = this.randomChar();
           this.queue[i].char = char;
         }
-        output += `<span class="dud">${char}</span>`;
+        // Créer un span avec classe "dud" de manière sécurisée
+        const dudSpan = document.createElement("span");
+        dudSpan.className = "dud";
+        dudSpan.textContent = char;
+        this.el.appendChild(dudSpan);
       } else {
-        output += from;
+        // Ajouter le caractère "from" de manière sécurisée
+        const fromSpan = document.createElement("span");
+        fromSpan.textContent = from;
+        this.el.appendChild(fromSpan);
       }
     }
-    this.el.innerHTML = output;
+
     if (complete === this.queue.length) {
       this.resolve?.();
     } else {

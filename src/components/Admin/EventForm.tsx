@@ -8,11 +8,10 @@ interface EventFormProps {
 }
 
 const EventForm: React.FC<EventFormProps> = ({ event, onSubmit }) => {
-  console.log("Event reçu dans le form:", event);
-  console.log("Format des genres:", {
-    genres: event?.genres,
-    type: typeof event?.genres,
-    isArray: Array.isArray(event?.genres),
+  // Log sécurisé de l'initialisation du formulaire
+  console.log("EventForm initialized:", {
+    mode: event ? "edit" : "create",
+    hasGenres: !!(event?.genres && event.genres.length > 0),
   });
   const formatDateForInput = (dateString: string) => {
     const date = new Date(dateString);
@@ -83,10 +82,11 @@ const EventForm: React.FC<EventFormProps> = ({ event, onSubmit }) => {
           : "0",
       };
 
-      // Log complet des données avant envoi
-      console.log("Complete form data before submission:", {
-        ...formDataToSend,
-        imageFile: image,
+      // Log sécurisé des données d'événement
+      console.log("Submitting event form:", {
+        operation: event?._id ? "update" : "create",
+        hasImage: !!image,
+        fieldsCount: Object.keys(formDataToSend).length,
       });
 
       // Vérification des champs requis
@@ -128,20 +128,24 @@ const EventForm: React.FC<EventFormProps> = ({ event, onSubmit }) => {
         data.append("image", image);
       }
 
-      // Log du FormData final
-      for (let pair of data.entries()) {
-        console.log(`FormData - ${pair[0]}:`, pair[1]);
-      }
+      // Log sécurisé du FormData
+      console.log(
+        `FormData prepared with ${Array.from(data.keys()).length} fields`
+      );
 
       if (event?._id) {
-        console.log("Data avant update:", Object.fromEntries(data.entries()));
+        console.log("Updating existing event");
         await eventsService.updateEvent(event._id, data);
       } else {
+        console.log("Creating new event");
         await eventsService.createEvent(data);
       }
       onSubmit();
     } catch (error) {
-      console.error("Erreur détaillée:", error);
+      console.error(
+        "Event form submission failed:",
+        error instanceof Error ? error.message : "Unknown error"
+      );
       // Afficher l'erreur à l'utilisateur
       // TODO: Ajouter un état pour gérer les erreurs
     }
