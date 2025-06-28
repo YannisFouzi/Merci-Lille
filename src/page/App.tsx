@@ -20,8 +20,6 @@ import ShotgunEvents from "../components/ShotgunEvents/ShotgunEvents";
 import SocialMediaMenu from "../components/SocialMediaMenu/SocialMediaMenu";
 import AnimatedSVGLogo from "../components/SVGAnimation/AnimatedSVGLogo";
 
-const IS_DEVELOPMENT = true;
-
 const useElementOnScreen = (options: IntersectionObserverInit) => {
   const elementRef = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
@@ -168,106 +166,8 @@ const MainContent: React.FC = () => {
   );
 };
 
-const ComingSoon: React.FC = () => {
-  const [password, setPassword] = useState("");
-  const [isAuthorized, setIsAuthorized] = useState(false);
-  const [showError, setShowError] = useState(false);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (password === "rapturejetaime") {
-      setIsAuthorized(true);
-      setShowError(false);
-      localStorage.setItem("isAuthorized", "true");
-    } else {
-      setShowError(true);
-      setTimeout(() => setShowError(false), 2000);
-    }
-  };
-
-  useEffect(() => {
-    const auth = localStorage.getItem("isAuthorized");
-    if (auth === "true") {
-      setIsAuthorized(true);
-    }
-  }, []);
-
-  if (isAuthorized) {
-    return <MainContent />;
-  }
-
-  return (
-    <div className="min-h-screen bg-black flex flex-col items-center justify-center p-4">
-      <div className="mb-24">
-        <AnimatedSVGLogo />
-      </div>
-
-      <h1 className="text-3xl md:text-5xl text-white font-bold text-center mb-6">
-        Notre site arrive bientôt
-      </h1>
-
-      <p className="text-xl md:text-2xl text-gray-400 text-center max-w-2xl mb-12">
-        Nous préparons quelque chose de spécial pour vous. Restez connectés !
-      </p>
-
-      <form onSubmit={handleSubmit} className="mb-8">
-        <div className="relative">
-          <input
-            type="text"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Mot de passe"
-            className={`bg-transparent border-2 ${
-              showError ? "border-red-500" : "border-gray-700"
-            } rounded-lg px-4 py-2 text-white focus:outline-none focus:border-white transition-colors`}
-          />
-          <div
-            className={`absolute -bottom-6 left-0 right-0 text-center text-red-500 text-sm transition-opacity ${
-              showError ? "opacity-100" : "opacity-0"
-            }`}
-          >
-            Mot de passe incorrect
-          </div>
-        </div>
-      </form>
-
-      <div className="transform scale-75">
-        <SocialMediaMenu />
-      </div>
-
-      <footer className="bottom-8 text-center text-gray-400">
-        <p>&copy; 2024 Merci Lille. Tous droits réservés.</p>
-      </footer>
-    </div>
-  );
-};
-
-const AppContent: React.FC = () => {
-  if (!IS_DEVELOPMENT) {
-    return <ComingSoon />;
-  }
-
-  return (
-    <Routes>
-      <Route path="/admin/login" element={<LoginForm />} />
-      <Route
-        path="/admin/*"
-        element={
-          <PrivateRoute>
-            <AdminLayout>
-              <Routes>
-                <Route path="events" element={<EventsManagement />} />
-                <Route path="gallery" element={<GalleryManagement />} />
-              </Routes>
-            </AdminLayout>
-          </PrivateRoute>
-        }
-      />
-      <Route path="/" element={<MainContent />} />
-      <Route path="/gallerie" element={<FullGallery />} />
-    </Routes>
-  );
-};
+// Système "Coming Soon" supprimé pour des raisons de sécurité
+// Le mot de passe en dur était visible dans le code source client
 
 const App: React.FC = () => {
   return (
