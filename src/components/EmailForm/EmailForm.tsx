@@ -70,48 +70,110 @@ const EmailForm: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("🚀 DÉBUT ENVOI EMAIL - Form submitted");
+
     if (validateForm()) {
+      console.log("✅ Validation du formulaire réussie");
+      console.log("📝 Données à envoyer:", formData);
+
       try {
-        const response = await fetch("/api/send-email", {
+        // Construire l'URL complète
+        const baseUrl = window.location.origin;
+        const apiUrl = `${baseUrl}/api/send-email`;
+        console.log("🌐 URL API complète:", apiUrl);
+        console.log("🏠 Origin actuel:", window.location.origin);
+        console.log("📍 Pathname actuel:", window.location.pathname);
+
+        const requestConfig = {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             "X-Requested-With": "XMLHttpRequest", // Header CSRF requis
           },
           body: JSON.stringify(formData),
-        });
+        };
+
+        console.log("📤 Configuration de la requête:", requestConfig);
+        console.log("📦 Body JSON:", JSON.stringify(formData, null, 2));
+
+        console.log("⏳ Envoi de la requête fetch...");
+        const response = await fetch("/api/send-email", requestConfig);
+
+        console.log("📬 Réponse reçue:");
+        console.log("  - Status:", response.status);
+        console.log("  - StatusText:", response.statusText);
+        console.log("  - OK:", response.ok);
+        console.log(
+          "  - Headers:",
+          Object.fromEntries(response.headers.entries())
+        );
 
         if (response.ok) {
+          console.log("🎉 Succès! Email envoyé");
+          const successData = await response.json();
+          console.log("📨 Données de succès:", successData);
+
           setConfirmationMessage("Email envoyé avec succès !");
           // Réinitialiser le formulaire
           setFormData({ name: "", email: "", subject: "", message: "" });
           // Effacer le message de confirmation après 5 secondes
           setTimeout(() => setConfirmationMessage(""), 5000);
         } else {
-          const errorData = await response.json();
+          console.log("❌ Erreur dans la réponse - Status:", response.status);
+
+          let errorData;
+          try {
+            errorData = await response.json();
+            console.log("📄 Données d'erreur reçues:", errorData);
+          } catch (jsonError) {
+            console.log("⚠️ Impossible de parser la réponse JSON:", jsonError);
+            console.log("📄 Réponse brute:", await response.text());
+          }
+
           if (response.status === 429) {
+            console.log("🚫 Rate limit atteint");
             setConfirmationMessage(
               "Trop d'emails envoyés. Veuillez réessayer dans une heure."
             );
           } else if (response.status >= 500) {
+            console.log("🔥 Erreur serveur 5xx");
             setConfirmationMessage(
               "Erreur serveur. Veuillez réessayer plus tard."
             );
           } else if (errorData?.message) {
+            console.log("💬 Message d'erreur spécifique:", errorData.message);
             setConfirmationMessage(errorData.message);
           } else {
+            console.log("❓ Erreur non spécifiée");
             setConfirmationMessage(
               "Échec de l'envoi de l'email. Veuillez réessayer."
             );
           }
         }
       } catch (error: any) {
-        console.error("Error sending email:", error);
+        console.log("💥 ERREUR CATCH - Exception attrapée:");
+        console.error("📊 Type d'erreur:", error.constructor.name);
+        console.error("📄 Message:", error.message);
+        console.error("📋 Stack:", error.stack);
+        console.error("🔍 Erreur complète:", error);
+
+        // Vérifier le type d'erreur
+        if (error.name === "TypeError" && error.message.includes("fetch")) {
+          console.log("🌐 Erreur de réseau ou CORS détectée");
+        } else if (error.name === "AbortError") {
+          console.log("⏰ Requête interrompue/timeout");
+        }
+
         setConfirmationMessage(
           "Une erreur est survenue. Veuillez réessayer plus tard."
         );
       }
+    } else {
+      console.log("❌ Validation du formulaire échouée");
+      console.log("🔍 Erreurs:", errors);
     }
+
+    console.log("🏁 FIN ENVOI EMAIL");
   };
 
   return (
