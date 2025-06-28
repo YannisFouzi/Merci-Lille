@@ -163,24 +163,10 @@ module.exports = async (req, res) => {
           user: process.env.EMAIL_USER,
           pass: process.env.EMAIL_PASS,
         },
-        logger: true, // Activer les logs détaillés temporairement pour diagnostic
-        debug: true,
+        logger: false, // Logs de production
+        debug: false,
       });
       console.log("✅ Transporteur email configuré");
-
-      // Test de connexion SMTP
-      console.log("🔗 Test de connexion SMTP...");
-      try {
-        await transporter.verify();
-        console.log("✅ Connexion SMTP validée avec succès");
-      } catch (verifyError) {
-        console.error("❌ Erreur de connexion SMTP:");
-        console.error("📄 Message:", verifyError.message);
-        console.error("📊 Code:", verifyError.code);
-        return res.status(500).json({
-          message: "Erreur de configuration email",
-        });
-      }
 
       // Envoi de l'email avec contenu nettoyé
       console.log("📤 Tentative d'envoi de l'email...");
@@ -280,20 +266,9 @@ module.exports = async (req, res) => {
 
         console.log("✅ Email envoyé avec succès!");
         console.log(`📨 Message ID: ${info.messageId || "N/A"}`);
-        console.log(`📬 Response: ${info.response || "N/A"}`);
-        console.log(`📊 Accepted: ${JSON.stringify(info.accepted || [])}`);
-        console.log(`❌ Rejected: ${JSON.stringify(info.rejected || [])}`);
-        console.log(`⚠️  Pending: ${JSON.stringify(info.pending || [])}`);
-        console.log(`🏠 Envelope: ${JSON.stringify(info.envelope || {})}`);
 
         res.status(200).json({
           message: "Email envoyé avec succès",
-          details: {
-            messageId: info.messageId,
-            accepted: info.accepted,
-            rejected: info.rejected,
-            response: info.response,
-          },
         });
       } catch (error) {
         console.error("❌ Erreur lors de l'envoi de l'email:");
