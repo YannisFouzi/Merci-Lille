@@ -155,7 +155,7 @@ module.exports = async (req, res) => {
 
       // Configuration du transporteur email
       console.log("📮 Configuration du transporteur email...");
-      const transporter = nodemailer.createTransporter({
+      const transporter = nodemailer.createTransport({
         host: "ssl0.ovh.net",
         port: 465,
         secure: true,
