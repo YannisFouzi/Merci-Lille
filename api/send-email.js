@@ -163,37 +163,113 @@ module.exports = async (req, res) => {
           user: process.env.EMAIL_USER,
           pass: process.env.EMAIL_PASS,
         },
-        logger: false, // Désactiver les logs détaillés en production
-        debug: false,
+        logger: true, // Activer les logs détaillés temporairement pour diagnostic
+        debug: true,
       });
-      console.log(
-        "✅ Transporteur email configuré (pas de vérification préalable)"
-      );
+      console.log("✅ Transporteur email configuré");
+
+      // Test de connexion SMTP
+      console.log("🔗 Test de connexion SMTP...");
+      try {
+        await transporter.verify();
+        console.log("✅ Connexion SMTP validée avec succès");
+      } catch (verifyError) {
+        console.error("❌ Erreur de connexion SMTP:");
+        console.error("📄 Message:", verifyError.message);
+        console.error("📊 Code:", verifyError.code);
+        return res.status(500).json({
+          message: "Erreur de configuration email",
+        });
+      }
 
       // Envoi de l'email avec contenu nettoyé
       console.log("📤 Tentative d'envoi de l'email...");
       try {
         const mailOptions = {
-          from: process.env.EMAIL_USER, // Utiliser l'email configuré comme expéditeur
-          replyTo: cleanData.email, // Email de l'utilisateur en reply-to
+          from: `"MerciLille Contact" <${process.env.EMAIL_USER}>`, // Nom d'affichage + email
+          replyTo: `"${cleanData.name}" <${cleanData.email}>`, // Nom + email en reply-to
           to: process.env.EMAIL_USER,
-          subject: `[Contact Site] ${cleanData.subject}`,
+          subject: `[MerciLille] ${cleanData.subject}`,
+          // Headers additionnels pour améliorer la délivrabilité
+          headers: {
+            "X-Mailer": "MerciLille Contact Form",
+            "X-Priority": "3",
+            "X-MSMail-Priority": "Normal",
+            "Message-ID": `<${Date.now()}.${Math.random()
+              .toString(36)
+              .substr(2, 9)}@mercilille.com>`,
+          },
           text: `De: ${cleanData.name} (${cleanData.email})\n\nMessage: ${cleanData.message}`,
           html: `
-            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-              <h2 style="color: #333;">Nouveau message depuis le site</h2>
-              <div style="background: #f5f5f5; padding: 20px; border-radius: 5px;">
-                <p><strong>De:</strong> ${cleanData.name}</p>
-                <p><strong>Email:</strong> ${cleanData.email}</p>
-                <p><strong>Sujet:</strong> ${cleanData.subject}</p>
-                <div style="margin-top: 20px;">
-                  <strong>Message:</strong>
-                  <div style="background: white; padding: 15px; border-radius: 3px; margin-top: 10px;">
-                    ${cleanData.message.replace(/\n/g, "<br>")}
-                  </div>
-                </div>
-              </div>
-            </div>
+            <!DOCTYPE html>
+            <html>
+            <head>
+              <meta charset="utf-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>Contact depuis MerciLille</title>
+            </head>
+            <body style="margin: 0; padding: 0; background-color: #f4f4f4;">
+              <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f4f4f4; padding: 20px;">
+                <tr>
+                  <td align="center">
+                    <table width="600" cellpadding="0" cellspacing="0" style="background-color: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                      <tr style="background-color: #333;">
+                        <td style="padding: 20px; text-align: center;">
+                          <h1 style="color: white; margin: 0; font-family: Arial, sans-serif;">MerciLille</h1>
+                          <p style="color: #ccc; margin: 5px 0 0 0; font-family: Arial, sans-serif;">Nouveau message de contact</p>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 30px; font-family: Arial, sans-serif;">
+                          <table width="100%" cellpadding="0" cellspacing="0">
+                            <tr>
+                              <td style="padding: 10px 0; border-bottom: 1px solid #eee;">
+                                <strong style="color: #333;">Nom:</strong><br>
+                                <span style="color: #666;">${
+                                  cleanData.name
+                                }</span>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td style="padding: 10px 0; border-bottom: 1px solid #eee;">
+                                <strong style="color: #333;">Email:</strong><br>
+                                <a href="mailto:${
+                                  cleanData.email
+                                }" style="color: #0066cc; text-decoration: none;">${
+            cleanData.email
+          }</a>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td style="padding: 10px 0; border-bottom: 1px solid #eee;">
+                                <strong style="color: #333;">Sujet:</strong><br>
+                                <span style="color: #666;">${
+                                  cleanData.subject
+                                }</span>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td style="padding: 20px 0;">
+                                <strong style="color: #333;">Message:</strong><br>
+                                <div style="background: #f9f9f9; padding: 15px; border-radius: 5px; margin-top: 10px; line-height: 1.6; color: #444;">
+                                  ${cleanData.message.replace(/\n/g, "<br>")}
+                                </div>
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                      <tr style="background-color: #f8f8f8;">
+                        <td style="padding: 15px; text-align: center; font-family: Arial, sans-serif; font-size: 12px; color: #888;">
+                          Ce message a été envoyé depuis le formulaire de contact de mercilille.com
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </body>
+            </html>
           `,
         };
 
@@ -204,9 +280,20 @@ module.exports = async (req, res) => {
 
         console.log("✅ Email envoyé avec succès!");
         console.log(`📨 Message ID: ${info.messageId || "N/A"}`);
+        console.log(`📬 Response: ${info.response || "N/A"}`);
+        console.log(`📊 Accepted: ${JSON.stringify(info.accepted || [])}`);
+        console.log(`❌ Rejected: ${JSON.stringify(info.rejected || [])}`);
+        console.log(`⚠️  Pending: ${JSON.stringify(info.pending || [])}`);
+        console.log(`🏠 Envelope: ${JSON.stringify(info.envelope || {})}`);
 
         res.status(200).json({
           message: "Email envoyé avec succès",
+          details: {
+            messageId: info.messageId,
+            accepted: info.accepted,
+            rejected: info.rejected,
+            response: info.response,
+          },
         });
       } catch (error) {
         console.error("❌ Erreur lors de l'envoi de l'email:");
