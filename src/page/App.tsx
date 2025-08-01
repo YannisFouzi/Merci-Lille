@@ -76,7 +76,7 @@ const Section: React.FC<{ children: React.ReactNode; className?: string }> = ({
 
 const MainContent: React.FC = () => {
   const [showPuzzle, setShowPuzzle] = useState(false);
-  const { restoreScrollPosition } = useScrollPosition();
+  const { restoreScrollPosition, saveScrollPosition } = useScrollPosition();
 
   const togglePuzzle = () => {
     setShowPuzzle(!showPuzzle);
@@ -84,8 +84,23 @@ const MainContent: React.FC = () => {
 
   // Restaurer la position de scroll quand on revient sur la page d'accueil
   useEffect(() => {
+    console.log("🏠 MainContent monté, tentative de restauration...");
     restoreScrollPosition("/");
   }, [restoreScrollPosition]);
+
+  // Sauvegarder automatiquement la position lors du scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      // Sauvegarder la position en continu
+      saveScrollPosition("/");
+    };
+
+    window.addEventListener("scroll", handleScroll);
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [saveScrollPosition]);
 
   useEffect(() => {
     if (showPuzzle) {

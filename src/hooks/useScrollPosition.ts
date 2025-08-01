@@ -8,20 +8,59 @@ export const useScrollPosition = () => {
 
   // Fonction pour sauvegarder la position de scroll actuelle
   const saveScrollPosition = (key: string = location.pathname) => {
-    scrollPositions.current[key] = window.scrollY;
+    const position = window.scrollY;
+    console.log(`🔄 Sauvegarde position scroll pour ${key}:`, position);
+    scrollPositions.current[key] = position;
     // Sauvegarder aussi dans sessionStorage pour persister entre les navigations
-    sessionStorage.setItem(`scrollPosition_${key}`, window.scrollY.toString());
+    sessionStorage.setItem(`scrollPosition_${key}`, position.toString());
   };
 
   // Fonction pour restaurer la position de scroll
   const restoreScrollPosition = (key: string = location.pathname) => {
     const savedPosition = sessionStorage.getItem(`scrollPosition_${key}`);
+    console.log(`🔍 Tentative de restauration pour ${key}:`, savedPosition);
+
     if (savedPosition) {
       const position = parseInt(savedPosition, 10);
-      // Utiliser setTimeout pour s'assurer que le DOM est rendu
-      setTimeout(() => {
-        window.scrollTo(0, position);
-      }, 100);
+      console.log(`📍 Restauration vers position:`, position);
+
+      // Essayer plusieurs fois avec des délais croissants
+      // pour s'assurer que React Router n'interfère pas
+      const attemptRestore = (delay: number, attempt: number = 1) => {
+        setTimeout(() => {
+          console.log(
+            `🚀 Tentative ${attempt} de scroll vers ${position}px (délai: ${delay}ms)`
+          );
+          window.scrollTo({
+            top: position,
+            left: 0,
+            behavior: "auto", // Pas d'animation pour éviter les conflits
+          });
+
+          // Vérifier si le scroll a fonctionné
+          setTimeout(() => {
+            const currentScroll = window.scrollY;
+            console.log(
+              `✅ Position actuelle après restauration: ${currentScroll}px (objectif: ${position}px)`
+            );
+
+            // Si on n'est pas à la bonne position et qu'on n'a pas fait trop de tentatives
+            if (Math.abs(currentScroll - position) > 50 && attempt < 3) {
+              console.log(
+                `🔄 Nouvelle tentative nécessaire (écart: ${Math.abs(
+                  currentScroll - position
+                )}px)`
+              );
+              attemptRestore(delay + 100, attempt + 1);
+            }
+          }, 50);
+        }, delay);
+      };
+
+      // Première tentative immédiate
+      attemptRestore(0);
+      // Deuxième tentative après 200ms au cas où
+      attemptRestore(200);
     }
   };
 
