@@ -19,6 +19,7 @@ import ProfileCard from "../components/ProfilCard/ProfileCard";
 import ShotgunEvents from "../components/ShotgunEvents/ShotgunEvents";
 import SocialMediaMenu from "../components/SocialMediaMenu/SocialMediaMenu";
 import AnimatedSVGLogo from "../components/SVGAnimation/AnimatedSVGLogo";
+import { useScrollPosition } from "../hooks/useScrollPosition";
 
 const useElementOnScreen = (options: IntersectionObserverInit) => {
   const elementRef = useRef<HTMLDivElement>(null);
@@ -75,10 +76,16 @@ const Section: React.FC<{ children: React.ReactNode; className?: string }> = ({
 
 const MainContent: React.FC = () => {
   const [showPuzzle, setShowPuzzle] = useState(false);
+  const { restoreScrollPosition } = useScrollPosition();
 
   const togglePuzzle = () => {
     setShowPuzzle(!showPuzzle);
   };
+
+  // Restaurer la position de scroll quand on revient sur la page d'accueil
+  useEffect(() => {
+    restoreScrollPosition("/");
+  }, [restoreScrollPosition]);
 
   useEffect(() => {
     if (showPuzzle) {

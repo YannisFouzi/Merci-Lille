@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
+import { useScrollPosition } from "../../hooks/useScrollPosition";
 import { galleryService } from "../../services/gallery.service";
 import "./Gallery.scss";
 
@@ -13,6 +14,7 @@ const FullGallery: React.FC = () => {
   const [images, setImages] = useState<GalleryImage[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const { restoreScrollPosition } = useScrollPosition();
 
   useEffect(() => {
     const fetchImages = async () => {
@@ -94,6 +96,12 @@ const FullGallery: React.FC = () => {
     setSelectedImage(null);
   };
 
+  // Fonction pour gérer le retour à l'accueil avec restauration de scroll
+  const handleBackToHome = () => {
+    // La restauration se fera automatiquement dans MainContent
+    // Pas besoin de faire quelque chose ici, juste permettre la navigation
+  };
+
   const Modal = () => {
     if (!selectedImage) return null;
     return createPortal(
@@ -123,6 +131,7 @@ const FullGallery: React.FC = () => {
             <Link
               to="/"
               className="flex items-center gap-2 text-white hover:text-red-500 transition-colors"
+              onClick={handleBackToHome}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"

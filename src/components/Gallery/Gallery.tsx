@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
+import { useScrollPosition } from "../../hooks/useScrollPosition";
 import { galleryService } from "../../services/gallery.service";
 import "./Gallery.scss";
 
@@ -15,6 +16,7 @@ const Gallery: React.FC = () => {
   const [images, setImages] = useState<GalleryImage[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const { saveScrollPosition } = useScrollPosition();
 
   useEffect(() => {
     const fetchImages = async () => {
@@ -97,6 +99,12 @@ const Gallery: React.FC = () => {
     setSelectedImage(null);
   };
 
+  // Fonction pour gérer le clic sur "Voir toute la galerie"
+  const handleViewAllGallery = () => {
+    // Sauvegarder la position de scroll actuelle avant la navigation
+    saveScrollPosition("/");
+  };
+
   const Modal = () => {
     if (!selectedImage) return null;
     return createPortal(
@@ -144,7 +152,11 @@ const Gallery: React.FC = () => {
 
       {showViewAll && (
         <div className="mt-8 text-center">
-          <Link to="/gallerie" className="btn-load-more">
+          <Link
+            to="/gallerie"
+            className="btn-load-more"
+            onClick={handleViewAllGallery}
+          >
             Voir toute la galerie
           </Link>
         </div>
