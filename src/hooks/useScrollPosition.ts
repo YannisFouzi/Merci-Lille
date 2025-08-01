@@ -70,10 +70,33 @@ export const useScrollPosition = () => {
     sessionStorage.removeItem(`scrollPosition_${key}`);
   };
 
+  // Fonction pour marquer qu'on fait une navigation interne
+  const markInternalNavigation = () => {
+    sessionStorage.setItem("isInternalNavigation", "true");
+    console.log("🔄 Navigation interne marquée");
+  };
+
+  // Fonction pour vérifier si c'est un retour de navigation interne
+  const isInternalNavigation = () => {
+    const isInternal =
+      sessionStorage.getItem("isInternalNavigation") === "true";
+    console.log("🔍 Vérification navigation interne:", isInternal);
+    return isInternal;
+  };
+
+  // Fonction pour nettoyer le marqueur de navigation interne
+  const clearInternalNavigation = () => {
+    sessionStorage.removeItem("isInternalNavigation");
+    console.log("🧹 Marqueur navigation interne nettoyé");
+  };
+
   return {
     saveScrollPosition,
     restoreScrollPosition,
     clearScrollPosition,
+    markInternalNavigation,
+    isInternalNavigation,
+    clearInternalNavigation,
   };
 };
 

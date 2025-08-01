@@ -19,6 +19,7 @@ import ProfileCard from "../components/ProfilCard/ProfileCard";
 import ShotgunEvents from "../components/ShotgunEvents/ShotgunEvents";
 import SocialMediaMenu from "../components/SocialMediaMenu/SocialMediaMenu";
 import AnimatedSVGLogo from "../components/SVGAnimation/AnimatedSVGLogo";
+import { AnimationProvider, useAnimation } from "../contexts/AnimationContext";
 import { useScrollPosition } from "../hooks/useScrollPosition";
 
 const useElementOnScreen = (options: IntersectionObserverInit) => {
@@ -61,6 +62,22 @@ const Section: React.FC<{ children: React.ReactNode; className?: string }> = ({
     rootMargin: "0px",
   });
 
+  const { shouldAnimate } = useAnimation();
+
+  // Si les animations sont désactivées, afficher directement sans animation
+  if (!shouldAnimate) {
+    return (
+      <section
+        ref={ref}
+        className={`mb-12 ${className}`}
+        style={{ opacity: 1, transform: "translateY(0)" }}
+      >
+        {children}
+      </section>
+    );
+  }
+
+  // Sinon, utiliser les animations normalement
   return (
     <motion.section
       ref={ref}
@@ -202,7 +219,14 @@ const App: React.FC = () => {
         />
       </Helmet>
       <Routes>
-        <Route path="/" element={<MainContent />} />
+        <Route
+          path="/"
+          element={
+            <AnimationProvider>
+              <MainContent />
+            </AnimationProvider>
+          }
+        />
         <Route path="/gallerie" element={<FullGallery />} />
         <Route path="/admin/login" element={<LoginForm />} />
         <Route

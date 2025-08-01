@@ -1,11 +1,29 @@
 import React, { useEffect, useRef } from "react";
+import { useAnimation } from "../../contexts/AnimationContext";
 
 const AnimatedSVGLogo: React.FC = () => {
   const svgRef = useRef<SVGSVGElement | null>(null);
+  const { shouldAnimate } = useAnimation();
 
   useEffect(() => {
     const svg = svgRef.current;
     if (!svg) return;
+
+    // Si les animations sont désactivées, afficher directement le logo sans animation
+    if (!shouldAnimate) {
+      const paths = svg.querySelectorAll("path");
+      paths.forEach((path) => {
+        path.style.strokeDasharray = "none";
+        path.style.strokeDashoffset = "0";
+        path.style.fill = "#ffffff";
+        path.style.fillOpacity = "1";
+        path.style.stroke = "#ffffff";
+        path.style.strokeOpacity = "0";
+        path.style.strokeWidth = "0";
+      });
+      console.log("🎨 Logo affiché sans animation (retour de navigation)");
+      return;
+    }
 
     const paths = svg.querySelectorAll("path");
     const animationDuration = 2; // durée en secondes
@@ -44,7 +62,7 @@ const AnimatedSVGLogo: React.FC = () => {
         path.style.strokeWidth = "0"; // Réduit progressivement l'épaisseur du trait
       });
     }, animationDuration * 1000 + 100);
-  }, []);
+  }, [shouldAnimate]);
 
   return (
     <svg

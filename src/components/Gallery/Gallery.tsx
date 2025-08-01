@@ -16,7 +16,7 @@ const Gallery: React.FC = () => {
   const [images, setImages] = useState<GalleryImage[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const { saveScrollPosition } = useScrollPosition();
+  const { saveScrollPosition, markInternalNavigation } = useScrollPosition();
 
   useEffect(() => {
     const fetchImages = async () => {
@@ -103,6 +103,8 @@ const Gallery: React.FC = () => {
   const handleViewAllGallery = () => {
     // Sauvegarder la position de scroll actuelle avant la navigation
     saveScrollPosition("/");
+    // Marquer qu'on fait une navigation interne
+    markInternalNavigation();
   };
 
   const Modal = () => {
