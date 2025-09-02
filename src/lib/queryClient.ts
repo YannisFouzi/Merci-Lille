@@ -17,7 +17,8 @@ export const queryClient = new QueryClient({
 
       // Retry en cas d'erreur
       retry: 2,
-      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+      retryDelay: (attemptIndex: number) =>
+        Math.min(1000 * 2 ** attemptIndex, 30000),
 
       // Cache les données même en cas d'erreur pendant 5 minutes
       gcTime: 5 * 60 * 1000, // Anciennement cacheTime
