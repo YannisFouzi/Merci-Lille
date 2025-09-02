@@ -1,88 +1,12 @@
-import React, { useEffect, useState } from "react";
-import { eventsService } from "../../services/events.service";
+import React from "react";
+import { useEvents } from "../../hooks/useEvents";
 import EventSection from "./components/EventSection/EventSection";
 import "./ShotgunEvents.scss";
-import { EventCardProps } from "./types";
 
 const ShotgunEvents: React.FC = () => {
-  const [upcomingEvents, setUpcomingEvents] = useState<EventCardProps[]>([]);
-  const [pastEvents, setPastEvents] = useState<EventCardProps[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const { upcomingEvents, pastEvents, isLoading, error } = useEvents();
 
-  useEffect(() => {
-    const fetchEvents = async () => {
-      try {
-        setLoading(true);
-        const allEvents = await eventsService.getAllEvents();
-
-        const now = new Date();
-        const upcoming: EventCardProps[] = [];
-        const past: EventCardProps[] = [];
-
-        allEvents.forEach((event: EventCardProps) => {
-          const [hours, minutes] = event.time.split(":");
-          const eventDate = new Date(event.date);
-          eventDate.setHours(parseInt(hours), parseInt(minutes));
-          const processedGenres = Array.isArray(event.genres)
-            ? event.genres
-            : typeof event.genres === "string"
-            ? JSON.parse(event.genres)
-            : [];
-
-          if (eventDate > now) {
-            upcoming.push({
-              ...event,
-              genres: processedGenres,
-              isFree: Boolean(event.isFree),
-              isPast: false,
-            });
-          } else {
-            past.push({
-              ...event,
-              genres: processedGenres,
-              isFree: Boolean(event.isFree),
-              isPast: true,
-            });
-          }
-        });
-
-        // Tri par date avec heure
-        upcoming.sort((a, b) => {
-          const dateA = new Date(a.date);
-          const dateB = new Date(b.date);
-          const [hoursA, minutesA] = a.time.split(":");
-          const [hoursB, minutesB] = b.time.split(":");
-          dateA.setHours(parseInt(hoursA), parseInt(minutesA));
-          dateB.setHours(parseInt(hoursB), parseInt(minutesB));
-          return dateA.getTime() - dateB.getTime();
-        });
-
-        past.sort((a, b) => {
-          const dateA = new Date(a.date);
-          const dateB = new Date(b.date);
-          const [hoursA, minutesA] = a.time.split(":");
-          const [hoursB, minutesB] = b.time.split(":");
-          dateA.setHours(parseInt(hoursA), parseInt(minutesA));
-          dateB.setHours(parseInt(hoursB), parseInt(minutesB));
-          return dateB.getTime() - dateA.getTime();
-        });
-
-        setUpcomingEvents(upcoming);
-        setPastEvents(past);
-        setError("");
-      } catch (err) {
-        setError("Erreur lors du chargement des événements");
-        console.error("Error fetching events:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchEvents();
-  }, []);
-
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="text-center py-12">
         <div className="text-white">Chargement des événements...</div>

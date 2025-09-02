@@ -1,35 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
+import { useGallery } from "../../hooks/useGallery";
 import { useScrollPosition } from "../../hooks/useScrollPosition";
-import { galleryService } from "../../services/gallery.service";
 import "./Gallery.scss";
 
-interface GalleryImage {
-  _id: string;
-  imageSrc: string;
-}
-
 const FullGallery: React.FC = () => {
-  const [images, setImages] = useState<GalleryImage[]>([]);
-  const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const { restoreScrollPosition } = useScrollPosition();
-
-  useEffect(() => {
-    const fetchImages = async () => {
-      try {
-        const data = await galleryService.getAllImages();
-        setImages(data);
-      } catch (error) {
-        console.error("Error fetching gallery images:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchImages();
-  }, []);
+  const { images, isLoading, error } = useGallery();
 
   useEffect(() => {
     // Désactiver le défilement quand une image est sélectionnée
@@ -114,10 +93,18 @@ const FullGallery: React.FC = () => {
     );
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="text-white text-xl">Chargement des images...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="text-red-500 text-xl">{error}</div>
       </div>
     );
   }

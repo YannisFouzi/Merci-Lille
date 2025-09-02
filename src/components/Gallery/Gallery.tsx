@@ -1,37 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
+import { useGallery } from "../../hooks/useGallery";
 import { useScrollPosition } from "../../hooks/useScrollPosition";
-import { galleryService } from "../../services/gallery.service";
 import "./Gallery.scss";
-
-interface GalleryImage {
-  _id: string;
-  imageSrc: string;
-}
 
 const Gallery: React.FC = () => {
   const ITEMS_PER_PAGE = 6;
   const [visibleItems, setVisibleItems] = useState(ITEMS_PER_PAGE);
-  const [images, setImages] = useState<GalleryImage[]>([]);
-  const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const { saveScrollPosition, markInternalNavigation } = useScrollPosition();
-
-  useEffect(() => {
-    const fetchImages = async () => {
-      try {
-        const data = await galleryService.getAllImages();
-        setImages(data);
-      } catch (error) {
-        console.error("Error fetching gallery images:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchImages();
-  }, []);
+  const { images, isLoading, error } = useGallery();
 
   useEffect(() => {
     // Désactiver le défilement quand une image est sélectionnée
@@ -119,10 +98,18 @@ const Gallery: React.FC = () => {
     );
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="text-center py-12">
         <div className="text-white">Chargement des images...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-12">
+        <div className="text-red-500">{error}</div>
       </div>
     );
   }

@@ -1,5 +1,6 @@
 import PuzzleGame from "@/components/PuzzleGame/PuzzleGame";
 import TextScramble from "@/components/TextScramble/TextScramble";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import React, { useEffect, useRef, useState } from "react";
 import { Helmet } from "react-helmet";
@@ -21,6 +22,7 @@ import SocialMediaMenu from "../components/SocialMediaMenu/SocialMediaMenu";
 import AnimatedSVGLogo from "../components/SVGAnimation/AnimatedSVGLogo";
 import { AnimationProvider, useAnimation } from "../contexts/AnimationContext";
 import { useScrollPosition } from "../hooks/useScrollPosition";
+import { queryClient } from "../lib/queryClient";
 
 const useElementOnScreen = (options: IntersectionObserverInit) => {
   const elementRef = useRef<HTMLDivElement>(null);
@@ -210,47 +212,49 @@ const MainContent: React.FC = () => {
 
 const App: React.FC = () => {
   return (
-    <Router>
-      <Helmet>
-        <title>Merci Lille</title>
-        <meta
-          name="description"
-          content="Découvrez nos événements électro à Lille. Rejoignez-nous pour une expérience musicale unique !"
-        />
-      </Helmet>
-      <Routes>
-        <Route
-          path="/"
-          element={
-            <AnimationProvider>
-              <MainContent />
-            </AnimationProvider>
-          }
-        />
-        <Route path="/gallerie" element={<FullGallery />} />
-        <Route path="/admin/login" element={<LoginForm />} />
-        <Route
-          path="/admin/events"
-          element={
-            <PrivateRoute>
-              <AdminLayout>
-                <EventsManagement />
-              </AdminLayout>
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/admin/gallery"
-          element={
-            <PrivateRoute>
-              <AdminLayout>
-                <GalleryManagement />
-              </AdminLayout>
-            </PrivateRoute>
-          }
-        />
-      </Routes>
-    </Router>
+    <QueryClientProvider client={queryClient}>
+      <Router>
+        <Helmet>
+          <title>Merci Lille</title>
+          <meta
+            name="description"
+            content="Découvrez nos événements électro à Lille. Rejoignez-nous pour une expérience musicale unique !"
+          />
+        </Helmet>
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <AnimationProvider>
+                <MainContent />
+              </AnimationProvider>
+            }
+          />
+          <Route path="/gallerie" element={<FullGallery />} />
+          <Route path="/admin/login" element={<LoginForm />} />
+          <Route
+            path="/admin/events"
+            element={
+              <PrivateRoute>
+                <AdminLayout>
+                  <EventsManagement />
+                </AdminLayout>
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/admin/gallery"
+            element={
+              <PrivateRoute>
+                <AdminLayout>
+                  <GalleryManagement />
+                </AdminLayout>
+              </PrivateRoute>
+            }
+          />
+        </Routes>
+      </Router>
+    </QueryClientProvider>
   );
 };
 
