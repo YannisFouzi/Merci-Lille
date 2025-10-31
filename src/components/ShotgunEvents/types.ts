@@ -3,6 +3,7 @@ export interface EventCardProps {
   imageSrc: string;
   title: string;
   eventNumber: string;
+  order?: number;
   city: string;
   country?: string;
   date: string;

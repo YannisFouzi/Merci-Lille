@@ -60,26 +60,10 @@ export const useEvents = () => {
       }
     });
 
-    // Tri par date avec heure
-    upcoming.sort((a, b) => {
-      const dateA = new Date(a.date);
-      const dateB = new Date(b.date);
-      const [hoursA, minutesA] = a.time.split(":");
-      const [hoursB, minutesB] = b.time.split(":");
-      dateA.setHours(parseInt(hoursA), parseInt(minutesA));
-      dateB.setHours(parseInt(hoursB), parseInt(minutesB));
-      return dateA.getTime() - dateB.getTime();
-    });
-
-    past.sort((a, b) => {
-      const dateA = new Date(a.date);
-      const dateB = new Date(b.date);
-      const [hoursA, minutesA] = a.time.split(":");
-      const [hoursB, minutesB] = b.time.split(":");
-      dateA.setHours(parseInt(hoursA), parseInt(minutesA));
-      dateB.setHours(parseInt(hoursB), parseInt(minutesB));
-      return dateB.getTime() - dateA.getTime();
-    });
+    // Tri par le champ 'order' (défini dans l'admin)
+    // L'ordre du backend (field 'order') détermine l'affichage côté public
+    upcoming.sort((a, b) => (a.order || 0) - (b.order || 0));
+    past.sort((a, b) => (a.order || 0) - (b.order || 0));
 
     return { upcomingEvents: upcoming, pastEvents: past };
   }, [rawEvents]);

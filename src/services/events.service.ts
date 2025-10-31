@@ -28,4 +28,9 @@ export const eventsService = {
     const response = await api.delete(`/events/${id}`);
     return response.data;
   },
+
+  async updateEventOrder(orderedIds: string[]) {
+    const response = await api.put("/events/update-order", { orderedIds });
+    return response.data;
+  },
 };

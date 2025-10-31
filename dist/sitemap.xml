@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <!-- Page principale -->
+  <url>
+    <loc>https://mercilille.com</loc>
+    <lastmod>2023-11-08</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  
+  <!-- Page de backend admin, si elle est publique et doit être indexée -->
+  <url>
+    <loc>https://mercilille.com/admin</loc>
+    <lastmod>2023-11-08</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+</urlset>

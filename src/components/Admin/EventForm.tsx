@@ -73,8 +73,10 @@ const EventForm: React.FC<EventFormProps> = ({ event, onSubmit }) => {
       const data = new FormData();
 
       // Formatage du prix avant l'envoi
+      // On retire eventNumber car il est généré automatiquement par le backend
+      const { eventNumber, ...formDataWithoutEventNumber } = formData as any;
       const formDataToSend = {
-        ...formData,
+        ...formDataWithoutEventNumber,
         price: formData.isFree
           ? "0"
           : formData.price?.trim()
@@ -193,42 +195,20 @@ const EventForm: React.FC<EventFormProps> = ({ event, onSubmit }) => {
           />
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <label className="text-white block text-lg font-bold border-b border-gray-600 pb-1 mb-2">
-              Numéro d'événement
-            </label>
-            <div className="relative">
-              <input
-                type="text"
-                value={formData.eventNumber}
-                onChange={(e) =>
-                  setFormData({ ...formData, eventNumber: e.target.value })
-                }
-                placeholder="Numéro d'événement (auto si vide)"
-                className="px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white w-full"
-              />
-              <div className="text-xs text-gray-400 mt-1">
-                Laissez vide pour auto-incrémentation
-              </div>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-white block text-lg font-bold border-b border-gray-600 pb-1 mb-2">
-              Ville
-            </label>
-            <input
-              type="text"
-              value={formData.city}
-              onChange={(e) =>
-                setFormData({ ...formData, city: e.target.value })
-              }
-              placeholder="Ville"
-              className="px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white w-full"
-              required
-            />
-          </div>
+        <div className="space-y-2">
+          <label className="text-white block text-lg font-bold border-b border-gray-600 pb-1 mb-2">
+            Ville
+          </label>
+          <input
+            type="text"
+            value={formData.city}
+            onChange={(e) =>
+              setFormData({ ...formData, city: e.target.value })
+            }
+            placeholder="Ville"
+            className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white"
+            required
+          />
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
