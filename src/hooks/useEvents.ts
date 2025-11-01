@@ -14,8 +14,8 @@ export const useEvents = () => {
     error,
     isError,
   } = useQuery({
-    queryKey: ["events"],
-    queryFn: eventsService.getAllEvents,
+    queryKey: ["events", "public"], // Clé différente pour le cache public vs admin
+    queryFn: () => eventsService.getAllEvents(false), // NE PAS inclure les événements masqués côté public
     // Configuration spécifique pour les events (hérite de la config globale)
     staleTime: 10 * 60 * 1000, // 10 minutes pour les events (plus court car plus dynamique)
   });
@@ -61,9 +61,28 @@ export const useEvents = () => {
     });
 
     // Tri par le champ 'order' (défini dans l'admin)
-    // L'ordre du backend (field 'order') détermine l'affichage côté public
-    upcoming.sort((a, b) => (a.order || 0) - (b.order || 0));
-    past.sort((a, b) => (a.order || 0) - (b.order || 0));
+    // Si order n'est pas défini, on trie par date (du plus récent au plus ancien)
+    upcoming.sort((a, b) => {
+      // Si les deux ont un order défini, utiliser order
+      if (a.order !== undefined && b.order !== undefined && a.order !== 0 && b.order !== 0) {
+        return a.order - b.order;
+      }
+      // Sinon, trier par date (plus récent en premier)
+      const dateA = new Date(a.date).getTime();
+      const dateB = new Date(b.date).getTime();
+      return dateB - dateA; // Ordre décroissant (plus récent d'abord)
+    });
+    
+    past.sort((a, b) => {
+      // Si les deux ont un order défini, utiliser order
+      if (a.order !== undefined && b.order !== undefined && a.order !== 0 && b.order !== 0) {
+        return a.order - b.order;
+      }
+      // Sinon, trier par date (plus récent en premier)
+      const dateA = new Date(a.date).getTime();
+      const dateB = new Date(b.date).getTime();
+      return dateB - dateA; // Ordre décroissant (plus récent d'abord)
+    });
 
     return { upcomingEvents: upcoming, pastEvents: past };
   }, [rawEvents]);

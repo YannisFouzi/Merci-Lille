@@ -14,4 +14,5 @@ export interface EventCardProps {
   ticketLink: string;
   isPast?: boolean;
   imagePublicId?: string;
+  isHidden?: boolean;
 }
