@@ -78,7 +78,7 @@ api.interceptors.response.use(
     ) {
       if (isRefreshing) {
         // Si un refresh est déjà en cours, mettre la requête en queue
-        return new Promise((resolve, reject) => {
+        return new Promise<void>((resolve, reject) => {
           failedQueue.push({ resolve, reject });
         })
           .then(() => {
