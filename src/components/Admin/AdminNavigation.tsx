@@ -1,10 +1,10 @@
 import { CalendarIcon, HomeIcon, PhotoIcon } from "@heroicons/react/24/outline";
 import React from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
+import { authService } from "../../services/auth.service";
 
 const AdminNavigation: React.FC = () => {
   const location = useLocation();
-  const navigate = useNavigate();
 
   const navigation = [
     {
@@ -20,8 +20,8 @@ const AdminNavigation: React.FC = () => {
   ];
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    navigate("/admin/login");
+    // Utiliser authService.logout() qui gère les cookies httpOnly
+    authService.logout();
   };
 
   return (

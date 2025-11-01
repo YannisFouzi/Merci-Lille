@@ -11,14 +11,8 @@ const PrivateRoute: React.FC<{ children: React.ReactNode }> = ({
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        // Vérification rapide locale d'abord
-        if (!authService.hasToken()) {
-          setIsAuthenticated(false);
-          setIsLoading(false);
-          return;
-        }
-
-        // Vérification côté serveur
+        // Avec les cookies httpOnly, on ne peut plus vérifier localement
+        // On doit toujours vérifier côté serveur (le cookie est envoyé automatiquement)
         const isValid = await authService.isAuthenticated();
         setIsAuthenticated(isValid);
       } catch (error) {

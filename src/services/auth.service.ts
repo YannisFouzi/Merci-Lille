@@ -3,33 +3,29 @@ import api from "./api";
 export const authService = {
   async login(username: string, password: string) {
     const response = await api.post("/auth/login", { username, password });
-    if (response.data.token) {
-      localStorage.setItem("token", response.data.token);
-      if (response.data.refreshToken) {
-        localStorage.setItem("refreshToken", response.data.refreshToken);
-      }
-      // Démarrer la vérification périodique après connexion
-      this.startPeriodicCheck();
+    
+    // Les tokens sont maintenant stockés en cookies httpOnly par le backend
+    // Plus besoin de localStorage !
+    
+    // Démarrer la vérification périodique après connexion
+    this.startPeriodicCheck();
 
-      // Programmer le refresh automatique du token
+    // Programmer le refresh automatique du token
+    if (response.data.expiresIn) {
       this.scheduleTokenRefresh(response.data.expiresIn);
     }
+    
     return response.data;
   },
 
   async logout() {
     try {
-      const refreshToken = localStorage.getItem("refreshToken");
-      if (refreshToken) {
-        // Notifier le serveur pour invalider le refresh token
-        await api.post("/auth/logout", { refreshToken });
-      }
+      // Le backend lira le refreshToken depuis les cookies
+      await api.post("/auth/logout");
     } catch (error) {
       console.warn("Erreur lors de la révocation du token:", error);
     } finally {
-      // Nettoyer le stockage local dans tous les cas
-      localStorage.removeItem("token");
-      localStorage.removeItem("refreshToken");
+      // Arrêter les vérifications périodiques
       this.stopPeriodicCheck();
       this.stopTokenRefresh();
 
@@ -38,60 +34,31 @@ export const authService = {
     }
   },
 
-  // Vérification locale (rapide) - vérifie juste la présence du token
-  hasToken() {
-    return !!localStorage.getItem("token");
-  },
-
   // Vérification serveur (sécurisée) - valide le token côté serveur
+  // Les cookies sont automatiquement envoyés avec la requête
   async isAuthenticated(): Promise<boolean> {
-    const token = localStorage.getItem("token");
-
-    if (!token) {
-      return false;
-    }
-
     try {
       const response = await api.get("/auth/verify");
       return response.data.valid === true;
     } catch (error: any) {
-      // Si le token a expiré, essayer de le rafraîchir
-      if (error.response?.data?.expired) {
-        const refreshed = await this.refreshToken();
-        if (refreshed) {
-          // Réessayer la vérification avec le nouveau token
-          try {
-            const retryResponse = await api.get("/auth/verify");
-            return retryResponse.data.valid === true;
-          } catch (retryError) {
-            this.clearInvalidToken();
-            return false;
-          }
-        }
-      }
-
-      // Si erreur 401 ou autre, le token n'est pas valide
-      this.clearInvalidToken();
+      // Si le token a expiré, l'intercepteur axios essaiera automatiquement
+      // de le rafraîchir. Si ça échoue, on retourne false.
       return false;
     }
   },
 
   // Rafraîchir le token d'accès
+  // Le refreshToken est automatiquement lu depuis les cookies par le backend
   async refreshToken(): Promise<boolean> {
     try {
-      const refreshToken = localStorage.getItem("refreshToken");
-      if (!refreshToken) {
-        return false;
-      }
+      const response = await api.post("/auth/refresh", {});
 
-      const response = await api.post("/auth/refresh", { refreshToken });
-
-      if (response.data.token) {
-        localStorage.setItem("token", response.data.token);
-
+      if (response.data.message === "Token refreshed successfully") {
+        // Le nouveau token est automatiquement stocké en cookie
         // Programmer le prochain refresh
-        this.scheduleTokenRefresh(response.data.expiresIn);
-
+        if (response.data.expiresIn) {
+          this.scheduleTokenRefresh(response.data.expiresIn);
+        }
         return true;
       }
 
@@ -103,10 +70,9 @@ export const authService = {
     }
   },
 
-  // Méthode pour nettoyer les tokens invalides sans redirection
+  // Méthode pour nettoyer l'état local sans redirection
   clearInvalidToken() {
-    localStorage.removeItem("token");
-    localStorage.removeItem("refreshToken");
+    // Les cookies sont gérés par le backend, on arrête juste les timers
     this.stopPeriodicCheck();
     this.stopTokenRefresh();
   },
@@ -154,14 +120,12 @@ export const authService = {
 
     // Vérifier le token toutes les 5 minutes
     this._intervalId = window.setInterval(async () => {
-      if (this.hasToken()) {
-        const isValid = await this.isAuthenticated();
-        if (!isValid) {
-          console.warn(
-            "Token expiré détecté lors de la vérification périodique"
-          );
-          this.forceLogout();
-        }
+      const isValid = await this.isAuthenticated();
+      if (!isValid) {
+        console.warn(
+          "Token expiré détecté lors de la vérification périodique"
+        );
+        this.forceLogout();
       }
     }, 5 * 60 * 1000); // 5 minutes
   },
@@ -173,16 +137,14 @@ export const authService = {
     }
   },
 
-  // Initialiser la vérification périodique si un token existe déjà
-  initializePeriodicCheck() {
-    if (this.hasToken()) {
+  // Initialiser la vérification périodique au démarrage de l'app
+  async initializePeriodicCheck() {
+    // Vérifier si on a une session valide (via cookie)
+    const isAuth = await this.isAuthenticated();
+    if (isAuth) {
       this.startPeriodicCheck();
-
-      // Si on a un refresh token, programmer le refresh automatique
-      // (on ne connaît pas l'expiration exacte, donc on utilise 14 min par défaut)
-      if (localStorage.getItem("refreshToken")) {
-        this.scheduleTokenRefresh(14 * 60); // 14 minutes
-      }
+      // Programmer le refresh automatique (14 min par défaut)
+      this.scheduleTokenRefresh(14 * 60);
     }
   },
 };

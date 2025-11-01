@@ -10,16 +10,16 @@ const api = axios.create({
 // Variable pour éviter les appels multiples de refresh
 let isRefreshing = false;
 let failedQueue: Array<{
-  resolve: (token: string) => void;
+  resolve: () => void;
   reject: (error: any) => void;
 }> = [];
 
-const processQueue = (error: any, token: string | null = null) => {
+const processQueue = (error: any) => {
   failedQueue.forEach(({ resolve, reject }) => {
     if (error) {
       reject(error);
     } else {
-      resolve(token!);
+      resolve();
     }
   });
 
@@ -29,40 +29,29 @@ const processQueue = (error: any, token: string | null = null) => {
 // Fonction pour rafraîchir le token (sans dépendance circulaire)
 const refreshTokenFunc = async (): Promise<boolean> => {
   try {
-    const refreshToken = localStorage.getItem("refreshToken");
-    if (!refreshToken) {
-      return false;
-    }
-
+    // Les tokens sont maintenant en cookies httpOnly
+    // Le backend lira automatiquement le refreshToken cookie
     const response = await axios.post(
       `${API_URL}/auth/refresh`,
-      { refreshToken },
+      {}, // Pas besoin d'envoyer le token dans le body
       {
         headers: { "X-Requested-With": "XMLHttpRequest" },
-        withCredentials: true,
+        withCredentials: true, // Envoie les cookies automatiquement
       }
     );
 
-    if (response.data.token) {
-      localStorage.setItem("token", response.data.token);
-      return true;
-    }
-
-    return false;
+    // Le nouveau accessToken est automatiquement stocké en cookie par le backend
+    return response.data.message === "Token refreshed successfully";
   } catch (error) {
     console.warn("Impossible de rafraîchir le token");
-    localStorage.removeItem("token");
-    localStorage.removeItem("refreshToken");
     return false;
   }
 };
 
 // Intercepteur pour ajouter les headers de sécurité aux requêtes
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
+  // Le token est maintenant en cookie httpOnly, pas besoin de l'ajouter manuellement
+  // Le navigateur l'envoie automatiquement grâce à withCredentials: true
 
   // Header anti-CSRF pour toutes les requêtes non-GET
   if (config.method !== "get") {
@@ -92,8 +81,8 @@ api.interceptors.response.use(
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
         })
-          .then((token) => {
-            originalRequest.headers.Authorization = `Bearer ${token}`;
+          .then(() => {
+            // Le cookie est automatiquement envoyé, pas besoin d'ajouter le header
             return api(originalRequest);
           })
           .catch((err) => {
@@ -109,20 +98,19 @@ api.interceptors.response.use(
         const refreshed = await refreshTokenFunc();
 
         if (refreshed) {
-          const newToken = localStorage.getItem("token");
-          processQueue(null, newToken);
+          // Le nouveau token est automatiquement stocké en cookie
+          processQueue(null);
 
-          // Réessayer la requête originale avec le nouveau token
-          originalRequest.headers.Authorization = `Bearer ${newToken}`;
+          // Réessayer la requête originale (le cookie sera envoyé automatiquement)
           return api(originalRequest);
         } else {
           // Impossible de rafraîchir, forcer la déconnexion
-          processQueue(error, null);
+          processQueue(error);
           window.location.href = "/admin/login";
           return Promise.reject(error);
         }
       } catch (refreshError) {
-        processQueue(refreshError, null);
+        processQueue(refreshError);
         window.location.href = "/admin/login";
         return Promise.reject(refreshError);
       } finally {
@@ -132,9 +120,8 @@ api.interceptors.response.use(
 
     // Pour les autres erreurs 401 ou autres codes d'erreur
     if (error.response?.status === 401) {
-      // Nettoyer les tokens invalides
-      localStorage.removeItem("token");
-      localStorage.removeItem("refreshToken");
+      // Les cookies seront effacés automatiquement par le backend lors du logout
+      // ou expireront naturellement
 
       // Rediriger vers la page de connexion seulement si on n'y est pas déjà
       const currentPath = window.location.pathname;
