@@ -103,10 +103,8 @@ const ShotgunSync: React.FC = () => {
       const result = await shotgunSyncService.previewEvents();
 
       if (result.success && result.data) {
-        // L'API Shotgun retourne les événements dans result.data (qui est un tableau)
-        const eventsCount = Array.isArray(result.data) 
-          ? result.data.length 
-          : (result.data.events?.length || result.data.data?.length || 0);
+        // L'API Shotgun retourne les événements dans result.data.events
+        const eventsCount = result.data.events?.length || 0;
         
         setMessage({
           type: "info",
