@@ -29,5 +29,3 @@ export const useGallery = () => {
     error: isError ? "Erreur lors du chargement des images" : null,
   };
 };
-
-
