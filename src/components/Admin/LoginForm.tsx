@@ -20,7 +20,11 @@ const LoginForm = () => {
     } catch (err: any) {
       console.error("Erreur de connexion:", err);
 
-      if (err.response?.status === 401) {
+      if (err.response?.status === 429) {
+        // Rate limiting activé
+        const retryMinutes = Math.ceil((err.response?.data?.retryAfter || 900) / 60);
+        setError(`Trop de tentatives de connexion. Veuillez réessayer dans ${retryMinutes} minutes.`);
+      } else if (err.response?.status === 401) {
         setError("Identifiants invalides");
       } else if (err.response?.status >= 500) {
         setError("Erreur serveur, veuillez réessayer plus tard");
