@@ -59,4 +59,24 @@ export const eventsService = {
     const response = await api.post("/events/renumber-all");
     return response.data;
   },
+
+  async featureEvent(id: string) {
+    const response = await api.patch(`/events/${id}/feature`);
+    return response.data;
+  },
+
+  async unfeatureEvent(id: string) {
+    const response = await api.patch(`/events/${id}/unfeature`);
+    return response.data;
+  },
+
+  async featureMultipleEvents(eventIds: string[]) {
+    const response = await api.post("/events/feature-multiple", { eventIds });
+    return response.data;
+  },
+
+  async unfeatureMultipleEvents(eventIds: string[]) {
+    const response = await api.post("/events/unfeature-multiple", { eventIds });
+    return response.data;
+  },
 };

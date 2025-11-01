@@ -4,7 +4,7 @@ import EventSection from "./components/EventSection/EventSection";
 import "./ShotgunEvents.scss";
 
 const ShotgunEvents: React.FC = () => {
-  const { upcomingEvents, pastEvents, isLoading, error } = useEvents();
+  const { featuredEvents, upcomingEvents, pastEvents, isLoading, error } = useEvents();
 
   if (isLoading) {
     return (
@@ -24,6 +24,9 @@ const ShotgunEvents: React.FC = () => {
 
   return (
     <div className="space-y-24">
+      {featuredEvents.length > 0 && (
+        <EventSection title="Évènements phares" events={featuredEvents} />
+      )}
       {upcomingEvents.length > 0 && (
         <EventSection title="Évènements à venir" events={upcomingEvents} />
       )}

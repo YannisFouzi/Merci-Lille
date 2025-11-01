@@ -41,6 +41,7 @@ const EventForm: React.FC<EventFormProps> = ({ event, onSubmit }) => {
           isFree: false,
           price: "",
           imageSrc: "",
+          isFeatured: false,
         }
   );
   const [image, setImage] = useState<File | null>(null);
@@ -368,6 +369,26 @@ const EventForm: React.FC<EventFormProps> = ({ event, onSubmit }) => {
               <span className="text-white">€</span>
             </div>
           )}
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-white block text-lg font-bold border-b border-gray-600 pb-1 mb-2">
+            Options
+          </label>
+          <div className="flex items-center">
+            <input
+              type="checkbox"
+              checked={formData.isFeatured || false}
+              onChange={(e) => {
+                setFormData({
+                  ...formData,
+                  isFeatured: e.target.checked,
+                });
+              }}
+              className="mr-2"
+            />
+            <label className="text-white">Mettre en avant (Événement phare)</label>
+          </div>
         </div>
       </div>
 

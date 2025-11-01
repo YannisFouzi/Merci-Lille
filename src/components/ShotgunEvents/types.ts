@@ -15,4 +15,5 @@ export interface EventCardProps {
   isPast?: boolean;
   imagePublicId?: string;
   isHidden?: boolean;
+  isFeatured?: boolean;
 }

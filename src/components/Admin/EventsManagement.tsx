@@ -406,6 +406,11 @@ const EventsManagement = () => {
                     👁️‍🗨️ Masqué
                   </span>
                 )}
+                {event.isFeatured && (
+                  <span className="bg-yellow-500 text-black text-xs px-2 py-1 rounded font-bold">
+                    ⭐ Phare
+                  </span>
+                )}
                 {isPast ? (
                   <span className="bg-gray-600 text-gray-300 text-xs px-2 py-1 rounded">
                     Passé

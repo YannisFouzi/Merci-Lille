@@ -20,13 +20,14 @@ export const useEvents = () => {
     staleTime: 10 * 60 * 1000, // 10 minutes pour les events (plus court car plus dynamique)
   });
 
-  // Traitement et tri des événements en upcoming/past
+  // Traitement et tri des événements en featured/upcoming/past
   const processedEvents = useMemo(() => {
     if (!rawEvents) {
-      return { upcomingEvents: [], pastEvents: [] };
+      return { featuredEvents: [], upcomingEvents: [], pastEvents: [] };
     }
 
     const now = new Date();
+    const featured: EventCardProps[] = [];
     const upcoming: EventCardProps[] = [];
     const past: EventCardProps[] = [];
 
@@ -47,6 +48,15 @@ export const useEvents = () => {
         isFree: Boolean(event.isFree),
       };
 
+      // Si l'événement est marqué comme phare, l'ajouter à la liste featured
+      if (event.isFeatured) {
+        featured.push({
+          ...processedEvent,
+          isPast: eventDate <= now,
+        });
+      }
+
+      // Ajouter aussi l'événement dans upcoming ou past (duplication intentionnelle)
       if (eventDate > now) {
         upcoming.push({
           ...processedEvent,
@@ -62,6 +72,17 @@ export const useEvents = () => {
 
     // Tri par le champ 'order' (défini dans l'admin)
     // Si order n'est pas défini, on trie par date (du plus récent au plus ancien)
+    featured.sort((a, b) => {
+      // Si les deux ont un order défini, utiliser order
+      if (a.order !== undefined && b.order !== undefined && a.order !== 0 && b.order !== 0) {
+        return a.order - b.order;
+      }
+      // Sinon, trier par date (plus récent en premier)
+      const dateA = new Date(a.date).getTime();
+      const dateB = new Date(b.date).getTime();
+      return dateB - dateA; // Ordre décroissant (plus récent d'abord)
+    });
+
     upcoming.sort((a, b) => {
       // Si les deux ont un order défini, utiliser order
       if (a.order !== undefined && b.order !== undefined && a.order !== 0 && b.order !== 0) {
@@ -84,7 +105,7 @@ export const useEvents = () => {
       return dateB - dateA; // Ordre décroissant (plus récent d'abord)
     });
 
-    return { upcomingEvents: upcoming, pastEvents: past };
+    return { featuredEvents: featured, upcomingEvents: upcoming, pastEvents: past };
   }, [rawEvents]);
 
   return {
