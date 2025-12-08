@@ -36,11 +36,6 @@ export const useEvents = () => {
       const eventDate = new Date(event.date);
       eventDate.setHours(parseInt(hours), parseInt(minutes));
 
-      const price =
-        typeof event.price === "string"
-          ? Number.parseFloat(event.price)
-          : event.price ?? 0;
-
       const processedGenres = Array.isArray(event.genres)
         ? event.genres
         : typeof event.genres === "string"
@@ -50,8 +45,6 @@ export const useEvents = () => {
       const processedEvent = {
         ...event,
         genres: processedGenres,
-        isFree: Boolean(event.isFree),
-        price: Number.isFinite(price) ? price : 0,
       };
 
       // Si l'événement est marqué comme phare, l'ajouter à la liste featured

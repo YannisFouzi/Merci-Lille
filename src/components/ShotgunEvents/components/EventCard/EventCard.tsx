@@ -10,8 +10,6 @@ const EventCard: React.FC<EventCardProps> = ({
   country,
   date,
   time,
-  isFree,
-  price,
   genres,
   ticketLink,
   isPast = false,
@@ -26,19 +24,13 @@ const EventCard: React.FC<EventCardProps> = ({
     >
       <div className="w-full bg-gray-800 rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 h-full">
         <div className="w-full aspect-[16/9] overflow-hidden">
-          <img
-            src={imageSrc}
-            alt={title}
-            className="w-full h-full object-cover"
-          />
+          <img src={imageSrc} alt={title} className="w-full h-full object-cover" />
         </div>
 
         <div className="p-3 space-y-2 flex flex-col">
           <div className="flex justify-between items-start">
-            <h2 className="text-base font-bold text-white pr-4">{title}</h2>{" "}
-            <span className="text-gray-400 flex-shrink-0 ml-2 text-sm">
-              #{eventNumber}
-            </span>
+            <h2 className="text-base font-bold text-white pr-4">{title}</h2>
+            <span className="text-gray-400 flex-shrink-0 ml-2 text-sm">#{eventNumber}</span>
           </div>
 
           <div className="text-gray-300 text-sm">
@@ -52,17 +44,6 @@ const EventCard: React.FC<EventCardProps> = ({
             <span className="text-red-500 font-bold">{formatDate(date)}</span>
             <span className="text-white">|</span>
             <span className="text-red-500 font-bold">{time}</span>
-            {/* N'afficher le prix que si l'événement n'est pas passé */}
-            {!isPast && (
-              <span className="text-white font-bold">
-                {isFree
-                  ? "Gratuit"
-                  : `${(price ?? 0).toLocaleString(undefined, {
-                      minimumFractionDigits: 0,
-                      maximumFractionDigits: 2,
-                    })} €`}
-              </span>
-            )}
           </div>
 
           <div className="min-h-[3rem]">
@@ -72,9 +53,7 @@ const EventCard: React.FC<EventCardProps> = ({
                   key={index}
                   className="bg-gray-700 text-xs text-gray-300 px-2 py-0.5 rounded-full border border-gray-600"
                 >
-                  {typeof genre === "string" && genre.startsWith("[")
-                    ? JSON.parse(genre)[0]
-                    : genre}
+                  {typeof genre === "string" && genre.startsWith("[") ? JSON.parse(genre)[0] : genre}
                 </span>
               ))}
             </div>
@@ -89,7 +68,7 @@ const EventCard: React.FC<EventCardProps> = ({
                 }}
                 className="btn w-full"
               >
-                Réserver
+                R\u00e9server
               </button>
             </div>
           )}

@@ -1,8 +1,10 @@
-import React, { useState } from "react";
+﻿import React, { useState } from "react";
 import { EventCardProps } from "../../components/ShotgunEvents/types";
 import { eventsService } from "../../services/events.service";
 
-type EventFormState = Omit<EventCardProps, "_id" | "price"> & { price: string };
+type EventFormState = Omit<EventCardProps, "_id" | "eventNumber" | "isPast"> & {
+  eventNumber?: string;
+};
 
 interface EventFormProps {
   event?: EventCardProps;
@@ -30,8 +32,6 @@ const EventForm: React.FC<EventFormProps> = ({ event, onSubmit }) => {
             : typeof event.genres === "string"
             ? JSON.parse(event.genres)
             : [],
-          price:
-            typeof event.price === "number" ? event.price.toString() : "0",
         }
       : {
           title: "",
@@ -41,8 +41,6 @@ const EventForm: React.FC<EventFormProps> = ({ event, onSubmit }) => {
           time: "",
           genres: [] as string[],
           ticketLink: "",
-          isFree: false,
-          price: "0",
           imageSrc: "",
           isFeatured: false,
         }
@@ -76,23 +74,11 @@ const EventForm: React.FC<EventFormProps> = ({ event, onSubmit }) => {
     try {
       const data = new FormData();
 
-      // Normalisation du prix avant l'envoi
       // On retire eventNumber car il est genere automatiquement par le backend
-      const { eventNumber: ignoredEventNumber, price, ...formDataWithoutEventNumber } = formData;
-      const numericPrice = formData.isFree
-        ? 0
-        : Number.parseFloat((price || "0").replace(",", "."));
-
-      if (
-        !formData.isFree &&
-        (!Number.isFinite(numericPrice) || numericPrice < 0)
-      ) {
-        throw new Error("Le prix doit etre un nombre positif");
-      }
+      const { eventNumber: ignoredEventNumber, ...formDataWithoutEventNumber } = formData;
 
       const formDataToSend = {
         ...formDataWithoutEventNumber,
-        price: numericPrice,
       };
 
       // Log sécurisé des données d'événement
@@ -335,53 +321,6 @@ const EventForm: React.FC<EventFormProps> = ({ event, onSubmit }) => {
               Ajouter
             </button>
           </div>
-        </div>
-
-        <div className="space-y-2">
-          <label className="text-white block text-lg font-bold border-b border-gray-600 pb-1 mb-2">
-            Tarification
-          </label>
-          <div className="flex items-center mb-2">
-            <input
-              type="checkbox"
-              checked={formData.isFree}
-              onChange={(e) => {
-                setFormData({
-                  ...formData,
-                  isFree: e.target.checked,
-                  price: e.target.checked ? "0" : formData.price,
-                });
-              }}
-              className="mr-2"
-            />
-            <label className="text-white">Gratuit</label>
-          </div>
-
-          {!formData.isFree && (
-            <div className="flex items-center gap-2">
-              <input
-                type="number"
-                inputMode="decimal"
-                step="0.01"
-                min="0"
-                value={formData.price}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  // Accepte uniquement les nombres avec point ou virgule, maximum 2 décimales
-                  if (/^\d*(?:[.,]\d{0,2})?$/.test(value)) {
-                    setFormData({
-                      ...formData,
-                      price: value.replace(",", "."),
-                    });
-                  }
-                }}
-                placeholder="Prix"
-                className="w-32 px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white"
-                required={!formData.isFree}
-              />
-              <span className="text-white">€</span>
-            </div>
-          )}
         </div>
 
         <div className="space-y-2">

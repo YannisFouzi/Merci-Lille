@@ -8,8 +8,6 @@ export interface EventCardProps {
   country?: string;
   date: string;
   time: string;
-  isFree: boolean;
-  price?: number;
   genres: string[];
   ticketLink: string;
   isPast?: boolean;
