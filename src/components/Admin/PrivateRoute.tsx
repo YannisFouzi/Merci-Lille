@@ -1,36 +1,14 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Navigate } from "react-router-dom";
-import { authService } from "../../services/auth.service";
+import { useAuth } from "../../contexts/AuthContext";
 
 const PrivateRoute: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        // Avec les cookies httpOnly, on ne peut plus vérifier localement
-        // On doit toujours vérifier côté serveur (le cookie est envoyé automatiquement)
-        const isValid = await authService.isAuthenticated();
-        setIsAuthenticated(isValid);
-      } catch (error) {
-        console.error(
-          "Erreur lors de la vérification d'authentification:",
-          error
-        );
-        setIsAuthenticated(false);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    checkAuth();
-  }, []);
+  const { status } = useAuth();
 
   // Affichage de chargement pendant la vérification
-  if (isLoading) {
+  if (status === "loading") {
     return (
       <div className="min-h-screen flex items-center justify-center bg-black">
         <div className="text-white text-center">
@@ -42,7 +20,7 @@ const PrivateRoute: React.FC<{ children: React.ReactNode }> = ({
   }
 
   // Redirection si non authentifié
-  if (!isAuthenticated) {
+  if (status !== "authenticated") {
     return <Navigate to="/admin/login" replace />;
   }
 

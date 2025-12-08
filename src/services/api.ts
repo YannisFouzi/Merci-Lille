@@ -1,4 +1,5 @@
 import axios from "axios";
+import { notifyUnauthorized } from "./authChannel";
 
 const API_URL = import.meta.env.VITE_APP_API_URL || "http://localhost:3000/api";
 
@@ -104,31 +105,26 @@ api.interceptors.response.use(
           // Réessayer la requête originale (le cookie sera envoyé automatiquement)
           return api(originalRequest);
         } else {
-          // Impossible de rafraîchir, forcer la déconnexion
+          // Impossible de rafraîchir, notifier l'UI
           processQueue(error);
-          window.location.href = "/admin/login";
+          notifyUnauthorized("expired");
           return Promise.reject(error);
         }
       } catch (refreshError) {
         processQueue(refreshError);
-        window.location.href = "/admin/login";
+        notifyUnauthorized("expired");
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;
       }
     }
 
-    // Pour les autres erreurs 401 ou autres codes d'erreur
+    // Pour les autres erreurs 401 ou 403 : notifier, pas de redirection ici
     if (error.response?.status === 401) {
-      // Les cookies seront effacés automatiquement par le backend lors du logout
-      // ou expireront naturellement
-
-      // Rediriger vers la page de connexion seulement si on n'y est pas déjà
-      const currentPath = window.location.pathname;
-      if (!currentPath.includes("/admin/login")) {
-        console.warn("Token invalide, redirection vers la page de connexion");
-        window.location.href = "/admin/login";
-      }
+      notifyUnauthorized(error.response?.data?.expired ? "expired" : "unauthorized");
+    }
+    if (error.response?.status === 403) {
+      notifyUnauthorized("forbidden");
     }
 
     return Promise.reject(error);

@@ -1,28 +1,34 @@
-import PuzzleGame from "@/components/PuzzleGame/PuzzleGame";
+﻿import PuzzleGame from "@/components/PuzzleGame/PuzzleGame";
 import TextScramble from "@/components/TextScramble/TextScramble";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import React, { useEffect, useRef, useState } from "react";
+import React, { Suspense, lazy, useEffect, useRef, useState } from "react";
 import { Helmet } from "react-helmet";
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
-import AdminLayout from "../components/Admin/AdminLayout";
-import EventsManagement from "../components/Admin/EventsManagement";
-import GalleryManagement from "../components/Admin/GalleryManagement";
-import LoginForm from "../components/Admin/LoginForm";
-import PrivateRoute from "../components/Admin/PrivateRoute";
-import Aftermovies from "../components/Aftermovies/Aftermovies";
-import EmailForm from "../components/EmailForm/EmailForm";
 import FloatingContactButton from "../components/FloatingContactButton/FloatingContactButton";
-import FullGallery from "../components/Gallery/FullGallery";
 import Gallery from "../components/Gallery/Gallery";
 import Introduction from "../components/Introduction/Introduction";
 import ProfileCard from "../components/ProfilCard/ProfileCard";
 import ShotgunEvents from "../components/ShotgunEvents/ShotgunEvents";
 import SocialMediaMenu from "../components/SocialMediaMenu/SocialMediaMenu";
 import AnimatedSVGLogo from "../components/SVGAnimation/AnimatedSVGLogo";
+import { AuthProvider } from "../contexts/AuthContext";
 import { AnimationProvider, useAnimation } from "../contexts/AnimationContext";
 import { useScrollPosition } from "../hooks/useScrollPosition";
 import { queryClient } from "../lib/queryClient";
+
+const Aftermovies = lazy(() => import("../components/Aftermovies/Aftermovies"));
+const EmailForm = lazy(() => import("../components/EmailForm/EmailForm"));
+const FullGallery = lazy(() => import("../components/Gallery/FullGallery"));
+const AdminLayout = lazy(() => import("../components/Admin/AdminLayout"));
+const EventsManagement = lazy(
+  () => import("../components/Admin/EventsManagement")
+);
+const GalleryManagement = lazy(
+  () => import("../components/Admin/GalleryManagement")
+);
+const LoginForm = lazy(() => import("../components/Admin/LoginForm"));
+const PrivateRoute = lazy(() => import("../components/Admin/PrivateRoute"));
 
 const useElementOnScreen = (options: IntersectionObserverInit) => {
   const elementRef = useRef<HTMLDivElement>(null);
@@ -213,47 +219,57 @@ const MainContent: React.FC = () => {
 const App: React.FC = () => {
   return (
     <QueryClientProvider client={queryClient}>
-      <Router>
-        <Helmet>
-          <title>Merci Lille</title>
-          <meta
-            name="description"
-            content="Découvrez nos événements électro à Lille. Rejoignez-nous pour une expérience musicale unique !"
-          />
-        </Helmet>
-        <Routes>
-          <Route
-            path="/"
-            element={
-              <AnimationProvider>
-                <MainContent />
-              </AnimationProvider>
+      <AuthProvider>
+        <Router>
+          <Helmet>
+            <title>Merci Lille</title>
+            <meta
+              name="description"
+              content="DÇ¸couvrez nos Ç¸vÇ¸nements Ç¸lectro Çÿ Lille. Rejoignez-nous pour une expÇ¸rience musicale unique !"
+            />
+          </Helmet>
+          <Suspense
+            fallback={
+              <div className="min-h-screen flex items-center justify-center bg-black text-white">
+                Chargement...
+              </div>
             }
-          />
-          <Route path="/gallerie" element={<FullGallery />} />
-          <Route path="/admin/login" element={<LoginForm />} />
-          <Route
-            path="/admin/events"
-            element={
-              <PrivateRoute>
-                <AdminLayout>
-                  <EventsManagement />
-                </AdminLayout>
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/admin/gallery"
-            element={
-              <PrivateRoute>
-                <AdminLayout>
-                  <GalleryManagement />
-                </AdminLayout>
-              </PrivateRoute>
-            }
-          />
-        </Routes>
-      </Router>
+          >
+            <Routes>
+              <Route
+                path="/"
+                element={
+                  <AnimationProvider>
+                    <MainContent />
+                  </AnimationProvider>
+                }
+              />
+              <Route path="/gallerie" element={<FullGallery />} />
+              <Route path="/admin/login" element={<LoginForm />} />
+              <Route
+                path="/admin/events"
+                element={
+                  <PrivateRoute>
+                    <AdminLayout>
+                      <EventsManagement />
+                    </AdminLayout>
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/admin/gallery"
+                element={
+                  <PrivateRoute>
+                    <AdminLayout>
+                      <GalleryManagement />
+                    </AdminLayout>
+                  </PrivateRoute>
+                }
+              />
+            </Routes>
+          </Suspense>
+        </Router>
+      </AuthProvider>
     </QueryClientProvider>
   );
 };

@@ -28,9 +28,6 @@ export const authService = {
       // Arrêter les vérifications périodiques
       this.stopPeriodicCheck();
       this.stopTokenRefresh();
-
-      // Rediriger vers la page de connexion
-      window.location.href = "/admin/login";
     }
   },
 
@@ -80,8 +77,7 @@ export const authService = {
   // Forcer la déconnexion (avec redirection)
   forceLogout() {
     this.clearInvalidToken();
-    console.warn("Session expirée, redirection vers la page de connexion");
-    window.location.href = "/admin/login";
+    console.warn("Session expirée");
   },
 
   // Gestion du refresh automatique des tokens
