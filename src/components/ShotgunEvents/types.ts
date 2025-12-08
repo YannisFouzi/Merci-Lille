@@ -9,7 +9,7 @@ export interface EventCardProps {
   date: string;
   time: string;
   isFree: boolean;
-  price?: string;
+  price?: number;
   genres: string[];
   ticketLink: string;
   isPast?: boolean;

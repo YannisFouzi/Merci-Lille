@@ -55,7 +55,12 @@ const EventCard: React.FC<EventCardProps> = ({
             {/* N'afficher le prix que si l'événement n'est pas passé */}
             {!isPast && (
               <span className="text-white font-bold">
-                {isFree ? "Gratuit" : `${price} €`}
+                {isFree
+                  ? "Gratuit"
+                  : `${(price ?? 0).toLocaleString(undefined, {
+                      minimumFractionDigits: 0,
+                      maximumFractionDigits: 2,
+                    })} €`}
               </span>
             )}
           </div>
