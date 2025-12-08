@@ -7,7 +7,7 @@ import "./Gallery.scss";
 
 const Gallery: React.FC = () => {
   const ITEMS_PER_PAGE = 6;
-  const [visibleItems, setVisibleItems] = useState(ITEMS_PER_PAGE);
+  const [visibleItems, ignoredSetVisibleItems] = useState(ITEMS_PER_PAGE);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const { saveScrollPosition, markInternalNavigation } = useScrollPosition();
   const { images, isLoading, error } = useGallery();

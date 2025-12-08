@@ -1,6 +1,7 @@
 import react from "@vitejs/plugin-react";
 import path from "path";
 import { defineConfig } from "vite";
+import sass from "sass-embedded";
 
 export default defineConfig({
   plugins: [react()],
@@ -17,6 +18,13 @@ export default defineConfig({
   build: {
     outDir: "dist",
     sourcemap: false,
+  },
+  css: {
+    preprocessorOptions: {
+      scss: {
+        implementation: sass,
+      },
+    },
   },
   resolve: {
     alias: {

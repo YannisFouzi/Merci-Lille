@@ -7,7 +7,7 @@ import "./Gallery.scss";
 
 const FullGallery: React.FC = () => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const { restoreScrollPosition } = useScrollPosition();
+  const { restoreScrollPosition: ignoredRestoreScrollPosition } = useScrollPosition();
   const { images, isLoading, error } = useGallery();
 
   useEffect(() => {

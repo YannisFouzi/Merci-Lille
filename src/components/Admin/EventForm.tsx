@@ -78,7 +78,7 @@ const EventForm: React.FC<EventFormProps> = ({ event, onSubmit }) => {
 
       // Normalisation du prix avant l'envoi
       // On retire eventNumber car il est genere automatiquement par le backend
-      const { eventNumber, price, ...formDataWithoutEventNumber } = formData;
+      const { eventNumber: ignoredEventNumber, price, ...formDataWithoutEventNumber } = formData;
       const numericPrice = formData.isFree
         ? 0
         : Number.parseFloat((price || "0").replace(",", "."));

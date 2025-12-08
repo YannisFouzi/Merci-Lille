@@ -11,7 +11,7 @@ export const useEvents = () => {
   const {
     data: rawEvents,
     isLoading,
-    error,
+    error: ignoredError,
     isError,
   } = useQuery({
     queryKey: ["events", "public"], // Clé différente pour le cache public vs admin

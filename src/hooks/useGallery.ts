@@ -14,7 +14,7 @@ export const useGallery = () => {
   const {
     data: images,
     isLoading,
-    error,
+    error: ignoredError,
     isError,
   } = useQuery({
     queryKey: ["gallery"],
