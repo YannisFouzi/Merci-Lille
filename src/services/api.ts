@@ -44,10 +44,10 @@ const ensureCsrfToken = async (): Promise<string | null> => {
 let isRefreshing = false;
 let failedQueue: Array<{
   resolve: () => void;
-  reject: (error: any) => void;
+  reject: (error: unknown) => void;
 }> = [];
 
-const processQueue = (error: any) => {
+const processQueue = (error: unknown) => {
   failedQueue.forEach(({ resolve, reject }) => {
     if (error) {
       reject(error);

@@ -7,7 +7,7 @@ export interface ShotgunSyncResult {
     created: number;
     updated: number;
     errors: string[];
-    events: any[];
+    events: Array<Record<string, unknown>>;
   };
 }
 

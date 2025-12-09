@@ -37,7 +37,7 @@ export const authService = {
     try {
       const response = await api.get("/auth/verify");
       return response.data.valid === true;
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Si le token a expiré, l'intercepteur axios essaiera automatiquement
       // de le rafraîchir. Si ça échoue, on retourne false.
       return false;
@@ -144,3 +144,4 @@ export const authService = {
     }
   },
 };
+

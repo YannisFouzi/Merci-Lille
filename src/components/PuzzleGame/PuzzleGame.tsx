@@ -11,7 +11,7 @@ interface CustomWindow extends Window {
     params: {
       event_category: string;
       event_label: string;
-      [key: string]: any;
+      [key: string]: unknown;
     }
   ) => void;
 }

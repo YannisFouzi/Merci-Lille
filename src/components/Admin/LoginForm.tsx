@@ -17,16 +17,19 @@ const LoginForm = () => {
     try {
       await authService.login(username, password);
       navigate("/admin/events", { replace: true });
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Erreur de connexion:", err);
 
-      if (err.response?.status === 429) {
-        // Rate limiting activé
-        const retryMinutes = Math.ceil((err.response?.data?.retryAfter || 900) / 60);
+      const responseStatus = (err as { response?: { status?: number; data?: { retryAfter?: number } } }).response
+        ?.status;
+      const retryAfter = (err as { response?: { data?: { retryAfter?: number } } }).response?.data?.retryAfter;
+
+      if (responseStatus === 429) {
+        const retryMinutes = Math.ceil((retryAfter || 900) / 60);
         setError(`Trop de tentatives de connexion. Veuillez réessayer dans ${retryMinutes} minutes.`);
-      } else if (err.response?.status === 401) {
+      } else if (responseStatus === 401) {
         setError("Identifiants invalides");
-      } else if (err.response?.status >= 500) {
+      } else if (responseStatus && responseStatus >= 500) {
         setError("Erreur serveur, veuillez réessayer plus tard");
       } else {
         setError("Erreur de connexion, vérifiez votre connexion internet");
