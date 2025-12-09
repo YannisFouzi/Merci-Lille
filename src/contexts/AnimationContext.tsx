@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useScrollPosition } from "../hooks/useScrollPosition";
 
 interface AnimationContextType {
@@ -45,22 +45,27 @@ export const AnimationProvider: React.FC<AnimationProviderProps> = ({
     }
   }, [isInternalNavigation, clearInternalNavigation]);
 
-  const disableAnimations = () => {
+  // useCallback pour stabilité référence des fonctions
+  const disableAnimations = useCallback(() => {
     setShouldAnimate(false);
-  };
+  }, []);
 
-  const enableAnimations = () => {
+  const enableAnimations = useCallback(() => {
     setShouldAnimate(true);
-  };
+  }, []);
+
+  // useMemo pour éviter de recréer l'objet value à chaque render
+  const value = useMemo(
+    () => ({
+      shouldAnimate,
+      disableAnimations,
+      enableAnimations,
+    }),
+    [shouldAnimate, disableAnimations, enableAnimations]
+  );
 
   return (
-    <AnimationContext.Provider
-      value={{
-        shouldAnimate,
-        disableAnimations,
-        enableAnimations,
-      }}
-    >
+    <AnimationContext.Provider value={value}>
       {children}
     </AnimationContext.Provider>
   );

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
 
 // Hook personnalisé pour gérer la sauvegarde et restauration de la position de scroll
@@ -7,15 +7,17 @@ export const useScrollPosition = () => {
   const scrollPositions = useRef<{ [key: string]: number }>({});
 
   // Fonction pour sauvegarder la position de scroll actuelle
-  const saveScrollPosition = (key: string = location.pathname) => {
+  // useCallback pour éviter de recréer la fonction à chaque render
+  const saveScrollPosition = useCallback((key: string = location.pathname) => {
     const position = window.scrollY;
     scrollPositions.current[key] = position;
     // Sauvegarder aussi dans sessionStorage pour persister entre les navigations
     sessionStorage.setItem(`scrollPosition_${key}`, position.toString());
-  };
+  }, [location.pathname]);
 
   // Fonction pour restaurer la position de scroll
-  const restoreScrollPosition = (key: string = location.pathname) => {
+  // useCallback pour stabilité référence
+  const restoreScrollPosition = useCallback((key: string = location.pathname) => {
     const savedPosition = sessionStorage.getItem(`scrollPosition_${key}`);
 
     if (savedPosition) {
@@ -48,30 +50,30 @@ export const useScrollPosition = () => {
       // Deuxième tentative après 200ms au cas où
       attemptRestore(200);
     }
-  };
+  }, [location.pathname]);
 
   // Fonction pour supprimer une position sauvegardée
-  const clearScrollPosition = (key: string = location.pathname) => {
+  const clearScrollPosition = useCallback((key: string = location.pathname) => {
     delete scrollPositions.current[key];
     sessionStorage.removeItem(`scrollPosition_${key}`);
-  };
+  }, [location.pathname]);
 
   // Fonction pour marquer qu'on fait une navigation interne
-  const markInternalNavigation = () => {
+  const markInternalNavigation = useCallback(() => {
     sessionStorage.setItem("isInternalNavigation", "true");
-  };
+  }, []);
 
   // Fonction pour vérifier si c'est un retour de navigation interne
-  const isInternalNavigation = () => {
+  const isInternalNavigation = useCallback(() => {
     const isInternal =
       sessionStorage.getItem("isInternalNavigation") === "true";
     return isInternal;
-  };
+  }, []);
 
   // Fonction pour nettoyer le marqueur de navigation interne
-  const clearInternalNavigation = () => {
+  const clearInternalNavigation = useCallback(() => {
     sessionStorage.removeItem("isInternalNavigation");
-  };
+  }, []);
 
   return {
     saveScrollPosition,

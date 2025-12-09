@@ -23,7 +23,12 @@ const EventCard: React.FC<EventCardProps> = ({
     >
       <div className="w-full bg-gray-800 rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 h-full">
         <div className="w-full aspect-[16/9] overflow-hidden">
-          <img src={imageSrc} alt={title} className="w-full h-full object-cover" />
+          <img
+            src={imageSrc}
+            alt={title}
+            className="w-full h-full object-cover"
+            loading="lazy"
+          />
         </div>
 
         <div className="p-3 space-y-2 flex flex-col">
@@ -67,7 +72,7 @@ const EventCard: React.FC<EventCardProps> = ({
                 }}
                 className="btn w-full"
               >
-                R\u00e9server
+                Réserver
               </button>
             </div>
           )}
@@ -77,4 +82,8 @@ const EventCard: React.FC<EventCardProps> = ({
   );
 };
 
-export default EventCard;
+/**
+ * Optimisation avec React.memo pour éviter les re-renders inutiles
+ * Les EventCard sont rendus dans des listes et ne changent que rarement
+ */
+export default React.memo(EventCard);

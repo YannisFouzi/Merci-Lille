@@ -34,6 +34,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
           src={imageSrc}
           alt={name}
           className="w-full h-64 md:h-full object-cover"
+          loading="lazy"
         />
       </div>
       <div className="w-full md:w-1/2 bg-white rounded-lg shadow-[0_0_20px_rgba(255,255,255,0.5)] p-4 flex flex-col">
@@ -58,41 +59,51 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
   );
 };
 
+/**
+ * Optimisation avec React.memo car les props sont statiques
+ * et ne changent jamais après le premier render
+ */
+const MemoizedProfileCard = React.memo(ProfileCard);
+
 const ProfileCardsGrid: React.FC = () => {
-  const profilesData = [
-    {
-      name: "Banana Smoothie",
-      description: `Deux imbéciles amateurs de mashups et de sets Freestyle à la cohérence artistique inexistante. Il est recommandé de trouver une autre activité lorsque ceux-ci sont bookés à une de nos soirées afin de gagner du temps (et de l'argent). Leur passion : vous faire préférer Katy Perry à la Techno Boom Boom sans saveur ni intérêt. Le font-ils correctement ? Non. Est-ce que c'est quand même rigolo ? Un peu.`,
-      imageSrc: bananaSmootie,
-      characteristics: [
-        { label: "Style", value: "Freestyle" },
-        { label: "Animal Préféré", value: "Scooby" },
-        { label: "BPM", value: "825" },
-      ],
-    },
-    {
-      name: "Rapture Fouzi",
-      description:
-        "Bon, lui il est de Paris mais par nécessité diplomatique nous faisons croire à tout le monde qu'il est Lillois. En gros, il fait un peu de tout et de rien (surtout de rien) et il s'amuse à edit un peu n'importe quoi tant que ça plait aux gens. Le soucis, c'est que ça ne plait à personne, mais au moins il ramène des machins à bidouiller en live et du coup ça fait un peu illusion qu'il fait de la musique.",
-      imageSrc: raptureFouzi,
-      characteristics: [
-        { label: "Style", value: "Débraillé" },
-        { label: "Soleil Préféré", value: "UY Scuti" },
-        { label: "Cachet Moyen", value: "180 000€" },
-      ],
-    },
-    {
-      name: "Scooby",
-      description:
-        "Car Merci Lille est non seulement un collectif d'événementiel mais également un refuge pour animaux, nous proposons les services du plus célèbre des chiens enquêteurs de Police. Son style unique permettra de transformer votre établissement en chenil le temps d'une soirée. Laisser la fenêtre entrouverte et une gamelle d'eau à l'entrée avant toute utilisation. N'aime pas les chats.",
-      imageSrc: scooby,
-      characteristics: [
-        { label: "Style ", value: "Drum & Bass" },
-        { label: "Accessoire Préféré", value: "Caisson de Basse" },
-        { label: "Race", value: "Dogue Allemand" },
-      ],
-    },
-  ];
+  // useMemo pour éviter de recréer l'array à chaque render
+  const profilesData = React.useMemo(
+    () => [
+      {
+        name: "Banana Smoothie",
+        description: `Deux imbéciles amateurs de mashups et de sets Freestyle à la cohérence artistique inexistante. Il est recommandé de trouver une autre activité lorsque ceux-ci sont bookés à une de nos soirées afin de gagner du temps (et de l'argent). Leur passion : vous faire préférer Katy Perry à la Techno Boom Boom sans saveur ni intérêt. Le font-ils correctement ? Non. Est-ce que c'est quand même rigolo ? Un peu.`,
+        imageSrc: bananaSmootie,
+        characteristics: [
+          { label: "Style", value: "Freestyle" },
+          { label: "Animal Préféré", value: "Scooby" },
+          { label: "BPM", value: "825" },
+        ],
+      },
+      {
+        name: "Rapture Fouzi",
+        description:
+          "Bon, lui il est de Paris mais par nécessité diplomatique nous faisons croire à tout le monde qu'il est Lillois. En gros, il fait un peu de tout et de rien (surtout de rien) et il s'amuse à edit un peu n'importe quoi tant que ça plait aux gens. Le soucis, c'est que ça ne plait à personne, mais au moins il ramène des machins à bidouiller en live et du coup ça fait un peu illusion qu'il fait de la musique.",
+        imageSrc: raptureFouzi,
+        characteristics: [
+          { label: "Style", value: "Débraillé" },
+          { label: "Soleil Préféré", value: "UY Scuti" },
+          { label: "Cachet Moyen", value: "180 000€" },
+        ],
+      },
+      {
+        name: "Scooby",
+        description:
+          "Car Merci Lille est non seulement un collectif d'événementiel mais également un refuge pour animaux, nous proposons les services du plus célèbre des chiens enquêteurs de Police. Son style unique permettra de transformer votre établissement en chenil le temps d'une soirée. Laisser la fenêtre entrouverte et une gamelle d'eau à l'entrée avant toute utilisation. N'aime pas les chats.",
+        imageSrc: scooby,
+        characteristics: [
+          { label: "Style ", value: "Drum & Bass" },
+          { label: "Accessoire Préféré", value: "Caisson de Basse" },
+          { label: "Race", value: "Dogue Allemand" },
+        ],
+      },
+    ],
+    []
+  );
 
   return (
     <div>
@@ -102,7 +113,7 @@ const ProfileCardsGrid: React.FC = () => {
 
       <div className="space-y-8">
         {profilesData.map((profile, index) => (
-          <ProfileCard key={index} {...profile} imageOnLeft={index % 2 === 0} />
+          <MemoizedProfileCard key={profile.name} {...profile} imageOnLeft={index % 2 === 0} />
         ))}
       </div>
     </div>
