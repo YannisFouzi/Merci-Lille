@@ -6,121 +6,71 @@ import {
   faFont,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { zodResolver } from "@hookform/resolvers/zod";
 import React, { useState } from "react";
-import { isValidEmail, isRequiredFieldFilled, VALIDATION_MESSAGES } from "../../utils";
+import { useForm } from "react-hook-form";
+import { contactFormSchema, type ContactFormData } from "../../schemas";
 import "./EmailForm.scss";
 
 const EmailForm: React.FC = () => {
   const [isFlipped, setIsFlipped] = useState(false);
   const [confirmationMessage, setConfirmationMessage] = useState("");
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    subject: "",
-    message: "",
-  });
-  const [errors, setErrors] = useState({
-    name: "",
-    email: "",
-    subject: "",
-    message: "",
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    reset,
+  } = useForm<ContactFormData>({
+    resolver: zodResolver(contactFormSchema),
+    mode: "onBlur", // Valider au blur pour une meilleure UX
   });
 
-  const validateForm = () => {
-    let isValid = true;
-    const newErrors = { name: "", email: "", subject: "", message: "" };
+  const onSubmit = async (data: ContactFormData) => {
+    try {
+      const requestConfig = {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Requested-With": "XMLHttpRequest", // Header CSRF requis
+        },
+        body: JSON.stringify(data),
+      };
 
-    if (!isRequiredFieldFilled(formData.name)) {
-      newErrors.name = VALIDATION_MESSAGES.REQUIRED;
-      isValid = false;
-    }
+      const response = await fetch("/api/send-email", requestConfig);
 
-    if (!isRequiredFieldFilled(formData.email)) {
-      newErrors.email = VALIDATION_MESSAGES.EMAIL_REQUIRED;
-      isValid = false;
-    } else if (!isValidEmail(formData.email)) {
-      newErrors.email = VALIDATION_MESSAGES.EMAIL_INVALID;
-      isValid = false;
-    }
-
-    if (!isRequiredFieldFilled(formData.subject)) {
-      newErrors.subject = VALIDATION_MESSAGES.REQUIRED;
-      isValid = false;
-    }
-
-    if (!isRequiredFieldFilled(formData.message)) {
-      newErrors.message = VALIDATION_MESSAGES.REQUIRED;
-      isValid = false;
-    }
-
-    setErrors(newErrors);
-    return isValid;
-  };
-
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prevState) => ({
-      ...prevState,
-      [name]: value,
-    }));
-    // Effacer l'erreur lorsque l'utilisateur commence à taper
-    setErrors((prevErrors) => ({
-      ...prevErrors,
-      [name]: "",
-    }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (validateForm()) {
-      try {
-        const requestConfig = {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "X-Requested-With": "XMLHttpRequest", // Header CSRF requis
-          },
-          body: JSON.stringify(formData),
-        };
-
-        const response = await fetch("/api/send-email", requestConfig);
-
-        if (response.ok) {
-          setConfirmationMessage("Email envoyé avec succès !");
-          // Réinitialiser le formulaire
-          setFormData({ name: "", email: "", subject: "", message: "" });
-          // Effacer le message de confirmation après 5 secondes
-          setTimeout(() => setConfirmationMessage(""), 5000);
-        } else {
-          let errorData;
-          try {
-            errorData = await response.json();
-          } catch {
-            // Impossible de parser la réponse JSON
-          }
-
-          if (response.status === 429) {
-            setConfirmationMessage(
-              "Trop d'emails envoyés. Veuillez réessayer dans une heure."
-            );
-          } else if (response.status >= 500) {
-            setConfirmationMessage(
-              "Erreur serveur. Veuillez réessayer plus tard."
-            );
-          } else if (errorData?.message) {
-            setConfirmationMessage(errorData.message);
-          } else {
-            setConfirmationMessage(
-              "Échec de l'envoi de l'email. Veuillez réessayer."
-            );
-          }
+      if (response.ok) {
+        setConfirmationMessage("Email envoyé avec succès !");
+        // Réinitialiser le formulaire
+        reset();
+        // Effacer le message de confirmation après 5 secondes
+        setTimeout(() => setConfirmationMessage(""), 5000);
+      } else {
+        let errorData;
+        try {
+          errorData = await response.json();
+        } catch {
+          // Impossible de parser la réponse JSON
         }
-      } catch (error: unknown) {
-        setConfirmationMessage("Une erreur est survenue. Veuillez réessayer plus tard.");
+
+        if (response.status === 429) {
+          setConfirmationMessage(
+            "Trop d'emails envoyés. Veuillez réessayer dans une heure."
+          );
+        } else if (response.status >= 500) {
+          setConfirmationMessage(
+            "Erreur serveur. Veuillez réessayer plus tard."
+          );
+        } else if (errorData?.message) {
+          setConfirmationMessage(errorData.message);
+        } else {
+          setConfirmationMessage(
+            "Échec de l'envoi de l'email. Veuillez réessayer."
+          );
+        }
       }
+    } catch (error: unknown) {
+      setConfirmationMessage("Une erreur est survenue. Veuillez réessayer plus tard.");
     }
   };
 
@@ -144,7 +94,7 @@ const EmailForm: React.FC = () => {
                   {confirmationMessage}
                 </div>
               )}
-              <form onSubmit={handleSubmit}>
+              <form onSubmit={handleSubmit(onSubmit)}>
                 <div className="form-group mb-2">
                   <div className="input-wrapper">
                     <FontAwesomeIcon
@@ -154,17 +104,17 @@ const EmailForm: React.FC = () => {
                     />
                     <input
                       type="text"
-                      name="name"
                       className="form-style"
                       placeholder="Votre nom"
-                      value={formData.name}
-                      onChange={handleChange}
+                      {...register("name")}
+                      disabled={isSubmitting}
                     />
                   </div>
                   {errors.name && (
-                    <div className="error-message">{errors.name}</div>
+                    <div className="error-message">{errors.name.message}</div>
                   )}
                 </div>
+
                 <div className="form-group mb-2">
                   <div className="input-wrapper">
                     <FontAwesomeIcon
@@ -174,17 +124,17 @@ const EmailForm: React.FC = () => {
                     />
                     <input
                       type="email"
-                      name="email"
                       className="form-style"
                       placeholder="Votre email"
-                      value={formData.email}
-                      onChange={handleChange}
+                      {...register("email")}
+                      disabled={isSubmitting}
                     />
                   </div>
                   {errors.email && (
-                    <div className="error-message">{errors.email}</div>
+                    <div className="error-message">{errors.email.message}</div>
                   )}
                 </div>
+
                 <div className="form-group mb-2">
                   <div className="input-wrapper">
                     <FontAwesomeIcon
@@ -194,17 +144,17 @@ const EmailForm: React.FC = () => {
                     />
                     <input
                       type="text"
-                      name="subject"
                       className="form-style"
                       placeholder="Objet"
-                      value={formData.subject}
-                      onChange={handleChange}
+                      {...register("subject")}
+                      disabled={isSubmitting}
                     />
                   </div>
                   {errors.subject && (
-                    <div className="error-message">{errors.subject}</div>
+                    <div className="error-message">{errors.subject.message}</div>
                   )}
                 </div>
+
                 <div className="form-group mb-2">
                   <div className="input-wrapper">
                     <FontAwesomeIcon
@@ -213,20 +163,24 @@ const EmailForm: React.FC = () => {
                       size="xl"
                     />
                     <textarea
-                      name="message"
                       className="form-style"
                       placeholder="Votre message"
                       rows={3}
-                      value={formData.message}
-                      onChange={handleChange}
+                      {...register("message")}
+                      disabled={isSubmitting}
                     ></textarea>
                   </div>
                   {errors.message && (
-                    <div className="error-message">{errors.message}</div>
+                    <div className="error-message">{errors.message.message}</div>
                   )}
                 </div>
-                <button type="submit" className="btn mt-4">
-                  Envoyer
+
+                <button
+                  type="submit"
+                  className="btn mt-4"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? "Envoi..." : "Envoyer"}
                 </button>
               </form>
             </div>

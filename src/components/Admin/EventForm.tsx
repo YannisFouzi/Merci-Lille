@@ -1,17 +1,10 @@
+import { zodResolver } from "@hookform/resolvers/zod";
 import React, { useState } from "react";
+import { useForm } from "react-hook-form";
 import { EventCardProps } from "../../components/ShotgunEvents/types";
+import { eventFormSchema, type EventFormData, validateEventImage } from "../../schemas";
 import { eventsService } from "../../services/events.service";
-import {
-  parseEventGenres,
-  extractFileNameFromUrl,
-  isValidFileSize,
-  isRequiredFieldFilled,
-  VALIDATION_MESSAGES,
-} from "../../utils";
-
-type EventFormState = Omit<EventCardProps, "_id" | "eventNumber" | "isPast"> & {
-  eventNumber?: string;
-};
+import { extractFileNameFromUrl, parseEventGenres } from "../../utils";
 
 interface EventFormProps {
   event?: EventCardProps;
@@ -24,118 +17,40 @@ const EventForm: React.FC<EventFormProps> = ({ event, onSubmit }) => {
     return date.toISOString().split("T")[0];
   };
 
-  const [formData, setFormData] = useState<EventFormState>(
-    event
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    watch,
+    setValue,
+  } = useForm<EventFormData>({
+    resolver: zodResolver(eventFormSchema),
+    mode: "onBlur",
+    defaultValues: event
       ? {
           ...event,
           date: formatDateForInput(event.date),
           genres: parseEventGenres(event.genres),
+          isFeatured: event.isFeatured || false,
         }
       : {
           title: "",
-          eventNumber: "",
           city: "",
           date: "",
           time: "",
-          genres: [] as string[],
+          genres: [],
           ticketLink: "",
-          imageSrc: "",
           isFeatured: false,
-        }
-  );
+        },
+  });
+
   const [image, setImage] = useState<File | null>(null);
   const [displayFileName, setDisplayFileName] = useState<string>("");
   const [newGenre, setNewGenre] = useState("");
   const [submitError, setSubmitError] = useState<string>("");
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [imageError, setImageError] = useState<string>("");
 
-  const handleAddGenre = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (newGenre.trim() && !formData.genres.includes(newGenre.trim())) {
-      setFormData({
-        ...formData,
-        genres: [...formData.genres, newGenre.trim()],
-      });
-      setNewGenre("");
-    }
-  };
-
-  const handleRemoveGenre = (genreToRemove: string) => {
-    setFormData({
-      ...formData,
-      genres: formData.genres.filter((genre) => genre !== genreToRemove),
-    });
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSubmitError("");
-    setIsSubmitting(true);
-
-    try {
-      const data = new FormData();
-
-      // On retire eventNumber car il est genere automatiquement par le backend
-      const { eventNumber: ignoredEventNumber, ...formDataWithoutEventNumber } = formData;
-
-      const formDataToSend = {
-        ...formDataWithoutEventNumber,
-      };
-
-      // Vérification des champs requis
-      if (
-        !isRequiredFieldFilled(formData.title) ||
-        !isRequiredFieldFilled(formData.city) ||
-        !isRequiredFieldFilled(formData.date) ||
-        !isRequiredFieldFilled(formData.time) ||
-        !isRequiredFieldFilled(formData.ticketLink)
-      ) {
-        throw new Error(VALIDATION_MESSAGES.REQUIRED);
-      }
-
-      // Vérification de l'image
-      if (!image && !event?.imageSrc) {
-        throw new Error(VALIDATION_MESSAGES.FILE_REQUIRED);
-      }
-
-      Object.entries(formDataToSend).forEach(([key, value]) => {
-        if (value !== undefined && value !== null) {
-          if (key === "genres") {
-            // Envoyer chaque genre individuellement
-            const genres = Array.isArray(value) ? value : [];
-            genres.forEach((genre, index) => {
-              data.append(`genres[${index}]`, genre);
-            });
-          } else {
-            data.append(key, value.toString());
-          }
-        }
-      });
-
-      if (image) {
-        // Vérifier la taille de l'image
-        if (!isValidFileSize(image, 5)) {
-          throw new Error(VALIDATION_MESSAGES.FILE_TOO_LARGE(5));
-        }
-        data.append("image", image);
-      }
-
-      if (event?._id) {
-        await eventsService.updateEvent(event._id, data);
-      } else {
-        await eventsService.createEvent(data);
-      }
-
-      onSubmit();
-    } catch (error) {
-      const errorMessage = error instanceof Error
-        ? error.message
-        : "Une erreur est survenue lors de l'enregistrement";
-      setSubmitError(errorMessage);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  const genres = watch("genres");
 
   React.useEffect(() => {
     if (event?.imageSrc) {
@@ -146,23 +61,92 @@ const EventForm: React.FC<EventFormProps> = ({ event, onSubmit }) => {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setImage(file);
-      setDisplayFileName(file.name);
-      // Effacer l'erreur quand l'utilisateur interagit
-      if (submitError) setSubmitError("");
+      // Valider l'image immédiatement
+      const validation = validateEventImage(file, !!event);
+      if (!validation.valid) {
+        setImageError(validation.error || "Erreur de validation de l'image");
+        setImage(null);
+        setDisplayFileName("");
+      } else {
+        setImage(file);
+        setDisplayFileName(file.name);
+        setImageError("");
+        setSubmitError("");
+      }
     }
   };
 
-  const handleFormDataChange = (updates: Partial<EventFormState>) => {
-    setFormData({ ...formData, ...updates });
-    // Effacer l'erreur quand l'utilisateur modifie le formulaire
-    if (submitError) setSubmitError("");
+  const handleAddGenre = (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmedGenre = newGenre.trim();
+    if (trimmedGenre && !genres.includes(trimmedGenre)) {
+      setValue("genres", [...genres, trimmedGenre], { shouldDirty: true });
+      setNewGenre("");
+    }
   };
 
-  // La partie return du composant
+  const handleRemoveGenre = (genreToRemove: string) => {
+    setValue(
+      "genres",
+      genres.filter((genre) => genre !== genreToRemove),
+      { shouldDirty: true }
+    );
+  };
+
+  const onFormSubmit = async (data: EventFormData) => {
+    setSubmitError("");
+    setImageError("");
+
+    // Validation de l'image
+    const imageValidation = validateEventImage(image, !!event);
+    if (!imageValidation.valid) {
+      setImageError(imageValidation.error || "Erreur de validation de l'image");
+      return;
+    }
+
+    try {
+      const formData = new FormData();
+
+      // Ajouter tous les champs du formulaire
+      Object.entries(data).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          if (key === "genres") {
+            // Envoyer chaque genre individuellement
+            const genresArray = Array.isArray(value) ? value : [];
+            genresArray.forEach((genre, index) => {
+              formData.append(`genres[${index}]`, genre);
+            });
+          } else {
+            formData.append(key, value.toString());
+          }
+        }
+      });
+
+      // Ajouter l'image si présente
+      if (image) {
+        formData.append("image", image);
+      }
+
+      // Créer ou mettre à jour l'événement
+      if (event?._id) {
+        await eventsService.updateEvent(event._id, formData);
+      } else {
+        await eventsService.createEvent(formData);
+      }
+
+      onSubmit();
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Une erreur est survenue lors de l'enregistrement";
+      setSubmitError(errorMessage);
+    }
+  };
+
   return (
     <form
-      onSubmit={handleSubmit}
+      onSubmit={handleSubmit(onFormSubmit)}
       className="space-y-6 bg-gray-900 p-4 rounded-lg sm:p-6"
     >
       {submitError && (
@@ -178,13 +162,14 @@ const EventForm: React.FC<EventFormProps> = ({ event, onSubmit }) => {
           </label>
           <input
             type="text"
-            value={formData.title}
-            onChange={(e) => handleFormDataChange({ title: e.target.value })}
             placeholder="Titre de l'événement"
             className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white"
-            required
             disabled={isSubmitting}
+            {...register("title")}
           />
+          {errors.title && (
+            <div className="text-red-500 text-sm mt-1">{errors.title.message}</div>
+          )}
         </div>
 
         <div className="space-y-2">
@@ -193,13 +178,14 @@ const EventForm: React.FC<EventFormProps> = ({ event, onSubmit }) => {
           </label>
           <input
             type="text"
-            value={formData.city}
-            onChange={(e) => handleFormDataChange({ city: e.target.value })}
             placeholder="Ville"
             className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white"
-            required
             disabled={isSubmitting}
+            {...register("city")}
           />
+          {errors.city && (
+            <div className="text-red-500 text-sm mt-1">{errors.city.message}</div>
+          )}
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -209,12 +195,13 @@ const EventForm: React.FC<EventFormProps> = ({ event, onSubmit }) => {
             </label>
             <input
               type="date"
-              value={formData.date}
-              onChange={(e) => handleFormDataChange({ date: e.target.value })}
               className="px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white w-full"
-              required
               disabled={isSubmitting}
+              {...register("date")}
             />
+            {errors.date && (
+              <div className="text-red-500 text-sm mt-1">{errors.date.message}</div>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -223,12 +210,13 @@ const EventForm: React.FC<EventFormProps> = ({ event, onSubmit }) => {
             </label>
             <input
               type="time"
-              value={formData.time}
-              onChange={(e) => handleFormDataChange({ time: e.target.value })}
               className="px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white w-full"
-              required
               disabled={isSubmitting}
+              {...register("time")}
             />
+            {errors.time && (
+              <div className="text-red-500 text-sm mt-1">{errors.time.message}</div>
+            )}
           </div>
         </div>
 
@@ -243,23 +231,25 @@ const EventForm: React.FC<EventFormProps> = ({ event, onSubmit }) => {
               accept="image/*"
               className="hidden"
               id="imageInput"
-              required={!event}
               disabled={isSubmitting}
             />
             <label
               htmlFor="imageInput"
               className={`w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white ${
-                isSubmitting ? "opacity-50 cursor-not-allowed" : "cursor-pointer hover:bg-gray-700"
+                isSubmitting
+                  ? "opacity-50 cursor-not-allowed"
+                  : "cursor-pointer hover:bg-gray-700"
               } flex justify-between items-center`}
             >
               <span className="truncate">
                 {displayFileName || "Choisir une image"}
               </span>
-              <span className="bg-gray-700 px-2 py-1 rounded ml-2">
-                Parcourir
-              </span>
+              <span className="bg-gray-700 px-2 py-1 rounded ml-2">Parcourir</span>
             </label>
           </div>
+          {imageError && (
+            <div className="text-red-500 text-sm mt-1">{imageError}</div>
+          )}
         </div>
 
         <div className="space-y-2">
@@ -268,13 +258,16 @@ const EventForm: React.FC<EventFormProps> = ({ event, onSubmit }) => {
           </label>
           <input
             type="text"
-            value={formData.ticketLink}
-            onChange={(e) => handleFormDataChange({ ticketLink: e.target.value })}
             placeholder="Lien billetterie"
             className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white"
-            required
             disabled={isSubmitting}
+            {...register("ticketLink")}
           />
+          {errors.ticketLink && (
+            <div className="text-red-500 text-sm mt-1">
+              {errors.ticketLink.message}
+            </div>
+          )}
         </div>
 
         <div className="space-y-2">
@@ -282,7 +275,7 @@ const EventForm: React.FC<EventFormProps> = ({ event, onSubmit }) => {
             Genres musicaux
           </label>
           <div className="flex flex-wrap gap-2 mb-2">
-            {formData.genres.map((genre) => (
+            {genres.map((genre) => (
               <span
                 key={genre}
                 className="bg-gray-700 text-white px-3 py-1 rounded-full flex items-center"
@@ -318,6 +311,9 @@ const EventForm: React.FC<EventFormProps> = ({ event, onSubmit }) => {
               Ajouter
             </button>
           </div>
+          {errors.genres && (
+            <div className="text-red-500 text-sm mt-1">{errors.genres.message}</div>
+          )}
         </div>
 
         <div className="space-y-2">
@@ -327,12 +323,13 @@ const EventForm: React.FC<EventFormProps> = ({ event, onSubmit }) => {
           <div className="flex items-center">
             <input
               type="checkbox"
-              checked={formData.isFeatured || false}
-              onChange={(e) => handleFormDataChange({ isFeatured: e.target.checked })}
               className="mr-2"
               disabled={isSubmitting}
+              {...register("isFeatured")}
             />
-            <label className="text-white">Mettre en avant (Événement phare)</label>
+            <label className="text-white">
+              Mettre en avant (Événement phare)
+            </label>
           </div>
         </div>
       </div>
@@ -342,7 +339,8 @@ const EventForm: React.FC<EventFormProps> = ({ event, onSubmit }) => {
         className="w-full px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         disabled={isSubmitting}
       >
-        {isSubmitting ? "Enregistrement..." : event ? "Modifier" : "Créer"} l'événement
+        {isSubmitting ? "Enregistrement..." : event ? "Modifier" : "Créer"}{" "}
+        l'événement
       </button>
     </form>
   );
