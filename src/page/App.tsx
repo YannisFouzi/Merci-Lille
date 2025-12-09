@@ -2,7 +2,7 @@
 import TextScramble from "@/components/TextScramble/TextScramble";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import React, { Suspense, lazy, useEffect, useRef, useState } from "react";
+import React, { Suspense, lazy, useEffect, useState } from "react";
 import { Helmet } from "react-helmet";
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import FloatingContactButton from "../components/FloatingContactButton/FloatingContactButton";
@@ -16,6 +16,7 @@ import { AuthProvider } from "../contexts/AuthContext";
 import { AnimationProvider, useAnimation } from "../contexts/AnimationContext";
 import { useScrollPosition } from "../hooks/useScrollPosition";
 import { queryClient } from "../lib/queryClient";
+import { useInView } from "react-intersection-observer";
 
 const Aftermovies = lazy(() => import("../components/Aftermovies/Aftermovies"));
 const EmailForm = lazy(() => import("../components/EmailForm/EmailForm"));
@@ -30,45 +31,11 @@ const GalleryManagement = lazy(
 const LoginForm = lazy(() => import("../components/Admin/LoginForm"));
 const PrivateRoute = lazy(() => import("../components/Admin/PrivateRoute"));
 
-const useElementOnScreen = (options: IntersectionObserverInit) => {
-  const elementRef = useRef<HTMLDivElement>(null);
-  const [isVisible, setIsVisible] = useState(false);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver((entries) => {
-      const [entry] = entries;
-      if (entry.isIntersecting) {
-        setIsVisible(true);
-        if (elementRef.current) {
-          observer.unobserve(elementRef.current);
-        }
-      }
-    }, options);
-
-    const currentElement = elementRef.current;
-    if (currentElement) {
-      observer.observe(currentElement);
-    }
-
-    return () => {
-      if (currentElement) {
-        observer.unobserve(currentElement);
-      }
-    };
-  }, [options]);
-
-  return [elementRef, isVisible] as const;
-};
-
 const Section: React.FC<{ children: React.ReactNode; className?: string }> = ({
   children,
   className = "",
 }) => {
-  const [ref, isVisible] = useElementOnScreen({
-    threshold: 0.1,
-    root: null,
-    rootMargin: "0px",
-  });
+  const { ref, inView } = useInView({ threshold: 0.1, triggerOnce: true });
 
   const { shouldAnimate } = useAnimation();
 
@@ -90,7 +57,7 @@ const Section: React.FC<{ children: React.ReactNode; className?: string }> = ({
     <motion.section
       ref={ref}
       initial={{ y: 20, opacity: 0 }}
-      animate={isVisible ? { y: 0, opacity: 1 } : { y: 20, opacity: 0 }}
+      animate={inView ? { y: 0, opacity: 1 } : { y: 20, opacity: 0 }}
       transition={{ duration: 0.7 }}
       className={`mb-12 ${className}`}
     >
