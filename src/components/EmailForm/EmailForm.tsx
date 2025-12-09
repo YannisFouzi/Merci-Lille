@@ -1,4 +1,4 @@
-﻿import { faMessage } from "@fortawesome/free-regular-svg-icons";
+import { faMessage } from "@fortawesome/free-regular-svg-icons";
 import {
   faAt,
   faCheckCircle,
@@ -61,7 +61,7 @@ const EmailForm: React.FC = () => {
       ...prevState,
       [name]: value,
     }));
-    // Effacer l'erreur lorsque l'utilisateur commence Ã  taper
+    // Effacer l'erreur lorsque l'utilisateur commence à taper
     setErrors((prevErrors) => ({
       ...prevErrors,
       [name]: "",
@@ -70,20 +70,9 @@ const EmailForm: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("ðŸš€ DÃ‰BUT ENVOI EMAIL - Form submitted");
 
     if (validateForm()) {
-      console.log("âœ… Validation du formulaire rÃ©ussie");
-      console.log("ðŸ“ DonnÃ©es Ã  envoyer:", formData);
-
       try {
-        // Construire l'URL complÃ¨te
-        const baseUrl = window.location.origin;
-        const apiUrl = `${baseUrl}/api/send-email`;
-        console.log("ðŸŒ URL API complÃ¨te:", apiUrl);
-        console.log("ðŸ  Origin actuel:", window.location.origin);
-        console.log("ðŸ“ Pathname actuel:", window.location.pathname);
-
         const requestConfig = {
           method: "POST",
           headers: {
@@ -93,87 +82,42 @@ const EmailForm: React.FC = () => {
           body: JSON.stringify(formData),
         };
 
-        console.log("ðŸ“¤ Configuration de la requÃªte:", requestConfig);
-        console.log("ðŸ“¦ Body JSON:", JSON.stringify(formData, null, 2));
-
-        console.log("â³ Envoi de la requÃªte fetch...");
         const response = await fetch("/api/send-email", requestConfig);
 
-        console.log("ðŸ“¬ RÃ©ponse reÃ§ue:");
-        console.log("  - Status:", response.status);
-        console.log("  - StatusText:", response.statusText);
-        console.log("  - OK:", response.ok);
-        console.log(
-          "  - Headers:",
-          Object.fromEntries(response.headers.entries())
-        );
-
         if (response.ok) {
-          console.log("ðŸŽ‰ SuccÃ¨s! Email envoyÃ©");
-          const successData = await response.json();
-          console.log("ðŸ“¨ DonnÃ©es de succÃ¨s:", successData);
-
-          setConfirmationMessage("Email envoyÃ© avec succÃ¨s !");
-          // RÃ©initialiser le formulaire
+          setConfirmationMessage("Email envoyé avec succès !");
+          // Réinitialiser le formulaire
           setFormData({ name: "", email: "", subject: "", message: "" });
-          // Effacer le message de confirmation aprÃ¨s 5 secondes
+          // Effacer le message de confirmation après 5 secondes
           setTimeout(() => setConfirmationMessage(""), 5000);
         } else {
-          console.log("âŒ Erreur dans la rÃ©ponse - Status:", response.status);
-
           let errorData;
           try {
             errorData = await response.json();
-            console.log("ðŸ“„ DonnÃ©es d'erreur reÃ§ues:", errorData);
-          } catch (jsonError) {
-            console.log("âš ï¸ Impossible de parser la rÃ©ponse JSON:", jsonError);
-            console.log("ðŸ“„ RÃ©ponse brute:", await response.text());
+          } catch {
+            // Impossible de parser la réponse JSON
           }
 
           if (response.status === 429) {
-            console.log("ðŸš« Rate limit atteint");
             setConfirmationMessage(
-              "Trop d'emails envoyÃ©s. Veuillez rÃ©essayer dans une heure."
+              "Trop d'emails envoyés. Veuillez réessayer dans une heure."
             );
           } else if (response.status >= 500) {
-            console.log("ðŸ”¥ Erreur serveur 5xx");
             setConfirmationMessage(
-              "Erreur serveur. Veuillez rÃ©essayer plus tard."
+              "Erreur serveur. Veuillez réessayer plus tard."
             );
           } else if (errorData?.message) {
-            console.log("ðŸ’¬ Message d'erreur spÃ©cifique:", errorData.message);
             setConfirmationMessage(errorData.message);
           } else {
-            console.log("â“ Erreur non spÃ©cifiÃ©e");
             setConfirmationMessage(
-              "Ã‰chec de l'envoi de l'email. Veuillez rÃ©essayer."
+              "Échec de l'envoi de l'email. Veuillez réessayer."
             );
           }
         }
       } catch (error: unknown) {
-  console.log("Erreur lors de l'envoi du message");
-  if (error instanceof Error) {
-    console.error("Type:", error.name);
-    console.error("Message:", error.message);
-    console.error("Stack:", error.stack);
-
-    if (error.name === "TypeError" && error.message.includes("fetch")) {
-      console.log("Erreur de reseau ou CORS detectee");
-    } else if (error.name === "AbortError") {
-      console.log("Requete interrompue/timeout");
+        setConfirmationMessage("Une erreur est survenue. Veuillez réessayer plus tard.");
+      }
     }
-  } else {
-    console.error("Erreur inconnue:", error);
-  }
-
-  setConfirmationMessage("Une erreur est survenue. Veuillez reessayer plus tard.");
-}
-    } else {
-      console.log("âŒ Validation du formulaire Ã©chouÃ©e");
-      console.log("ðŸ” Erreurs:", errors);
-    }
-
-    console.log("ðŸ FIN ENVOI EMAIL");
   };
 
   return (
@@ -287,7 +231,7 @@ const EmailForm: React.FC = () => {
         <div className="card-back">
           <div className="center-wrap">
             <div className="section text-center">
-              <h4 className="mb-4 pb-3">E-mail envoyÃ© avec succÃ¨s!</h4>
+              <h4 className="mb-4 pb-3">E-mail envoyé avec succès!</h4>
               <button onClick={() => setIsFlipped(false)} className="btn mt-4">
                 Envoyer un autre e-mail
               </button>
@@ -300,5 +244,3 @@ const EmailForm: React.FC = () => {
 };
 
 export default EmailForm;
-
-

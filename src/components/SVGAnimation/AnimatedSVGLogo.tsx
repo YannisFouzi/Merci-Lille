@@ -21,7 +21,6 @@ const AnimatedSVGLogo: React.FC = () => {
         path.style.strokeOpacity = "0";
         path.style.strokeWidth = "0";
       });
-      console.log("🎨 Logo affiché sans animation (retour de navigation)");
       return;
     }
 

@@ -1,4 +1,4 @@
-﻿import React, { useState } from "react";
+import React, { useState } from "react";
 import { EventCardProps } from "../../components/ShotgunEvents/types";
 import { eventsService } from "../../services/events.service";
 
@@ -12,11 +12,6 @@ interface EventFormProps {
 }
 
 const EventForm: React.FC<EventFormProps> = ({ event, onSubmit }) => {
-  // Log sécurisé de l'initialisation du formulaire
-  console.log("EventForm initialized:", {
-    mode: event ? "edit" : "create",
-    hasGenres: !!(event?.genres && event.genres.length > 0),
-  });
   const formatDateForInput = (dateString: string) => {
     const date = new Date(dateString);
     return date.toISOString().split("T")[0];
@@ -81,13 +76,6 @@ const EventForm: React.FC<EventFormProps> = ({ event, onSubmit }) => {
         ...formDataWithoutEventNumber,
       };
 
-      // Log sécurisé des données d'événement
-      console.log("Submitting event form:", {
-        operation: event?._id ? "update" : "create",
-        hasImage: !!image,
-        fieldsCount: Object.keys(formDataToSend).length,
-      });
-
       // Vérification des champs requis
       if (
         !formData.title ||
@@ -127,26 +115,16 @@ const EventForm: React.FC<EventFormProps> = ({ event, onSubmit }) => {
         data.append("image", image);
       }
 
-      // Log sécurisé du FormData
-      console.log(
-        `FormData prepared with ${Array.from(data.keys()).length} fields`
-      );
-
       if (event?._id) {
-        console.log("Updating existing event");
         await eventsService.updateEvent(event._id, data);
       } else {
-        console.log("Creating new event");
         await eventsService.createEvent(data);
       }
       onSubmit();
     } catch (error) {
-      console.error(
-        "Event form submission failed:",
-        error instanceof Error ? error.message : "Unknown error"
-      );
       // Afficher l'erreur à l'utilisateur
       // TODO: Ajouter un état pour gérer les erreurs
+      throw error;
     }
   };
 

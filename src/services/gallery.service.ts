@@ -7,11 +7,6 @@ export const galleryService = {
   },
 
   async uploadImages(formData: FormData) {
-    // Log sécurisé sans exposer le contenu des fichiers
-    console.log(
-      `Uploading ${formData.getAll("images").length} images to gallery`
-    );
-
     const response = await api.post("/gallery", formData, {
       headers: {
         "Content-Type": "multipart/form-data",

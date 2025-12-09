@@ -1,4 +1,4 @@
-﻿import PuzzleGame from "@/components/PuzzleGame/PuzzleGame";
+import PuzzleGame from "@/components/PuzzleGame/PuzzleGame";
 import TextScramble from "@/components/TextScramble/TextScramble";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { motion } from "framer-motion";
@@ -12,7 +12,6 @@ import ProfileCard from "../components/ProfilCard/ProfileCard";
 import ShotgunEvents from "../components/ShotgunEvents/ShotgunEvents";
 import SocialMediaMenu from "../components/SocialMediaMenu/SocialMediaMenu";
 import AnimatedSVGLogo from "../components/SVGAnimation/AnimatedSVGLogo";
-import { AuthProvider } from "../contexts/AuthContext";
 import { AnimationProvider, useAnimation } from "../contexts/AnimationContext";
 import { useScrollPosition } from "../hooks/useScrollPosition";
 import { queryClient } from "../lib/queryClient";
@@ -76,7 +75,6 @@ const MainContent: React.FC = () => {
 
   // Restaurer la position de scroll quand on revient sur la page d'accueil
   useEffect(() => {
-    console.log("🏠 MainContent monté, tentative de restauration...");
     restoreScrollPosition("/");
   }, [restoreScrollPosition]);
 
@@ -186,57 +184,55 @@ const MainContent: React.FC = () => {
 const App: React.FC = () => {
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <Router>
-          <Helmet>
-            <title>Merci Lille</title>
-            <meta
-              name="description"
-              content="DÇ¸couvrez nos Ç¸vÇ¸nements Ç¸lectro Çÿ Lille. Rejoignez-nous pour une expÇ¸rience musicale unique !"
+      <Router>
+        <Helmet>
+          <title>Merci Lille</title>
+          <meta
+            name="description"
+            content="Découvrez nos événements électro à Lille. Rejoignez-nous pour une expérience musicale unique !"
+          />
+        </Helmet>
+        <Suspense
+          fallback={
+            <div className="min-h-screen flex items-center justify-center bg-black text-white">
+              Chargement...
+            </div>
+          }
+        >
+          <Routes>
+            <Route
+              path="/"
+              element={
+                <AnimationProvider>
+                  <MainContent />
+                </AnimationProvider>
+              }
             />
-          </Helmet>
-          <Suspense
-            fallback={
-              <div className="min-h-screen flex items-center justify-center bg-black text-white">
-                Chargement...
-              </div>
-            }
-          >
-            <Routes>
-              <Route
-                path="/"
-                element={
-                  <AnimationProvider>
-                    <MainContent />
-                  </AnimationProvider>
-                }
-              />
-              <Route path="/gallerie" element={<FullGallery />} />
-              <Route path="/admin/login" element={<LoginForm />} />
-              <Route
-                path="/admin/events"
-                element={
-                  <PrivateRoute>
-                    <AdminLayout>
-                      <EventsManagement />
-                    </AdminLayout>
-                  </PrivateRoute>
-                }
-              />
-              <Route
-                path="/admin/gallery"
-                element={
-                  <PrivateRoute>
-                    <AdminLayout>
-                      <GalleryManagement />
-                    </AdminLayout>
-                  </PrivateRoute>
-                }
-              />
-            </Routes>
-          </Suspense>
-        </Router>
-      </AuthProvider>
+            <Route path="/gallerie" element={<FullGallery />} />
+            <Route path="/admin/login" element={<LoginForm />} />
+            <Route
+              path="/admin/events"
+              element={
+                <PrivateRoute>
+                  <AdminLayout>
+                    <EventsManagement />
+                  </AdminLayout>
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/admin/gallery"
+              element={
+                <PrivateRoute>
+                  <AdminLayout>
+                    <GalleryManagement />
+                  </AdminLayout>
+                </PrivateRoute>
+              }
+            />
+          </Routes>
+        </Suspense>
+      </Router>
     </QueryClientProvider>
   );
 };

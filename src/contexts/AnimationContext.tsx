@@ -34,31 +34,22 @@ export const AnimationProvider: React.FC<AnimationProviderProps> = ({
     const isInternal = isInternalNavigation();
 
     if (isInternal) {
-      console.log(
-        "🚫 Désactivation des animations (retour de navigation interne)"
-      );
       setShouldAnimate(false);
       // Nettoyer le marqueur et réactiver les animations après que tout soit rendu
       setTimeout(() => {
         clearInternalNavigation();
-        console.log("✅ Animations réactivées après nettoyage");
         setShouldAnimate(true);
       }, 1500); // Délai plus long pour laisser le temps aux sections de se rendre
     } else {
-      console.log(
-        "✨ Animations activées (première visite ou navigation externe)"
-      );
       setShouldAnimate(true);
     }
   }, [isInternalNavigation, clearInternalNavigation]);
 
   const disableAnimations = () => {
-    console.log("🚫 Animations désactivées manuellement");
     setShouldAnimate(false);
   };
 
   const enableAnimations = () => {
-    console.log("✨ Animations activées manuellement");
     setShouldAnimate(true);
   };
 
