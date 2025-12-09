@@ -1,11 +1,17 @@
-﻿import axios from "axios";
+import axios, { type AxiosError, type AxiosInstance } from "axios";
 import { notifyUnauthorized } from "./authChannel";
 
 const API_URL = import.meta.env.VITE_APP_API_URL || "http://localhost:3000/api";
 const CSRF_COOKIE_NAME = "csrfToken";
 const SAFE_METHODS = ["get", "head", "options"];
 
-const api = axios.create({
+export type NormalizedApiError = {
+  status: number;
+  message: string;
+  data?: unknown;
+};
+
+const api: AxiosInstance = axios.create({
   baseURL: API_URL,
   withCredentials: true, // Pour les cookies httpOnly
 });
@@ -40,7 +46,7 @@ const ensureCsrfToken = async (): Promise<string | null> => {
   return pendingCsrfPromise;
 };
 
-// Variable pour Ã©viter les appels multiples de refresh
+// Variable pour eviter les appels multiples de refresh
 let isRefreshing = false;
 let failedQueue: Array<{
   resolve: () => void;
@@ -59,7 +65,7 @@ const processQueue = (error: unknown) => {
   failedQueue = [];
 };
 
-// Fonction pour rafraÃ®chir le token (sans dÃ©pendance circulaire)
+// Fonction pour rafraichir le token (sans dependance circulaire)
 const refreshTokenFunc = async (): Promise<boolean> => {
   try {
     const csrfToken = await ensureCsrfToken();
@@ -68,21 +74,18 @@ const refreshTokenFunc = async (): Promise<boolean> => {
       headers["X-CSRF-Token"] = csrfToken;
     }
 
-    // Les tokens sont maintenant en cookies httpOnly
-    // Le backend lira automatiquement le refreshToken cookie
     const response = await axios.post(
       `${API_URL}/auth/refresh`,
-      {}, // Pas besoin d'envoyer le token dans le body
+      {},
       {
         headers,
-        withCredentials: true, // Envoie les cookies automatiquement
+        withCredentials: true,
       }
     );
 
-    // Le nouveau accessToken est automatiquement stockÃ© en cookie par le backend
     return response.data.message === "Token refreshed successfully";
   } catch (error) {
-    console.warn("Impossible de rafraÃ®chir le token");
+    console.warn("Impossible de rafraichir le token");
     return false;
   }
 };
@@ -91,7 +94,6 @@ const refreshTokenFunc = async (): Promise<boolean> => {
 api.interceptors.request.use(async (config) => {
   const method = (config.method || "get").toLowerCase();
 
-  // Header anti-CSRF pour toutes les requetes non-GET
   if (!SAFE_METHODS.includes(method)) {
     config.headers = config.headers ?? {};
     config.headers["X-Requested-With"] = "XMLHttpRequest";
@@ -105,50 +107,49 @@ api.interceptors.request.use(async (config) => {
   return config;
 });
 
-// Intercepteur pour gÃ©rer les erreurs d'authentification avec refresh automatique
+// Intercepteur pour gerer les erreurs d'authentification avec refresh automatique
 api.interceptors.response.use(
-  (response) => {
-    // Si la rÃ©ponse est OK, on la retourne
-    return response;
-  },
-  async (error) => {
-    const originalRequest = error.config;
+  (response) => response,
+  async (error: AxiosError) => {
+    const originalRequest = error.config as typeof error.config & { _retry?: boolean };
 
-    // Si c'est une erreur 401 ET que le token a expirÃ©
+    let message: string = error.message || "Request failed";
+    const serverData = error.response?.data;
     if (
-      error.response?.status === 401 &&
-      error.response?.data?.expired &&
-      !originalRequest._retry
+      serverData &&
+      typeof serverData === "object" &&
+      "message" in (serverData as Record<string, unknown>) &&
+      typeof (serverData as Record<string, unknown>).message === "string"
     ) {
+      message = (serverData as Record<string, unknown>).message as string;
+    }
+
+    const normalizedError: NormalizedApiError = {
+      status: error.response?.status ?? 0,
+      message,
+      data: error.response?.data,
+    };
+    (error as AxiosError & { normalized?: NormalizedApiError }).normalized = normalizedError;
+
+    if (error.response?.status === 401 && (error.response?.data as any)?.expired && !originalRequest._retry) {
       if (isRefreshing) {
-        // Si un refresh est dÃ©jÃ  en cours, mettre la requÃªte en queue
         return new Promise<void>((resolve, reject) => {
           failedQueue.push({ resolve, reject });
         })
-          .then(() => {
-            // Le cookie est automatiquement envoyÃ©, pas besoin d'ajouter le header
-            return api(originalRequest);
-          })
-          .catch((err) => {
-            return Promise.reject(err);
-          });
+          .then(() => api(originalRequest))
+          .catch((err) => Promise.reject(err));
       }
 
       originalRequest._retry = true;
       isRefreshing = true;
 
       try {
-        // Essayer de rafraÃ®chir le token
         const refreshed = await refreshTokenFunc();
 
         if (refreshed) {
-          // Le nouveau token est automatiquement stockÃ© en cookie
           processQueue(null);
-
-          // RÃ©essayer la requÃªte originale (le cookie sera envoyÃ© automatiquement)
           return api(originalRequest);
         } else {
-          // Impossible de rafraÃ®chir, notifier l'UI
           processQueue(error);
           notifyUnauthorized("expired");
           return Promise.reject(error);
@@ -162,9 +163,8 @@ api.interceptors.response.use(
       }
     }
 
-    // Pour les autres erreurs 401 ou 403 : notifier, pas de redirection ici
     if (error.response?.status === 401) {
-      notifyUnauthorized(error.response?.data?.expired ? "expired" : "unauthorized");
+      notifyUnauthorized((error.response?.data as any)?.expired ? "expired" : "unauthorized");
     }
     if (error.response?.status === 403) {
       notifyUnauthorized("forbidden");
@@ -175,5 +175,3 @@ api.interceptors.response.use(
 );
 
 export default api;
-
-

@@ -1,43 +1,45 @@
-import React, { useEffect, useState } from "react";
-import { galleryService } from "../../services/gallery.service";
-
-interface GalleryImage {
-  _id: string;
-  imageSrc: string;
-  createdAt: string;
-}
+import React, { useState } from "react";
+import { useAdminGallery } from "../../hooks/useAdminGallery";
+import { useDragAndDropList } from "../../hooks/useDragAndDropList";
+import { useSelection } from "../../hooks/useSelection";
+import GalleryGridItem from "./GalleryGridItem";
+import GalleryToolbar from "./GalleryToolbar";
+import GalleryUploadModal from "./GalleryUploadModal";
 
 const GalleryManagement: React.FC = () => {
-  const [images, setImages] = useState<GalleryImage[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const {
+    images,
+    setImages,
+    loading,
+    error,
+    setError,
+    refetch,
+    uploadImages,
+    deleteMany,
+    updateOrder,
+  } = useAdminGallery();
   const [showUploadForm, setShowUploadForm] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
   const [uploadLoading, setUploadLoading] = useState(false);
-  const [selectedImages, setSelectedImages] = useState<string[]>([]);
+  const {
+    selectedIds: selectedImages,
+    toggleSelection: toggleImageSelection,
+    setSelectedIds: setSelectedImages,
+  } = useSelection();
   const [isDragOver, setIsDragOver] = useState(false);
   const [isGalleryDragOver, setIsGalleryDragOver] = useState(false);
-  const [draggedImage, setDraggedImage] = useState<string | null>(null);
-  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
-  const [hasOrderChanged, setHasOrderChanged] = useState(false);
+  const {
+    draggedId: draggedImage,
+    dragOverIndex,
+    hasOrderChanged,
+    setHasOrderChanged,
+    handleDragStart,
+    handleDragOver,
+    handleDragLeave,
+    handleDrop,
+    resetOrderChanged,
+  } = useDragAndDropList(images, setImages, (img) => img._id);
   const [saveOrderLoading, setSaveOrderLoading] = useState(false);
-
-  const loadImages = async () => {
-    try {
-      setLoading(true);
-      const data = await galleryService.getAllImages();
-      setImages(data);
-      setError("");
-    } catch (err) {
-      setError("Erreur lors du chargement des images");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadImages();
-  }, []);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -60,11 +62,10 @@ const GalleryManagement: React.FC = () => {
         formData.append("images", selectedFiles[i]);
       }
 
-      await galleryService.uploadImages(formData);
-      await loadImages();
+      await uploadImages(formData);
       setShowUploadForm(false);
       setSelectedFiles(null);
-      setHasOrderChanged(false); // Reset car on recharge les images
+      resetOrderChanged();
     } catch (err) {
       setError("Erreur lors de l'upload des images");
       console.error("Upload error:", err);
@@ -73,49 +74,39 @@ const GalleryManagement: React.FC = () => {
     }
   };
 
-  const toggleImageSelection = (id: string) => {
-    setSelectedImages((prev) =>
-      prev.includes(id)
-        ? prev.filter((imageId) => imageId !== id)
-        : [...prev, id]
-    );
-  };
-
   const handleDeleteSelected = async () => {
-    if (selectedImages.length === 0) return;
+    if (selectedImages.size === 0) return;
 
     if (
       window.confirm(
-        `Êtes-vous sûr de vouloir supprimer ${selectedImages.length} image(s) ?`
+        `Êtes-vous sûr de vouloir supprimer ${selectedImages.size} image(s) ?`
       )
     ) {
       try {
-        await galleryService.deleteImages(selectedImages);
-        await loadImages();
-        setSelectedImages([]);
+        await deleteMany(Array.from(selectedImages));
+        setSelectedImages(new Set());
       } catch (err) {
         setError("Erreur lors de la suppression des images");
       }
     }
   };
 
-  const handleDragOver = (e: React.DragEvent) => {
+  const handleUploadDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragOver(true);
   };
 
-  const handleDragLeave = (e: React.DragEvent) => {
+  const handleUploadDragLeave = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragOver(false);
   };
 
-  const handleDrop = async (e: React.DragEvent) => {
+  const handleUploadDrop = async (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragOver(false);
 
     const files = e.dataTransfer.files;
     if (files && files.length > 0) {
-      // Filtrer pour ne garder que les images
       const imageFiles = Array.from(files).filter((file) =>
         file.type.startsWith("image/")
       );
@@ -129,9 +120,8 @@ const GalleryManagement: React.FC = () => {
             formData.append("images", file);
           });
 
-          await galleryService.uploadImages(formData);
-          await loadImages();
-          setHasOrderChanged(false); // Reset car on recharge les images
+          await uploadImages(formData);
+          setHasOrderChanged(false);
         } catch (err) {
           setError("Erreur lors de l'upload des images");
           console.error("Upload error:", err);
@@ -146,7 +136,6 @@ const GalleryManagement: React.FC = () => {
 
   const handleGalleryDragOver = (e: React.DragEvent) => {
     e.preventDefault();
-    // Vérifier si ce sont des fichiers (pas un réordrement d'images)
     if (e.dataTransfer.types.includes("Files")) {
       setIsGalleryDragOver(true);
     }
@@ -154,7 +143,6 @@ const GalleryManagement: React.FC = () => {
 
   const handleGalleryDragLeave = (e: React.DragEvent) => {
     e.preventDefault();
-    // Vérifier si on sort vraiment de la zone de galerie
     if (!e.currentTarget.contains(e.relatedTarget as Node)) {
       setIsGalleryDragOver(false);
     }
@@ -164,14 +152,12 @@ const GalleryManagement: React.FC = () => {
     e.preventDefault();
     setIsGalleryDragOver(false);
 
-    // Si c'est un réordrement d'image, ne pas traiter comme un upload
     if (draggedImage) {
       return;
     }
 
     const files = e.dataTransfer.files;
     if (files && files.length > 0) {
-      // Filtrer pour ne garder que les images
       const imageFiles = Array.from(files).filter((file) =>
         file.type.startsWith("image/")
       );
@@ -185,9 +171,8 @@ const GalleryManagement: React.FC = () => {
             formData.append("images", file);
           });
 
-          await galleryService.uploadImages(formData);
-          await loadImages();
-          setHasOrderChanged(false); // Reset car on recharge les images
+          await uploadImages(formData);
+          setHasOrderChanged(false);
         } catch (err) {
           setError("Erreur lors de l'upload des images");
           console.error("Upload error:", err);
@@ -200,44 +185,6 @@ const GalleryManagement: React.FC = () => {
     }
   };
 
-  const handleImageDragStart = (e: React.DragEvent, imageId: string) => {
-    setDraggedImage(imageId);
-    e.dataTransfer.effectAllowed = "move";
-  };
-
-  const handleImageDragOver = (e: React.DragEvent, index: number) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = "move";
-    setDragOverIndex(index);
-  };
-
-  const handleImageDragLeave = () => {
-    setDragOverIndex(null);
-  };
-
-  const handleImageDrop = async (e: React.DragEvent, dropIndex: number) => {
-    e.preventDefault();
-    setDragOverIndex(null);
-
-    if (!draggedImage) return;
-
-    const draggedIndex = images.findIndex((img) => img._id === draggedImage);
-    if (draggedIndex === -1 || draggedIndex === dropIndex) {
-      setDraggedImage(null);
-      return;
-    }
-
-    // Créer un nouveau tableau avec l'ordre modifié
-    const newImages = [...images];
-    const [draggedItem] = newImages.splice(draggedIndex, 1);
-    newImages.splice(dropIndex, 0, draggedItem);
-
-    // Mettre à jour localement pour un feedback immédiat
-    setImages(newImages);
-    setDraggedImage(null);
-    setHasOrderChanged(true);
-  };
-
   const saveImageOrder = async () => {
     if (!hasOrderChanged) return;
 
@@ -245,11 +192,9 @@ const GalleryManagement: React.FC = () => {
       setSaveOrderLoading(true);
       const orderedIds = images.map((img) => img._id);
 
-      await galleryService.updateImageOrder(orderedIds);
+      await updateOrder(orderedIds);
 
-      setHasOrderChanged(false);
-      // Optionnel: recharger pour confirmer l'ordre depuis le serveur
-      // await loadImages();
+      resetOrderChanged();
     } catch (err) {
       setError("Erreur lors de la sauvegarde de l'ordre");
       console.error("Save order error:", err);
@@ -259,8 +204,8 @@ const GalleryManagement: React.FC = () => {
   };
 
   const cancelOrderChanges = async () => {
-    setHasOrderChanged(false);
-    await loadImages(); // Recharger l'ordre original
+    resetOrderChanged();
+    await refetch();
   };
 
   if (loading) {
@@ -273,47 +218,18 @@ const GalleryManagement: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-        <h1 className="text-2xl font-bold text-white">Gestion de la galerie</h1>
-        <div className="flex gap-2">
-          {hasOrderChanged && (
-            <>
-              <button
-                onClick={cancelOrderChanges}
-                className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
-              >
-                Annuler
-              </button>
-              <button
-                onClick={saveImageOrder}
-                disabled={saveOrderLoading}
-                className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50"
-              >
-                {saveOrderLoading ? "Sauvegarde..." : "Sauvegarder l'ordre"}
-              </button>
-            </>
-          )}
-          <button
-            onClick={() => setShowUploadForm(true)}
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
-            disabled={uploadLoading}
-            className={`px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-all duration-200 flex items-center gap-2 disabled:opacity-50 ${
-              isDragOver ? "bg-red-500 scale-105 shadow-lg" : ""
-            }`}
-          >
-            {uploadLoading && (
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-            )}
-            {uploadLoading
-              ? "Upload en cours..."
-              : isDragOver
-              ? "Déposez vos images ici"
-              : "Ajouter une image"}
-          </button>
-        </div>
-      </div>
+      <GalleryToolbar
+        hasOrderChanged={hasOrderChanged}
+        saveOrderLoading={saveOrderLoading}
+        uploadLoading={uploadLoading}
+        isDragOver={isDragOver}
+        onCancelOrder={cancelOrderChanges}
+        onSaveOrder={saveImageOrder}
+        onOpenUpload={() => setShowUploadForm(true)}
+        onDragOver={handleUploadDragOver}
+        onDragLeave={handleUploadDragLeave}
+        onDrop={handleUploadDrop}
+      />
 
       {error && (
         <div className="bg-red-500 text-white p-4 rounded">{error}</div>
@@ -333,63 +249,27 @@ const GalleryManagement: React.FC = () => {
         </div>
       )}
 
-      {showUploadForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50">
-          <div className="bg-gray-900 rounded-lg p-6 w-full max-w-md">
-            <h2 className="text-xl font-bold text-white mb-4">
-              Ajouter des images
-            </h2>
-            <form onSubmit={handleUpload} className="space-y-4">
-              <div>
-                <input
-                  type="file"
-                  onChange={handleFileChange}
-                  accept="image/*"
-                  multiple
-                  className="text-white w-full"
-                />
-                {selectedFiles && (
-                  <p className="text-gray-400 mt-2">
-                    {selectedFiles.length} fichier(s) sélectionné(s)
-                  </p>
-                )}
-              </div>
-              <div className="flex justify-end gap-4">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowUploadForm(false);
-                    setSelectedFiles(null);
-                  }}
-                  className="px-4 py-2 text-gray-400 hover:text-white"
-                >
-                  Annuler
-                </button>
-                <button
-                  type="submit"
-                  disabled={uploadLoading || !selectedFiles}
-                  className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50 flex items-center gap-2"
-                >
-                  {uploadLoading && (
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                  )}
-                  {uploadLoading ? `Upload en cours...` : "Upload"}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      <GalleryUploadModal
+        isOpen={showUploadForm}
+        selectedFiles={selectedFiles}
+        uploadLoading={uploadLoading}
+        onClose={() => {
+          setShowUploadForm(false);
+          setSelectedFiles(null);
+        }}
+        onFileChange={handleFileChange}
+        onSubmit={handleUpload}
+      />
 
-      {selectedImages.length > 0 && (
+      {selectedImages.size > 0 && (
         <div className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-4 sm:w-auto bg-gray-900 p-4 rounded-lg shadow-lg z-50">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
             <p className="text-white text-center sm:text-left">
-              {selectedImages.length} image(s) sélectionnée(s)
+              {selectedImages.size} image(s) sélectionnée(s)
             </p>
             <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
               <button
-                onClick={() => setSelectedImages([])}
+                onClick={() => setSelectedImages(new Set())}
                 className="w-full sm:w-auto px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
               >
                 Annuler
@@ -423,42 +303,19 @@ const GalleryManagement: React.FC = () => {
           </div>
         )}
         {images.map((image, index) => (
-          <div
+          <GalleryGridItem
             key={image._id}
-            draggable
-            onDragStart={(e) => handleImageDragStart(e, image._id)}
-            onDragOver={(e) => handleImageDragOver(e, index)}
-            onDragLeave={handleImageDragLeave}
-            onDrop={(e) => handleImageDrop(e, index)}
-            className={`relative group bg-gray-800 rounded-lg overflow-hidden cursor-move transition-all duration-200 ${
-              selectedImages.includes(image._id) ? "ring-2 ring-red-500" : ""
-            } ${draggedImage === image._id ? "opacity-50 scale-95" : ""} ${
-              dragOverIndex === index ? "ring-2 ring-blue-400 scale-105" : ""
-            }`}
-            onClick={() => toggleImageSelection(image._id)}
-          >
-            <img
-              src={image.imageSrc}
-              alt="Gallery"
-              className="w-full h-48 object-cover pointer-events-none"
-            />
-            <div className="absolute top-2 right-2 bg-black bg-opacity-75 text-white text-xs px-2 py-1 rounded">
-              {index + 1}
-            </div>
-            <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all duration-300 flex items-center justify-center">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  toggleImageSelection(image._id);
-                }}
-                className="opacity-0 group-hover:opacity-100 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-opacity duration-300 pointer-events-auto"
-              >
-                {selectedImages.includes(image._id)
-                  ? "Désélectionner"
-                  : "Sélectionner"}
-              </button>
-            </div>
-          </div>
+            image={image}
+            index={index}
+            isSelected={selectedImages.has(image._id)}
+            draggedImageId={draggedImage}
+            dragOverIndex={dragOverIndex}
+            onToggleSelect={toggleImageSelection}
+            onDragStart={handleDragStart}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+          />
         ))}
       </div>
 
