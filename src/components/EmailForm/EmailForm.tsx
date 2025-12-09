@@ -7,6 +7,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useState } from "react";
+import { isValidEmail, isRequiredFieldFilled, VALIDATION_MESSAGES } from "../../utils";
 import "./EmailForm.scss";
 
 const EmailForm: React.FC = () => {
@@ -29,23 +30,26 @@ const EmailForm: React.FC = () => {
     let isValid = true;
     const newErrors = { name: "", email: "", subject: "", message: "" };
 
-    if (!formData.name.trim()) {
-      newErrors.name = "Le nom est requis";
+    if (!isRequiredFieldFilled(formData.name)) {
+      newErrors.name = VALIDATION_MESSAGES.REQUIRED;
       isValid = false;
     }
-    if (!formData.email.trim()) {
-      newErrors.email = "L'email est requis";
+
+    if (!isRequiredFieldFilled(formData.email)) {
+      newErrors.email = VALIDATION_MESSAGES.EMAIL_REQUIRED;
       isValid = false;
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = "L'email n'est pas valide";
-      isValid = false;
-    }
-    if (!formData.subject.trim()) {
-      newErrors.subject = "L'objet est requis";
+    } else if (!isValidEmail(formData.email)) {
+      newErrors.email = VALIDATION_MESSAGES.EMAIL_INVALID;
       isValid = false;
     }
-    if (!formData.message.trim()) {
-      newErrors.message = "Le message est requis";
+
+    if (!isRequiredFieldFilled(formData.subject)) {
+      newErrors.subject = VALIDATION_MESSAGES.REQUIRED;
+      isValid = false;
+    }
+
+    if (!isRequiredFieldFilled(formData.message)) {
+      newErrors.message = VALIDATION_MESSAGES.REQUIRED;
       isValid = false;
     }
 

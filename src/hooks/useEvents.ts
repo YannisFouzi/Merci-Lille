@@ -2,6 +2,11 @@ import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { EventCardProps } from "../components/ShotgunEvents/types";
 import { eventsService } from "../services/events.service";
+import {
+  parseEventGenres,
+  sortEventsByOrderOrDate,
+  isEventPast,
+} from "../utils";
 
 /**
  * Hook personnalisé pour récupérer et traiter les événements
@@ -32,79 +37,46 @@ export const useEvents = () => {
     const past: EventCardProps[] = [];
 
     rawEvents.forEach((event: EventCardProps) => {
-      const [hours, minutes] = event.time.split(":");
-      const eventDate = new Date(event.date);
-      eventDate.setHours(parseInt(hours), parseInt(minutes));
-
-      const processedGenres = Array.isArray(event.genres)
-        ? event.genres
-        : typeof event.genres === "string"
-        ? JSON.parse(event.genres)
-        : [];
+      const isPast = isEventPast(event.date, event.time, now);
 
       const processedEvent = {
         ...event,
-        genres: processedGenres,
+        genres: parseEventGenres(event.genres),
       };
 
       // Si l'événement est marqué comme phare, l'ajouter à la liste featured
       if (event.isFeatured) {
         featured.push({
           ...processedEvent,
-          isPast: eventDate <= now,
+          isPast,
         });
       }
 
       // Ajouter aussi l'événement dans upcoming ou past (duplication intentionnelle)
-      if (eventDate > now) {
-        upcoming.push({
-          ...processedEvent,
-          isPast: false,
-        });
-      } else {
+      if (isPast) {
         past.push({
           ...processedEvent,
           isPast: true,
+        });
+      } else {
+        upcoming.push({
+          ...processedEvent,
+          isPast: false,
         });
       }
     });
 
     // Tri par le champ 'order' (défini dans l'admin)
     // Si order n'est pas défini, on trie par date (du plus récent au plus ancien)
-    featured.sort((a, b) => {
-      // Si les deux ont un order défini, utiliser order
-      if (a.order !== undefined && b.order !== undefined && a.order !== 0 && b.order !== 0) {
-        return a.order - b.order;
-      }
-      // Sinon, trier par date (plus récent en premier)
-      const dateA = new Date(a.date).getTime();
-      const dateB = new Date(b.date).getTime();
-      return dateB - dateA; // Ordre décroissant (plus récent d'abord)
-    });
+    const sortedFeatured = sortEventsByOrderOrDate(featured);
+    const sortedUpcoming = sortEventsByOrderOrDate(upcoming);
+    const sortedPast = sortEventsByOrderOrDate(past);
 
-    upcoming.sort((a, b) => {
-      // Si les deux ont un order défini, utiliser order
-      if (a.order !== undefined && b.order !== undefined && a.order !== 0 && b.order !== 0) {
-        return a.order - b.order;
-      }
-      // Sinon, trier par date (plus récent en premier)
-      const dateA = new Date(a.date).getTime();
-      const dateB = new Date(b.date).getTime();
-      return dateB - dateA; // Ordre décroissant (plus récent d'abord)
-    });
-    
-    past.sort((a, b) => {
-      // Si les deux ont un order défini, utiliser order
-      if (a.order !== undefined && b.order !== undefined && a.order !== 0 && b.order !== 0) {
-        return a.order - b.order;
-      }
-      // Sinon, trier par date (plus récent en premier)
-      const dateA = new Date(a.date).getTime();
-      const dateB = new Date(b.date).getTime();
-      return dateB - dateA; // Ordre décroissant (plus récent d'abord)
-    });
-
-    return { featuredEvents: featured, upcomingEvents: upcoming, pastEvents: past };
+    return {
+      featuredEvents: sortedFeatured,
+      upcomingEvents: sortedUpcoming,
+      pastEvents: sortedPast,
+    };
   }, [rawEvents]);
 
   return {

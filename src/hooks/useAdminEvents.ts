@@ -1,17 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { eventsService } from "../services/events.service";
 import { EventCardProps } from "../components/ShotgunEvents/types";
-
-const sortEvents = (data: EventCardProps[]): EventCardProps[] => {
-  return [...data].sort((a, b) => {
-    if (a.order !== undefined && b.order !== undefined && a.order !== 0 && b.order !== 0) {
-      return b.order - a.order;
-    }
-    const dateA = new Date(a.date).getTime();
-    const dateB = new Date(b.date).getTime();
-    return dateB - dateA;
-  });
-};
+import { sortEventsForAdmin } from "../utils";
 
 export const useAdminEvents = () => {
   const [events, setEvents] = useState<EventCardProps[]>([]);
@@ -22,7 +12,7 @@ export const useAdminEvents = () => {
     try {
       setLoading(true);
       const data = await eventsService.getAllEvents(true);
-      setEvents(sortEvents(data));
+      setEvents(sortEventsForAdmin(data));
       setError("");
     } catch (err) {
       setError("Erreur lors du chargement des événements");

@@ -1,6 +1,13 @@
 import React, { useState } from "react";
 import { EventCardProps } from "../../components/ShotgunEvents/types";
 import { eventsService } from "../../services/events.service";
+import {
+  parseEventGenres,
+  extractFileNameFromUrl,
+  isValidFileSize,
+  isRequiredFieldFilled,
+  VALIDATION_MESSAGES,
+} from "../../utils";
 
 type EventFormState = Omit<EventCardProps, "_id" | "eventNumber" | "isPast"> & {
   eventNumber?: string;
@@ -22,11 +29,7 @@ const EventForm: React.FC<EventFormProps> = ({ event, onSubmit }) => {
       ? {
           ...event,
           date: formatDateForInput(event.date),
-          genres: Array.isArray(event.genres)
-            ? event.genres
-            : typeof event.genres === "string"
-            ? JSON.parse(event.genres)
-            : [],
+          genres: parseEventGenres(event.genres),
         }
       : {
           title: "",
@@ -42,8 +45,9 @@ const EventForm: React.FC<EventFormProps> = ({ event, onSubmit }) => {
   );
   const [image, setImage] = useState<File | null>(null);
   const [displayFileName, setDisplayFileName] = useState<string>("");
-
   const [newGenre, setNewGenre] = useState("");
+  const [submitError, setSubmitError] = useState<string>("");
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   const handleAddGenre = (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,6 +69,8 @@ const EventForm: React.FC<EventFormProps> = ({ event, onSubmit }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmitError("");
+    setIsSubmitting(true);
 
     try {
       const data = new FormData();
@@ -78,18 +84,18 @@ const EventForm: React.FC<EventFormProps> = ({ event, onSubmit }) => {
 
       // Vérification des champs requis
       if (
-        !formData.title ||
-        !formData.city ||
-        !formData.date ||
-        !formData.time ||
-        !formData.ticketLink
+        !isRequiredFieldFilled(formData.title) ||
+        !isRequiredFieldFilled(formData.city) ||
+        !isRequiredFieldFilled(formData.date) ||
+        !isRequiredFieldFilled(formData.time) ||
+        !isRequiredFieldFilled(formData.ticketLink)
       ) {
-        throw new Error("Veuillez remplir tous les champs requis");
+        throw new Error(VALIDATION_MESSAGES.REQUIRED);
       }
 
       // Vérification de l'image
       if (!image && !event?.imageSrc) {
-        throw new Error("Une image est requise");
+        throw new Error(VALIDATION_MESSAGES.FILE_REQUIRED);
       }
 
       Object.entries(formDataToSend).forEach(([key, value]) => {
@@ -108,9 +114,8 @@ const EventForm: React.FC<EventFormProps> = ({ event, onSubmit }) => {
 
       if (image) {
         // Vérifier la taille de l'image
-        if (image.size > 5 * 1024 * 1024) {
-          // 5MB
-          throw new Error("L'image est trop volumineuse (max 5MB)");
+        if (!isValidFileSize(image, 5)) {
+          throw new Error(VALIDATION_MESSAGES.FILE_TOO_LARGE(5));
         }
         data.append("image", image);
       }
@@ -120,17 +125,16 @@ const EventForm: React.FC<EventFormProps> = ({ event, onSubmit }) => {
       } else {
         await eventsService.createEvent(data);
       }
+
       onSubmit();
     } catch (error) {
-      // Afficher l'erreur à l'utilisateur
-      // TODO: Ajouter un état pour gérer les erreurs
-      throw error;
+      const errorMessage = error instanceof Error
+        ? error.message
+        : "Une erreur est survenue lors de l'enregistrement";
+      setSubmitError(errorMessage);
+    } finally {
+      setIsSubmitting(false);
     }
-  };
-
-  const extractFileNameFromUrl = (url: string) => {
-    const parts = url.split("/");
-    return parts[parts.length - 1];
   };
 
   React.useEffect(() => {
@@ -144,7 +148,15 @@ const EventForm: React.FC<EventFormProps> = ({ event, onSubmit }) => {
     if (file) {
       setImage(file);
       setDisplayFileName(file.name);
+      // Effacer l'erreur quand l'utilisateur interagit
+      if (submitError) setSubmitError("");
     }
+  };
+
+  const handleFormDataChange = (updates: Partial<EventFormState>) => {
+    setFormData({ ...formData, ...updates });
+    // Effacer l'erreur quand l'utilisateur modifie le formulaire
+    if (submitError) setSubmitError("");
   };
 
   // La partie return du composant
@@ -153,6 +165,12 @@ const EventForm: React.FC<EventFormProps> = ({ event, onSubmit }) => {
       onSubmit={handleSubmit}
       className="space-y-6 bg-gray-900 p-4 rounded-lg sm:p-6"
     >
+      {submitError && (
+        <div className="bg-red-500/10 border border-red-500 text-red-500 px-4 py-3 rounded">
+          {submitError}
+        </div>
+      )}
+
       <div className="space-y-6">
         <div className="space-y-2">
           <label className="text-white block text-lg font-bold border-b border-gray-600 pb-1 mb-2">
@@ -161,12 +179,11 @@ const EventForm: React.FC<EventFormProps> = ({ event, onSubmit }) => {
           <input
             type="text"
             value={formData.title}
-            onChange={(e) =>
-              setFormData({ ...formData, title: e.target.value })
-            }
+            onChange={(e) => handleFormDataChange({ title: e.target.value })}
             placeholder="Titre de l'événement"
             className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white"
             required
+            disabled={isSubmitting}
           />
         </div>
 
@@ -177,12 +194,11 @@ const EventForm: React.FC<EventFormProps> = ({ event, onSubmit }) => {
           <input
             type="text"
             value={formData.city}
-            onChange={(e) =>
-              setFormData({ ...formData, city: e.target.value })
-            }
+            onChange={(e) => handleFormDataChange({ city: e.target.value })}
             placeholder="Ville"
             className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white"
             required
+            disabled={isSubmitting}
           />
         </div>
 
@@ -194,11 +210,10 @@ const EventForm: React.FC<EventFormProps> = ({ event, onSubmit }) => {
             <input
               type="date"
               value={formData.date}
-              onChange={(e) =>
-                setFormData({ ...formData, date: e.target.value })
-              }
+              onChange={(e) => handleFormDataChange({ date: e.target.value })}
               className="px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white w-full"
               required
+              disabled={isSubmitting}
             />
           </div>
 
@@ -209,11 +224,10 @@ const EventForm: React.FC<EventFormProps> = ({ event, onSubmit }) => {
             <input
               type="time"
               value={formData.time}
-              onChange={(e) =>
-                setFormData({ ...formData, time: e.target.value })
-              }
+              onChange={(e) => handleFormDataChange({ time: e.target.value })}
               className="px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white w-full"
               required
+              disabled={isSubmitting}
             />
           </div>
         </div>
@@ -230,10 +244,13 @@ const EventForm: React.FC<EventFormProps> = ({ event, onSubmit }) => {
               className="hidden"
               id="imageInput"
               required={!event}
+              disabled={isSubmitting}
             />
             <label
               htmlFor="imageInput"
-              className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white cursor-pointer hover:bg-gray-700 flex justify-between items-center"
+              className={`w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white ${
+                isSubmitting ? "opacity-50 cursor-not-allowed" : "cursor-pointer hover:bg-gray-700"
+              } flex justify-between items-center`}
             >
               <span className="truncate">
                 {displayFileName || "Choisir une image"}
@@ -252,12 +269,11 @@ const EventForm: React.FC<EventFormProps> = ({ event, onSubmit }) => {
           <input
             type="text"
             value={formData.ticketLink}
-            onChange={(e) =>
-              setFormData({ ...formData, ticketLink: e.target.value })
-            }
+            onChange={(e) => handleFormDataChange({ ticketLink: e.target.value })}
             placeholder="Lien billetterie"
             className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white"
             required
+            disabled={isSubmitting}
           />
         </div>
 
@@ -276,6 +292,7 @@ const EventForm: React.FC<EventFormProps> = ({ event, onSubmit }) => {
                   type="button"
                   onClick={() => handleRemoveGenre(genre)}
                   className="ml-2 text-red-500 hover:text-red-400"
+                  disabled={isSubmitting}
                 >
                   ×
                 </button>
@@ -290,11 +307,13 @@ const EventForm: React.FC<EventFormProps> = ({ event, onSubmit }) => {
               onChange={(e) => setNewGenre(e.target.value)}
               placeholder="Ajouter un genre"
               className="flex-1 px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white"
+              disabled={isSubmitting}
             />
             <button
               type="button"
               onClick={handleAddGenre}
-              className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+              className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={isSubmitting}
             >
               Ajouter
             </button>
@@ -309,13 +328,9 @@ const EventForm: React.FC<EventFormProps> = ({ event, onSubmit }) => {
             <input
               type="checkbox"
               checked={formData.isFeatured || false}
-              onChange={(e) => {
-                setFormData({
-                  ...formData,
-                  isFeatured: e.target.checked,
-                });
-              }}
+              onChange={(e) => handleFormDataChange({ isFeatured: e.target.checked })}
               className="mr-2"
+              disabled={isSubmitting}
             />
             <label className="text-white">Mettre en avant (Événement phare)</label>
           </div>
@@ -324,9 +339,10 @@ const EventForm: React.FC<EventFormProps> = ({ event, onSubmit }) => {
 
       <button
         type="submit"
-        className="w-full px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+        className="w-full px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        disabled={isSubmitting}
       >
-        {event ? "Modifier" : "Créer"} l'événement
+        {isSubmitting ? "Enregistrement..." : event ? "Modifier" : "Créer"} l'événement
       </button>
     </form>
   );
