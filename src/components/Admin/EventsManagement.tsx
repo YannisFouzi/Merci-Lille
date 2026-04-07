@@ -22,12 +22,9 @@ const EventsManagement = () => {
     hideMany,
     unhideMany,
     hideOne,
-    renumberAll,
   } = useAdminEvents();
   const [showForm, setShowForm] = useState(false);
-  const [selectedEvent, setSelectedEvent] = useState<EventCardProps | null>(
-    null
-  );
+  const [selectedEvent, setSelectedEvent] = useState<EventCardProps | null>(null);
   const {
     draggedId,
     dragOverIndex,
@@ -62,15 +59,15 @@ const EventsManagement = () => {
 
   const handleDelete = async (id: string | undefined) => {
     if (!id) {
-      showError("ID d'événement invalide");
+      showError("ID d'evenement invalide");
       return;
     }
 
-    if (window.confirm("Êtes-vous sûr de vouloir supprimer cet événement ?")) {
+    if (window.confirm("Etes-vous sur de vouloir supprimer cet evenement ?")) {
       try {
         await deleteEvent(id);
         setHasOrderChanged(false);
-      } catch (err) {
+      } catch {
         showError("Erreur lors de la suppression");
       }
     }
@@ -108,7 +105,7 @@ const EventsManagement = () => {
       await updateOrder(orderedIds);
 
       setHasOrderChanged(false);
-      showSuccess("Nouvel ordre enregistré");
+      showSuccess("Nouvel ordre enregistre");
     } catch (err) {
       showError("Erreur lors de la sauvegarde de l'ordre");
       console.error("Save order error:", err);
@@ -132,7 +129,7 @@ const EventsManagement = () => {
 
     if (
       !window.confirm(
-        `Êtes-vous sûr de vouloir supprimer ${selectedEventIds.size} événement(s) ?`
+        `Etes-vous sur de vouloir supprimer ${selectedEventIds.size} evenement(s) ?`
       )
     ) {
       return;
@@ -144,9 +141,9 @@ const EventsManagement = () => {
       setSelectedEventIds(new Set());
       setIsSelectionMode(false);
       resetOrderChanged();
-      showSuccess("Événements supprimés");
-    } catch (err) {
-      showError("Erreur lors de la suppression des événements");
+      showSuccess("Evenements supprimes");
+    } catch {
+      showError("Erreur lors de la suppression des evenements");
     }
   };
 
@@ -157,9 +154,9 @@ const EventsManagement = () => {
       await hideMany(Array.from(selectedEventIds));
       setSelectedEventIds(new Set());
       setIsSelectionMode(false);
-      showSuccess("Événements masqués");
-    } catch (err) {
-      showError("Erreur lors du masquage des événements");
+      showSuccess("Evenements masques");
+    } catch {
+      showError("Erreur lors du masquage des evenements");
     }
   };
 
@@ -170,37 +167,19 @@ const EventsManagement = () => {
       await unhideMany(Array.from(selectedEventIds));
       setSelectedEventIds(new Set());
       setIsSelectionMode(false);
-      showSuccess("Événements affichés");
-    } catch (err) {
-      showError("Erreur lors du démasquage des événements");
+      showSuccess("Evenements affiches");
+    } catch {
+      showError("Erreur lors du demasquage des evenements");
     }
   };
 
-  const toggleHideEvent = async (
-    eventId: string | undefined,
-    currentHiddenState: boolean
-  ) => {
+  const toggleHideEvent = async (eventId: string | undefined, currentHiddenState: boolean) => {
     if (!eventId) return;
 
     try {
       await hideOne(eventId, currentHiddenState);
-    } catch (err) {
-      showError("Erreur lors du masquage/démasquage de l'événement");
-    }
-  };
-
-  const forceRenumber = async () => {
-    if (
-      !window.confirm("Renuméroter tous les événements visibles de 1 à N ?")
-    ) {
-      return;
-    }
-
-    try {
-      await renumberAll();
-      alert("Renumérotation effectuée avec succès !");
-    } catch (err) {
-      showError("Erreur lors de la renumérotation");
+    } catch {
+      showError("Erreur lors du masquage/demasquage de l'evenement");
     }
   };
 
@@ -215,7 +194,7 @@ const EventsManagement = () => {
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-        <h1 className="text-2xl font-bold text-white">Gestion des événements</h1>
+        <h1 className="text-2xl font-bold text-white">Gestion des evenements</h1>
         <EventsToolbar
           hasOrderChanged={hasOrderChanged}
           saveOrderLoading={saveOrderLoading}
@@ -224,21 +203,20 @@ const EventsManagement = () => {
           onCancelOrder={cancelOrderChanges}
           onSaveOrder={saveEventOrder}
           onDeselectAll={deselectAll}
-      onHideSelected={hideSelected}
-      onUnhideSelected={unhideSelected}
-      onDeleteSelected={deleteSelected}
-      onSelectAll={() => selectAll(events.map((e) => e._id as string))}
-      onToggleSelectionMode={toggleSelectionMode}
-      onCreateNew={handleCreateNew}
-      onRenumber={forceRenumber}
-    />
+          onHideSelected={hideSelected}
+          onUnhideSelected={unhideSelected}
+          onDeleteSelected={deleteSelected}
+          onSelectAll={() => selectAll(events.map((event) => event._id as string))}
+          onToggleSelectionMode={toggleSelectionMode}
+          onCreateNew={handleCreateNew}
+        />
       </div>
 
       {toast && <AdminToast toast={toast} onClose={clearToast} />}
 
       <ShotgunSync />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
         {events.map((event, index) => (
           <EventCardItem
             key={event._id}
@@ -261,9 +239,7 @@ const EventsManagement = () => {
       </div>
 
       {events.length === 0 && !loading && (
-        <div className="text-center py-12 text-gray-400">
-          Aucun événement trouvé
-        </div>
+        <div className="text-center py-12 text-gray-400">Aucun evenement trouve</div>
       )}
 
       <EventFormModal

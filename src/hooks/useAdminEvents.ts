@@ -77,8 +77,8 @@ export const useAdminEvents = () => {
     [fetchEvents]
   );
 
-  const renumberAll = useCallback(async () => {
-    await eventsService.renumberAllEvents();
+  const renumberAll = useCallback(async (orderedIds?: string[]) => {
+    await eventsService.renumberAllEvents(orderedIds);
     await fetchEvents();
   }, [fetchEvents]);
 

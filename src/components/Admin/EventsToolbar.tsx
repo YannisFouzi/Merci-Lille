@@ -14,7 +14,6 @@ type EventsToolbarProps = {
   onSelectAll: () => void;
   onToggleSelectionMode: () => void;
   onCreateNew: () => void;
-  onRenumber: () => void;
 };
 
 const EventsToolbar: React.FC<EventsToolbarProps> = ({
@@ -31,7 +30,6 @@ const EventsToolbar: React.FC<EventsToolbarProps> = ({
   onSelectAll,
   onToggleSelectionMode,
   onCreateNew,
-  onRenumber,
 }) => {
   return (
     <div className="flex gap-2 flex-wrap">
@@ -52,13 +50,14 @@ const EventsToolbar: React.FC<EventsToolbarProps> = ({
           </button>
         </>
       )}
+
       {isSelectionMode && selectedCount > 0 && (
         <>
           <button
             onClick={onDeselectAll}
             className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
           >
-            Tout désélectionner
+            Tout deselectionner
           </button>
           <button
             onClick={onHideSelected}
@@ -80,14 +79,16 @@ const EventsToolbar: React.FC<EventsToolbarProps> = ({
           </button>
         </>
       )}
+
       {isSelectionMode && selectedCount === 0 && (
         <button
           onClick={onSelectAll}
           className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
         >
-          Tout sélectionner
+          Tout selectionner
         </button>
       )}
+
       <button
         onClick={onToggleSelectionMode}
         className={`px-4 py-2 rounded ${
@@ -96,20 +97,14 @@ const EventsToolbar: React.FC<EventsToolbarProps> = ({
             : "bg-blue-600 hover:bg-blue-700"
         } text-white`}
       >
-        {isSelectionMode ? "Annuler sélection" : "Sélectionner"}
+        {isSelectionMode ? "Annuler selection" : "Selectionner"}
       </button>
+
       <button
         onClick={onCreateNew}
         className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
       >
-        Nouvel événement
-      </button>
-      <button
-        onClick={onRenumber}
-        className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 text-sm"
-        title="Renuméroter tous les événements visibles de 1 à N"
-      >
-        Renuméroter
+        Nouvel evenement
       </button>
     </div>
   );

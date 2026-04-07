@@ -1,6 +1,7 @@
 import React from "react";
+import { isEventPast } from "../../utils";
+import { EventCardContent } from "../ShotgunEvents/components/EventCard/EventCard";
 import { EventCardProps } from "../ShotgunEvents/types";
-import { formatDate } from "../ShotgunEvents/utils/dateFormatter";
 
 type EventCardItemProps = {
   event: EventCardProps;
@@ -35,39 +36,32 @@ const EventCardItem: React.FC<EventCardItemProps> = ({
   onToggleHide,
   onDelete,
 }) => {
-  const now = new Date();
-  const eventDate = new Date(event.date);
-  const [hours, minutes] = event.time.split(":");
-  eventDate.setHours(parseInt(hours, 10), parseInt(minutes, 10));
-  const isPast = eventDate <= now;
+  const eventIsPast = isEventPast(event.date, event.time);
+  const isDragEnabled = !isSelectionMode;
+  const displayEventNumber =
+    event.eventNumber?.startsWith("HIDDEN_") || event.eventNumber?.startsWith("TEMP_")
+      ? "---"
+      : event.eventNumber || "---";
 
   return (
     <div
       key={event._id}
-      draggable={!isSelectionMode}
-      onDragStart={(e) => !isSelectionMode && onDragStart(e, event._id as string)}
-      onDragOver={(e) => !isSelectionMode && onDragOver(e, index)}
-      onDragLeave={!isSelectionMode ? onDragLeave : undefined}
-      onDrop={(e) => !isSelectionMode && onDrop(e, index)}
+      draggable={isDragEnabled}
+      onDragStart={(e) => isDragEnabled && onDragStart(e, event._id as string)}
+      onDragOver={(e) => isDragEnabled && onDragOver(e, index)}
+      onDragLeave={isDragEnabled ? onDragLeave : undefined}
+      onDrop={(e) => isDragEnabled && onDrop(e, index)}
       onClick={() => isSelectionMode && onToggleSelect(event._id as string)}
-      className={`relative bg-gray-800 rounded-lg overflow-hidden transition-all duration-200 ${
-        !isSelectionMode ? "cursor-move" : "cursor-pointer"
-      } ${draggedEventId === event._id ? "opacity-50 scale-95" : ""} ${
-        dragOverIndex === index ? "ring-2 ring-blue-400 scale-105" : ""
-      } ${
-        isSelectionMode && isSelected ? "ring-4 ring-red-500" : ""
-      } ${event.isHidden ? "opacity-50" : ""}`}
+      className={`relative rounded-lg transition-all duration-200 ${
+        isDragEnabled ? "cursor-move" : isSelectionMode ? "cursor-pointer" : "cursor-default"
+      } ${draggedEventId === event._id ? "scale-95 opacity-50" : ""} ${
+        dragOverIndex === index ? "scale-105 ring-2 ring-blue-400" : ""
+      } ${isSelectionMode && isSelected ? "ring-4 ring-red-500" : ""} ${
+        event.isHidden ? "opacity-50" : ""
+      }`}
     >
-      <div className="absolute top-2 left-2 bg-black bg-opacity-75 text-white text-sm font-bold px-3 py-1 rounded z-10">
-        #
-        {event.eventNumber?.startsWith("HIDDEN_") ||
-        event.eventNumber?.startsWith("TEMP_")
-          ? "---"
-          : event.eventNumber || "---"}
-      </div>
-
       {isSelectionMode && (
-        <div className="absolute top-2 left-16 z-10">
+        <div className="absolute left-3 top-3 z-10">
           <input
             type="checkbox"
             checked={isSelected}
@@ -75,104 +69,77 @@ const EventCardItem: React.FC<EventCardItemProps> = ({
               e.stopPropagation();
               onToggleSelect(event._id as string);
             }}
-            className="w-6 h-6 cursor-pointer"
+            className="h-6 w-6 cursor-pointer rounded"
           />
         </div>
       )}
 
-      <div className="absolute top-2 right-2 z-10 flex gap-2">
+      <div className="absolute right-3 top-3 z-10 flex gap-2">
         {event.isHidden && (
-          <span className="bg-orange-600 text-white text-xs px-2 py-1 rounded font-bold">
-            Masqué
+          <span className="rounded bg-orange-600 px-2 py-1 text-xs font-bold text-white">
+            Masque
           </span>
         )}
         {event.isFeatured && (
-          <span className="bg-yellow-500 text-black text-xs px-2 py-1 rounded font-bold">
+          <span className="rounded bg-yellow-500 px-2 py-1 text-xs font-bold text-black">
             Phare
           </span>
         )}
-        {isPast ? (
-          <span className="bg-gray-600 text-gray-300 text-xs px-2 py-1 rounded">
-            Passé
-          </span>
+        {eventIsPast ? (
+          <span className="rounded bg-gray-600 px-2 py-1 text-xs text-gray-300">Passe</span>
         ) : (
-          <span className="bg-green-600 text-white text-xs px-2 py-1 rounded">
-            À venir
-          </span>
+          <span className="rounded bg-green-600 px-2 py-1 text-xs text-white">A venir</span>
         )}
       </div>
 
-      <div className="h-48 overflow-hidden">
-        <img
-          src={event.imageSrc}
-          alt={event.title}
-          className="w-full h-full object-cover pointer-events-none"
-        />
-      </div>
-
-      <div className="p-4 space-y-2">
-        <h3 className="text-white font-bold text-lg truncate">{event.title}</h3>
-        <div className="text-gray-400 text-sm space-y-1">
-          <p className="flex items-center gap-2">
-            <span role="img" aria-label="date">
-              📅
-            </span>
-            <span>{formatDate(event.date)}</span>
-          </p>
-          <p className="flex items-center gap-2">
-            <span role="img" aria-label="location">
-              📍
-            </span>
-            <span>{event.city}</span>
-          </p>
-          <p className="flex items-center gap-2">
-            <span role="img" aria-label="genres">
-              🎵
-            </span>
-            <span className="truncate">
-              {event.genres && event.genres.length > 0
-                ? event.genres.join(", ")
-                : "Aucun genre"}
-            </span>
-          </p>
-        </div>
-
-        {!isSelectionMode && (
-          <div className="flex gap-2 pt-2">
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onEdit(event);
-              }}
-              className="flex-1 px-3 py-2 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition-colors"
-            >
-              Modifier
-            </button>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onToggleHide(event._id, event.isHidden || false);
-              }}
-              className={`flex-1 px-3 py-2 text-white text-sm rounded transition-colors ${
-                event.isHidden
-                  ? "bg-green-600 hover:bg-green-700"
-                  : "bg-orange-600 hover:bg-orange-700"
-              }`}
-            >
-              {event.isHidden ? "Afficher" : "Masquer"}
-            </button>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onDelete(event._id);
-              }}
-              className="flex-1 px-3 py-2 bg-red-600 text-white text-sm rounded hover:bg-red-700 transition-colors"
-            >
-              Supprimer
-            </button>
-          </div>
-        )}
-      </div>
+      <EventCardContent
+        imageSrc={event.imageSrc}
+        title={event.title}
+        eventNumberLabel={displayEventNumber}
+        city={event.city}
+        country={event.country}
+        date={event.date}
+        time={event.time}
+        genres={event.genres}
+        className="h-full hover:shadow-xl"
+        footer={
+          !isSelectionMode ? (
+            <div className="flex gap-2">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit(event);
+                }}
+                className="flex-1 rounded bg-blue-600 px-3 py-2 text-sm text-white transition-colors hover:bg-blue-700"
+              >
+                Modifier
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onToggleHide(event._id, event.isHidden || false);
+                }}
+                className={`flex-1 rounded px-3 py-2 text-sm text-white transition-colors ${
+                  event.isHidden
+                    ? "bg-green-600 hover:bg-green-700"
+                    : "bg-orange-600 hover:bg-orange-700"
+                }`}
+              >
+                {event.isHidden ? "Afficher" : "Masquer"}
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete(event._id);
+                }}
+                className="flex-1 rounded bg-red-600 px-3 py-2 text-sm text-white transition-colors hover:bg-red-700"
+              >
+                Supprimer
+              </button>
+            </div>
+          ) : undefined
+        }
+      />
     </div>
   );
 };

@@ -55,8 +55,10 @@ export const eventsService = {
     return response.data;
   },
 
-  async renumberAllEvents() {
-    const response = await api.post("/events/renumber-all");
+  async renumberAllEvents(orderedIds?: string[]) {
+    const response = await api.post("/events/renumber-all", {
+      orderedIds,
+    });
     return response.data;
   },
 
