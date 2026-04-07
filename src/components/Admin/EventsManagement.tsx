@@ -23,10 +23,13 @@ const EventsManagement = () => {
     hideMany,
     unhideMany,
     hideOne,
+    renumberAll,
   } = useAdminEvents();
   const [showForm, setShowForm] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<EventCardProps | null>(null);
   const [shotgunPreviewEvents, setShotgunPreviewEvents] = useState<EventCardProps[] | null>(null);
+  const [renumberPreviewEvents, setRenumberPreviewEvents] = useState<EventCardProps[] | null>(null);
+  const [renumberLoading, setRenumberLoading] = useState(false);
   const {
     draggedId,
     dragOverIndex,
@@ -49,7 +52,26 @@ const EventsManagement = () => {
   const [isSelectionMode, setIsSelectionMode] = useState(false);
   const { toast, showError, showSuccess, clearToast } = useAdminFeedback();
   const isShotgunPreviewActive = shotgunPreviewEvents !== null;
-  const displayedEvents = shotgunPreviewEvents ?? events;
+  const isRenumberPreviewActive = renumberPreviewEvents !== null;
+  const displayedEvents = renumberPreviewEvents ?? shotgunPreviewEvents ?? events;
+
+  const buildRenumberPreview = (sourceEvents: EventCardProps[]) => {
+    const visibleEvents = sourceEvents.filter((event) => !event.isHidden);
+    let remainingNumber = visibleEvents.length;
+
+    return sourceEvents.map((event) => {
+      if (event.isHidden) {
+        return event;
+      }
+
+      const nextEvent = {
+        ...event,
+        eventNumber: String(remainingNumber).padStart(3, "0"),
+      };
+      remainingNumber -= 1;
+      return nextEvent;
+    });
+  };
 
   const handleCreateNew = () => {
     setSelectedEvent(null);
@@ -129,10 +151,55 @@ const EventsManagement = () => {
     setShotgunPreviewEvents(null);
   };
 
+  const clearRenumberPreview = () => {
+    setRenumberPreviewEvents(null);
+  };
+
   const handleShotgunSyncSuccess = async () => {
     clearShotgunSyncPreview();
+    clearRenumberPreview();
     await refetch();
     setHasOrderChanged(false);
+  };
+
+  const previewRenumbering = () => {
+    if (isShotgunPreviewActive) {
+      showError("Annulez d'abord la previsualisation Shotgun");
+      return;
+    }
+
+    if (hasOrderChanged) {
+      showError("Sauvegardez ou annulez d'abord l'ordre local avant de renumeroter");
+      return;
+    }
+
+    if (isSelectionMode) {
+      setIsSelectionMode(false);
+      setSelectedEventIds(new Set());
+    }
+
+    setRenumberPreviewEvents(buildRenumberPreview(events));
+  };
+
+  const confirmRenumbering = async () => {
+    if (!renumberPreviewEvents) {
+      return;
+    }
+
+    try {
+      setRenumberLoading(true);
+      const orderedIds = renumberPreviewEvents
+        .filter((event) => !event.isHidden)
+        .map((event) => event._id as string);
+
+      await renumberAll(orderedIds);
+      clearRenumberPreview();
+      showSuccess("Evenements renumerotes");
+    } catch {
+      showError("Erreur lors de la renumerotation");
+    } finally {
+      setRenumberLoading(false);
+    }
   };
 
   const saveEventOrder = async () => {
@@ -237,11 +304,16 @@ const EventsManagement = () => {
         <h1 className="text-2xl font-bold text-white">Gestion des evenements</h1>
         <EventsToolbar
           disabled={isShotgunPreviewActive}
+          isRenumberPreviewActive={isRenumberPreviewActive}
+          renumberLoading={renumberLoading}
           hasOrderChanged={hasOrderChanged}
           saveOrderLoading={saveOrderLoading}
           isSelectionMode={isSelectionMode}
           selectedCount={selectedEventIds.size}
+          onCancelRenumberPreview={clearRenumberPreview}
           onCancelOrder={cancelOrderChanges}
+          onConfirmRenumber={confirmRenumbering}
+          onPreviewRenumber={previewRenumbering}
           onSaveOrder={saveEventOrder}
           onDeselectAll={deselectAll}
           onHideSelected={hideSelected}
@@ -270,17 +342,26 @@ const EventsManagement = () => {
         </div>
       )}
 
+      {isRenumberPreviewActive && (
+        <div className="rounded-lg border border-purple-700 bg-purple-900/20 p-4 text-sm text-purple-200">
+          Previsualisation de renumerotation active : le haut de la liste recevra le plus grand
+          numero. Rien n'est ecrit en base tant que vous n'avez pas clique sur Valider.
+        </div>
+      )}
+
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
         {displayedEvents.map((event, index) => (
           <EventCardItem
             key={event._id}
             event={event}
             index={index}
-            isPreviewMode={isShotgunPreviewActive}
+            isPreviewMode={isShotgunPreviewActive || isRenumberPreviewActive}
             isSelectionMode={isSelectionMode}
             isSelected={selectedEventIds.has(event._id as string)}
-            draggedEventId={isShotgunPreviewActive ? null : draggedId}
-            dragOverIndex={isShotgunPreviewActive ? null : dragOverIndex}
+            draggedEventId={isShotgunPreviewActive || isRenumberPreviewActive ? null : draggedId}
+            dragOverIndex={
+              isShotgunPreviewActive || isRenumberPreviewActive ? null : dragOverIndex
+            }
             onToggleSelect={toggleEventSelection}
             onDragStart={handleEventDragStart}
             onDragOver={handleEventDragOver}

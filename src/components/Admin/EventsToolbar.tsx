@@ -2,11 +2,16 @@ import React from "react";
 
 type EventsToolbarProps = {
   disabled?: boolean;
+  isRenumberPreviewActive: boolean;
+  renumberLoading: boolean;
   hasOrderChanged: boolean;
   saveOrderLoading: boolean;
   isSelectionMode: boolean;
   selectedCount: number;
+  onCancelRenumberPreview: () => void;
   onCancelOrder: () => void;
+  onConfirmRenumber: () => void;
+  onPreviewRenumber: () => void;
   onSaveOrder: () => void;
   onDeselectAll: () => void;
   onHideSelected: () => void;
@@ -19,11 +24,16 @@ type EventsToolbarProps = {
 
 const EventsToolbar: React.FC<EventsToolbarProps> = ({
   disabled = false,
+  isRenumberPreviewActive,
+  renumberLoading,
   hasOrderChanged,
   saveOrderLoading,
   isSelectionMode,
   selectedCount,
+  onCancelRenumberPreview,
   onCancelOrder,
+  onConfirmRenumber,
+  onPreviewRenumber,
   onSaveOrder,
   onDeselectAll,
   onHideSelected,
@@ -33,20 +43,49 @@ const EventsToolbar: React.FC<EventsToolbarProps> = ({
   onToggleSelectionMode,
   onCreateNew,
 }) => {
+  const normalActionsDisabled = disabled || isRenumberPreviewActive;
+
   return (
     <div className="flex gap-2 flex-wrap">
+      {isRenumberPreviewActive ? (
+        <>
+          <button
+            onClick={onCancelRenumberPreview}
+            disabled={renumberLoading}
+            className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            Annuler la previsualisation
+          </button>
+          <button
+            onClick={onConfirmRenumber}
+            disabled={renumberLoading}
+            className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {renumberLoading ? "Validation..." : "Valider"}
+          </button>
+        </>
+      ) : (
+        <button
+          onClick={onPreviewRenumber}
+          disabled={disabled}
+          className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          Renumeroter
+        </button>
+      )}
+
       {hasOrderChanged && (
         <>
           <button
             onClick={onCancelOrder}
-            disabled={disabled}
+            disabled={normalActionsDisabled}
             className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             Annuler
           </button>
           <button
             onClick={onSaveOrder}
-            disabled={disabled || saveOrderLoading}
+            disabled={normalActionsDisabled || saveOrderLoading}
             className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {saveOrderLoading ? "Sauvegarde..." : "Sauvegarder l'ordre"}
@@ -58,28 +97,28 @@ const EventsToolbar: React.FC<EventsToolbarProps> = ({
         <>
           <button
             onClick={onDeselectAll}
-            disabled={disabled}
+            disabled={normalActionsDisabled}
             className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             Tout deselectionner
           </button>
           <button
             onClick={onHideSelected}
-            disabled={disabled}
+            disabled={normalActionsDisabled}
             className="px-4 py-2 bg-orange-600 text-white rounded hover:bg-orange-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             Masquer ({selectedCount})
           </button>
           <button
             onClick={onUnhideSelected}
-            disabled={disabled}
+            disabled={normalActionsDisabled}
             className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             Afficher ({selectedCount})
           </button>
           <button
             onClick={onDeleteSelected}
-            disabled={disabled}
+            disabled={normalActionsDisabled}
             className="px-4 py-2 bg-red-700 text-white rounded hover:bg-red-800 disabled:cursor-not-allowed disabled:opacity-50"
           >
             Supprimer ({selectedCount})
@@ -90,7 +129,7 @@ const EventsToolbar: React.FC<EventsToolbarProps> = ({
       {isSelectionMode && selectedCount === 0 && (
         <button
           onClick={onSelectAll}
-          disabled={disabled}
+          disabled={normalActionsDisabled}
           className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
         >
           Tout selectionner
@@ -99,7 +138,7 @@ const EventsToolbar: React.FC<EventsToolbarProps> = ({
 
       <button
         onClick={onToggleSelectionMode}
-        disabled={disabled}
+        disabled={normalActionsDisabled}
         className={`px-4 py-2 rounded ${
           isSelectionMode
             ? "bg-yellow-600 hover:bg-yellow-700"
@@ -111,7 +150,7 @@ const EventsToolbar: React.FC<EventsToolbarProps> = ({
 
       <button
         onClick={onCreateNew}
-        disabled={disabled}
+        disabled={normalActionsDisabled}
         className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
       >
         Nouvel evenement
