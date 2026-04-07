@@ -14,4 +14,5 @@ export interface EventCardProps {
   imagePublicId?: string;
   isHidden?: boolean;
   isFeatured?: boolean;
+  previewStatus?: "created" | "updated";
 }

@@ -6,6 +6,7 @@ import { EventCardProps } from "../ShotgunEvents/types";
 type EventCardItemProps = {
   event: EventCardProps;
   index: number;
+  isPreviewMode: boolean;
   isSelectionMode: boolean;
   isSelected: boolean;
   draggedEventId: string | null;
@@ -23,6 +24,7 @@ type EventCardItemProps = {
 const EventCardItem: React.FC<EventCardItemProps> = ({
   event,
   index,
+  isPreviewMode,
   isSelectionMode,
   isSelected,
   draggedEventId,
@@ -37,11 +39,17 @@ const EventCardItem: React.FC<EventCardItemProps> = ({
   onDelete,
 }) => {
   const eventIsPast = isEventPast(event.date, event.time);
-  const isDragEnabled = !isSelectionMode;
+  const isDragEnabled = !isSelectionMode && !isPreviewMode;
   const displayEventNumber =
     event.eventNumber?.startsWith("HIDDEN_") || event.eventNumber?.startsWith("TEMP_")
       ? "---"
       : event.eventNumber || "---";
+  const previewBadgeLabel =
+    event.previewStatus === "created"
+      ? "A ajouter"
+      : event.previewStatus === "updated"
+        ? "MAJ prevue"
+        : null;
 
   return (
     <div
@@ -51,7 +59,7 @@ const EventCardItem: React.FC<EventCardItemProps> = ({
       onDragOver={(e) => isDragEnabled && onDragOver(e, index)}
       onDragLeave={isDragEnabled ? onDragLeave : undefined}
       onDrop={(e) => isDragEnabled && onDrop(e, index)}
-      onClick={() => isSelectionMode && onToggleSelect(event._id as string)}
+      onClick={() => isSelectionMode && !isPreviewMode && onToggleSelect(event._id as string)}
       className={`relative rounded-lg transition-all duration-200 ${
         isDragEnabled ? "cursor-move" : isSelectionMode ? "cursor-pointer" : "cursor-default"
       } ${draggedEventId === event._id ? "scale-95 opacity-50" : ""} ${
@@ -60,7 +68,21 @@ const EventCardItem: React.FC<EventCardItemProps> = ({
         event.isHidden ? "opacity-50" : ""
       }`}
     >
-      {isSelectionMode && (
+      {previewBadgeLabel && (
+        <div className="absolute left-3 top-3 z-10">
+          <span
+            className={`rounded px-2 py-1 text-xs font-bold ${
+              event.previewStatus === "created"
+                ? "bg-emerald-500 text-white"
+                : "bg-blue-500 text-white"
+            }`}
+          >
+            {previewBadgeLabel}
+          </span>
+        </div>
+      )}
+
+      {isSelectionMode && !isPreviewMode && (
         <div className="absolute left-3 top-3 z-10">
           <input
             type="checkbox"
@@ -103,7 +125,7 @@ const EventCardItem: React.FC<EventCardItemProps> = ({
         genres={event.genres}
         className="h-full hover:shadow-xl"
         footer={
-          !isSelectionMode ? (
+          !isSelectionMode && !isPreviewMode ? (
             <div className="flex gap-2">
               <button
                 onClick={(e) => {

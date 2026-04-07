@@ -3,6 +3,7 @@ import { useAdminEvents } from "../../hooks/useAdminEvents";
 import { useDragAndDropList } from "../../hooks/useDragAndDropList";
 import { useSelection } from "../../hooks/useSelection";
 import { useAdminFeedback } from "../../hooks/useAdminFeedback";
+import { sortEventsForAdmin } from "../../utils";
 import { EventCardProps } from "../ShotgunEvents/types";
 import EventCardItem from "./EventCardItem";
 import EventFormModal from "./EventFormModal";
@@ -25,6 +26,7 @@ const EventsManagement = () => {
   } = useAdminEvents();
   const [showForm, setShowForm] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<EventCardProps | null>(null);
+  const [shotgunPreviewEvents, setShotgunPreviewEvents] = useState<EventCardProps[] | null>(null);
   const {
     draggedId,
     dragOverIndex,
@@ -46,6 +48,8 @@ const EventsManagement = () => {
   } = useSelection();
   const [isSelectionMode, setIsSelectionMode] = useState(false);
   const { toast, showError, showSuccess, clearToast } = useAdminFeedback();
+  const isShotgunPreviewActive = shotgunPreviewEvents !== null;
+  const displayedEvents = shotgunPreviewEvents ?? events;
 
   const handleCreateNew = () => {
     setSelectedEvent(null);
@@ -93,6 +97,42 @@ const EventsManagement = () => {
 
   const handleEventDrop = async (e: React.DragEvent, dropIndex: number) => {
     handleDrop(e, dropIndex);
+  };
+
+  const prepareShotgunSyncPreview = async () => {
+    if (hasOrderChanged) {
+      const shouldDiscardLocalOrder = window.confirm(
+        "Vous avez un ordre local non sauvegarde. Il faut l'annuler avant de previsualiser la synchronisation Shotgun. Continuer ?"
+      );
+
+      if (!shouldDiscardLocalOrder) {
+        return false;
+      }
+
+      resetOrderChanged();
+      await refetch();
+    }
+
+    if (isSelectionMode) {
+      setIsSelectionMode(false);
+      setSelectedEventIds(new Set());
+    }
+
+    return true;
+  };
+
+  const applyShotgunSyncPreview = (previewEvents: EventCardProps[]) => {
+    setShotgunPreviewEvents(sortEventsForAdmin(previewEvents));
+  };
+
+  const clearShotgunSyncPreview = () => {
+    setShotgunPreviewEvents(null);
+  };
+
+  const handleShotgunSyncSuccess = async () => {
+    clearShotgunSyncPreview();
+    await refetch();
+    setHasOrderChanged(false);
   };
 
   const saveEventOrder = async () => {
@@ -196,6 +236,7 @@ const EventsManagement = () => {
       <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
         <h1 className="text-2xl font-bold text-white">Gestion des evenements</h1>
         <EventsToolbar
+          disabled={isShotgunPreviewActive}
           hasOrderChanged={hasOrderChanged}
           saveOrderLoading={saveOrderLoading}
           isSelectionMode={isSelectionMode}
@@ -214,18 +255,32 @@ const EventsManagement = () => {
 
       {toast && <AdminToast toast={toast} onClose={clearToast} />}
 
-      <ShotgunSync />
+      <ShotgunSync
+        onBeforeSyncPreview={prepareShotgunSyncPreview}
+        onApplySyncPreview={applyShotgunSyncPreview}
+        onCancelSyncPreview={clearShotgunSyncPreview}
+        onSyncSuccess={handleShotgunSyncSuccess}
+        isSyncPreviewActive={isShotgunPreviewActive}
+      />
+
+      {isShotgunPreviewActive && (
+        <div className="rounded-lg border border-blue-700 bg-blue-900/20 p-4 text-sm text-blue-200">
+          Previsualisation Shotgun active : la grille ci-dessous montre le rendu final avant ecriture
+          en base. Les actions d'edition sont temporairement bloquees jusqu'a validation ou annulation.
+        </div>
+      )}
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {events.map((event, index) => (
+        {displayedEvents.map((event, index) => (
           <EventCardItem
             key={event._id}
             event={event}
             index={index}
+            isPreviewMode={isShotgunPreviewActive}
             isSelectionMode={isSelectionMode}
             isSelected={selectedEventIds.has(event._id as string)}
-            draggedEventId={draggedId}
-            dragOverIndex={dragOverIndex}
+            draggedEventId={isShotgunPreviewActive ? null : draggedId}
+            dragOverIndex={isShotgunPreviewActive ? null : dragOverIndex}
             onToggleSelect={toggleEventSelection}
             onDragStart={handleEventDragStart}
             onDragOver={handleEventDragOver}
@@ -238,7 +293,7 @@ const EventsManagement = () => {
         ))}
       </div>
 
-      {events.length === 0 && !loading && (
+      {displayedEvents.length === 0 && !loading && (
         <div className="text-center py-12 text-gray-400">Aucun evenement trouve</div>
       )}
 

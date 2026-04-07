@@ -24,11 +24,11 @@ const ShotgunEvents: React.FC = () => {
 
   return (
     <div className="space-y-24">
-      {featuredEvents.length > 0 && (
-        <EventSection title="Évènements phares" events={featuredEvents} />
-      )}
       {upcomingEvents.length > 0 && (
         <EventSection title="Évènements à venir" events={upcomingEvents} />
+      )}
+      {featuredEvents.length > 0 && (
+        <EventSection title="Évènements phares" events={featuredEvents} />
       )}
       {pastEvents.length > 0 && (
         <EventSection title="Évènements passés" events={pastEvents} />

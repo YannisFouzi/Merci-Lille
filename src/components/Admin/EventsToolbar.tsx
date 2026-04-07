@@ -1,6 +1,7 @@
 import React from "react";
 
 type EventsToolbarProps = {
+  disabled?: boolean;
   hasOrderChanged: boolean;
   saveOrderLoading: boolean;
   isSelectionMode: boolean;
@@ -17,6 +18,7 @@ type EventsToolbarProps = {
 };
 
 const EventsToolbar: React.FC<EventsToolbarProps> = ({
+  disabled = false,
   hasOrderChanged,
   saveOrderLoading,
   isSelectionMode,
@@ -37,14 +39,15 @@ const EventsToolbar: React.FC<EventsToolbarProps> = ({
         <>
           <button
             onClick={onCancelOrder}
-            className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
+            disabled={disabled}
+            className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             Annuler
           </button>
           <button
             onClick={onSaveOrder}
-            disabled={saveOrderLoading}
-            className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50"
+            disabled={disabled || saveOrderLoading}
+            className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {saveOrderLoading ? "Sauvegarde..." : "Sauvegarder l'ordre"}
           </button>
@@ -55,25 +58,29 @@ const EventsToolbar: React.FC<EventsToolbarProps> = ({
         <>
           <button
             onClick={onDeselectAll}
-            className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
+            disabled={disabled}
+            className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             Tout deselectionner
           </button>
           <button
             onClick={onHideSelected}
-            className="px-4 py-2 bg-orange-600 text-white rounded hover:bg-orange-700"
+            disabled={disabled}
+            className="px-4 py-2 bg-orange-600 text-white rounded hover:bg-orange-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             Masquer ({selectedCount})
           </button>
           <button
             onClick={onUnhideSelected}
-            className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+            disabled={disabled}
+            className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             Afficher ({selectedCount})
           </button>
           <button
             onClick={onDeleteSelected}
-            className="px-4 py-2 bg-red-700 text-white rounded hover:bg-red-800"
+            disabled={disabled}
+            className="px-4 py-2 bg-red-700 text-white rounded hover:bg-red-800 disabled:cursor-not-allowed disabled:opacity-50"
           >
             Supprimer ({selectedCount})
           </button>
@@ -83,7 +90,8 @@ const EventsToolbar: React.FC<EventsToolbarProps> = ({
       {isSelectionMode && selectedCount === 0 && (
         <button
           onClick={onSelectAll}
-          className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
+          disabled={disabled}
+          className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
         >
           Tout selectionner
         </button>
@@ -91,18 +99,20 @@ const EventsToolbar: React.FC<EventsToolbarProps> = ({
 
       <button
         onClick={onToggleSelectionMode}
+        disabled={disabled}
         className={`px-4 py-2 rounded ${
           isSelectionMode
             ? "bg-yellow-600 hover:bg-yellow-700"
             : "bg-blue-600 hover:bg-blue-700"
-        } text-white`}
+        } text-white disabled:cursor-not-allowed disabled:opacity-50`}
       >
         {isSelectionMode ? "Annuler selection" : "Selectionner"}
       </button>
 
       <button
         onClick={onCreateNew}
-        className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+        disabled={disabled}
+        className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
       >
         Nouvel evenement
       </button>

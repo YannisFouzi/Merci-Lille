@@ -1,13 +1,31 @@
+import { EventCardProps } from "../components/ShotgunEvents/types";
 import api from "./api";
 
 export interface ShotgunSyncResult {
   success: boolean;
   message: string;
   data?: {
+    total?: number;
     created: number;
     updated: number;
-    errors: string[];
-    events: Array<Record<string, unknown>>;
+    errors?: string[];
+    events?: Array<Record<string, unknown>>;
+    previewEvents?: EventCardProps[];
+    createdEvents?: Array<{
+      shotgunId: number;
+      title: string;
+      startTime: string;
+      isPast: boolean;
+    }>;
+    updatedEvents?: Array<{
+      shotgunId: number;
+      title: string;
+      changes: Array<{
+        field: string;
+        before: string;
+        after: string;
+      }>;
+    }>;
   };
 }
 
