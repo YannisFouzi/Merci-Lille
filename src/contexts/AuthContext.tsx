@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { authService } from "../services/auth.service";
 import {
   clearUnauthorizedHandler,
@@ -40,7 +40,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
     checkSession();
 
-    // S'abonner aux notifications 401/403
+    // S'abonner aux notifications d'auth
     registerUnauthorizedHandler((reason) => {
       setStatus(reason === "expired" ? "expired" : "unauthenticated");
       authService.clearInvalidToken();
@@ -52,25 +52,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     };
   }, []);
 
-  const login = async (username: string, password: string) => {
+  const login = useCallback(async (username: string, password: string) => {
     await authService.login(username, password);
     setStatus("authenticated");
-  };
+  }, []);
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
     await authService.logout();
     setStatus("unauthenticated");
-  };
+  }, []);
+
+  const markUnauthenticated = useCallback((reason?: AuthStatus) => {
+    setStatus(reason ?? "unauthenticated");
+  }, []);
 
   const value = useMemo(
     () => ({
       status,
       login,
       logout,
-      markUnauthenticated: (reason?: AuthStatus) =>
-        setStatus(reason ?? "unauthenticated"),
+      markUnauthenticated,
     }),
-    [status]
+    [status, login, logout, markUnauthenticated]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

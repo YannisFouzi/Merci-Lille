@@ -1,14 +1,16 @@
 import { CalendarIcon, HomeIcon, PhotoIcon } from "@heroicons/react/24/outline";
-import React from "react";
+import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { authService } from "../../services/auth.service";
+import { useAuth } from "../../contexts/AuthContext";
 
 const AdminNavigation: React.FC = () => {
   const location = useLocation();
+  const { logout } = useAuth();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const navigation = [
     {
-      name: "Événements",
+      name: "Evenements",
       path: "/admin/events",
       icon: CalendarIcon,
     },
@@ -19,9 +21,16 @@ const AdminNavigation: React.FC = () => {
     },
   ];
 
-  const handleLogout = () => {
-    // Utiliser authService.logout() qui gère les cookies httpOnly
-    authService.logout();
+  const handleLogout = async () => {
+    if (isLoggingOut) return;
+
+    setIsLoggingOut(true);
+
+    try {
+      await logout();
+    } finally {
+      setIsLoggingOut(false);
+    }
   };
 
   return (
@@ -33,6 +42,7 @@ const AdminNavigation: React.FC = () => {
           <ul className="flex space-x-6">
             {navigation.map((item) => {
               const isActive = location.pathname === item.path;
+
               return (
                 <li key={item.name}>
                   <Link
@@ -51,19 +61,17 @@ const AdminNavigation: React.FC = () => {
         </div>
 
         <div className="flex items-center space-x-4">
-          <Link
-            to="/"
-            className="flex items-center space-x-2 text-white hover:text-red-500 transition-colors"
-          >
+          <Link to="/" className="flex items-center space-x-2 text-white hover:text-red-500 transition-colors">
             <HomeIcon className="h-5 w-5" />
             <span>Retour au site</span>
           </Link>
 
           <button
             onClick={handleLogout}
-            className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+            disabled={isLoggingOut}
+            className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors disabled:bg-gray-600"
           >
-            Déconnexion
+            {isLoggingOut ? "Deconnexion..." : "Deconnexion"}
           </button>
         </div>
       </div>

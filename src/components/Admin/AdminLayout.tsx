@@ -1,13 +1,21 @@
-import React from "react";
-import { Link, Outlet, useNavigate } from "react-router-dom";
-import { authService } from "../../services/auth.service";
+import React, { useState } from "react";
+import { Link, Outlet } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext";
 
 const AdminLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
-  const navigate = useNavigate();
+  const { logout } = useAuth();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
-  const handleLogout = () => {
-    authService.logout();
-    navigate("/admin/login");
+  const handleLogout = async () => {
+    if (isLoggingOut) return;
+
+    setIsLoggingOut(true);
+
+    try {
+      await logout();
+    } finally {
+      setIsLoggingOut(false);
+    }
   };
 
   return (
@@ -16,12 +24,9 @@ const AdminLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => 
         <div className="flex justify-between items-center">
           <div className="flex items-center space-x-4">
             <Link to="/admin/events" className="text-white hover:text-gray-300">
-              Événements
+              Evenements
             </Link>
-            <Link
-              to="/admin/gallery"
-              className="text-white hover:text-gray-300"
-            >
+            <Link to="/admin/gallery" className="text-white hover:text-gray-300">
               Galerie
             </Link>
             <a
@@ -49,9 +54,10 @@ const AdminLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => 
           </div>
           <button
             onClick={handleLogout}
-            className="text-white hover:text-gray-300"
+            disabled={isLoggingOut}
+            className="text-white hover:text-gray-300 disabled:text-gray-500"
           >
-            Déconnexion
+            {isLoggingOut ? "Deconnexion..." : "Deconnexion"}
           </button>
         </div>
       </nav>

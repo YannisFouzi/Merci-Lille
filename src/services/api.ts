@@ -112,6 +112,7 @@ api.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
     const originalRequest = error.config as typeof error.config & { _retry?: boolean };
+    const requestUrl = typeof originalRequest?.url === "string" ? originalRequest.url : "";
 
     let message: string = error.message || "Request failed";
     const serverData = error.response?.data;
@@ -166,8 +167,8 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       notifyUnauthorized((error.response?.data as any)?.expired ? "expired" : "unauthorized");
     }
-    if (error.response?.status === 403) {
-      notifyUnauthorized("forbidden");
+    if (error.response?.status === 403 && requestUrl.includes("/auth/refresh")) {
+      notifyUnauthorized("expired");
     }
 
     return Promise.reject(error);
