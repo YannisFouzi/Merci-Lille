@@ -1,8 +1,8 @@
 import React from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, Outlet, useNavigate } from "react-router-dom";
 import { authService } from "../../services/auth.service";
 
-const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+const AdminLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -55,7 +55,7 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           </button>
         </div>
       </nav>
-      <main className="container mx-auto px-4 py-8">{children}</main>
+      <main className="container mx-auto px-4 py-8">{children ?? <Outlet />}</main>
     </div>
   );
 };

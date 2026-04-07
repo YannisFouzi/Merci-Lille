@@ -4,7 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import React, { Suspense, lazy, useEffect, useState } from "react";
 import { Helmet } from "react-helmet";
-import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
+import { Navigate, Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import FloatingContactButton from "../components/FloatingContactButton/FloatingContactButton";
 import Gallery from "../components/Gallery/Gallery";
 import Introduction from "../components/Introduction/Introduction";
@@ -211,25 +211,17 @@ const App: React.FC = () => {
             <Route path="/gallerie" element={<FullGallery />} />
             <Route path="/admin/login" element={<LoginForm />} />
             <Route
-              path="/admin/events"
+              path="/admin"
               element={
                 <PrivateRoute>
-                  <AdminLayout>
-                    <EventsManagement />
-                  </AdminLayout>
+                  <AdminLayout />
                 </PrivateRoute>
               }
-            />
-            <Route
-              path="/admin/gallery"
-              element={
-                <PrivateRoute>
-                  <AdminLayout>
-                    <GalleryManagement />
-                  </AdminLayout>
-                </PrivateRoute>
-              }
-            />
+            >
+              <Route index element={<Navigate to="events" replace />} />
+              <Route path="events" element={<EventsManagement />} />
+              <Route path="gallery" element={<GalleryManagement />} />
+            </Route>
           </Routes>
         </Suspense>
       </Router>
