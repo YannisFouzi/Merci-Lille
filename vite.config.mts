@@ -1,7 +1,6 @@
 import react from "@vitejs/plugin-react";
-import path from "path";
+import { fileURLToPath } from "node:url";
 import { defineConfig } from "vite";
-import sass from "sass-embedded";
 import { visualizer } from "rollup-plugin-visualizer";
 
 export default defineConfig({
@@ -49,13 +48,13 @@ export default defineConfig({
   css: {
     preprocessorOptions: {
       scss: {
-        implementation: sass,
+        api: "modern-compiler",
       },
     },
   },
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
+      "@": fileURLToPath(new URL("./src", import.meta.url)),
     },
   },
   define: {
